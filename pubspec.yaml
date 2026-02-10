@@ -1,0 +1,48 @@
+name: graficacion_ai
+description: "Una app de graficación matemática 2D/3D con asistencia de IA."
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0' # Actualizado para soportar las últimas librerías
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Iconos base ---
+  cupertino_icons: ^1.0.6
+
+  # --- Gestión de Estado ---
+  provider: ^6.1.1
+
+  # --- Matemáticas y Lógica ---
+  math_expressions: ^3.1.0
+  vector_math: ^2.1.4
+
+  # --- Visualización (Gráficos) ---
+  fl_chart: ^1.1.1
+  
+  #Para visualización 3D sencilla en Canvas (OpenGL ligero)
+  ditredi: ^2.0.2 
+
+  # --- Inteligencia Artificial ---
+  # He actualizado esta también para asegurar compatibilidad
+  google_generative_ai: ^0.4.0
+  
+  # --- UI / Diseño ---
+  flutter_markdown: ^0.7.7+1
+  google_fonts: ^8.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # Aquí agregaremos las imágenes cuando las tengas
+  # assets:
+  #   - assets/images/
