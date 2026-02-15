@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../editor/screens/editor_screen.dart';
+<<<<<<< Updated upstream
+=======
+import '../../chat/screens/chat_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+>>>>>>> Stashed changes
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,8 +19,14 @@ class _HomeScreenState extends State<HomeScreen> {
   // Lista de pantallas. La primera es tu Editor con zoom infinito.
   final List<Widget> _screens = [
     const EditorScreen(), 
+<<<<<<< Updated upstream
     const Center(child: Text('Módulo de IA (Próximamente)', style: TextStyle(fontSize: 18, color: Colors.grey))),
     const Center(child: Text('Ajustes y Perfil', style: TextStyle(fontSize: 18, color: Colors.grey))),
+=======
+    const ChatScreen(),
+    const SettingsScreen(), 
+
+>>>>>>> Stashed changes
   ];
 
   @override
@@ -26,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Math AI Studio', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
       ),
       
       // Aquí se muestra la pantalla seleccionada
