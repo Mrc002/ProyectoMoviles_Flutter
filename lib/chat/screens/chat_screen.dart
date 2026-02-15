@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
-import '../../editor/logic/editor_provider.dart';
-
+import '../../features/editor/logic/editor_provider.dart';
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 

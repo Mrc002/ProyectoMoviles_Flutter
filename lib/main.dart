@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'features/editor/logic/editor_provider.dart';
-import 'features/chat/logic/chat_provider.dart';
+import 'chat/logic/chat_provider.dart';
 import 'features/settings/logic/theme_provider.dart';
 import 'features/settings/logic/language_provider.dart';
 

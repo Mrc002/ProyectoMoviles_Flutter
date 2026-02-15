@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../editor/screens/editor_screen.dart';
-import '../../chat/screens/chat_screen.dart';
+import '../../../chat/screens/chat_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
