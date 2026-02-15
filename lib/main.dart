@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'features/editor/logic/editor_provider.dart';
-import 'features/chat/logic/chat_provider.dart'; // Importar ChatProvider
+import 'features/chat/logic/chat_provider.dart';
 import 'features/settings/logic/theme_provider.dart';
 import 'features/settings/logic/language_provider.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env"); // Cargar variables de entorno
-void main() {
+  // Asegura que los bindings de Flutter estén listos antes de ejecutar código asíncrono
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  // Carga las variables de entorno
+  await dotenv.load(fileName: ".env"); 
+
   runApp(
     MultiProvider(
       providers: [
-        // AQUÍ INYECTAMOS EL CEREBRO DEL EDITOR
         ChangeNotifierProvider(create: (_) => EditorProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
-
       ],
       child: const MyApp(),
     ),

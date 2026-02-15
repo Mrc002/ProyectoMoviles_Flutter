@@ -9,6 +9,9 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Declaramos l10n aquí arriba para usarlo en toda la pantalla
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -17,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
           Padding( 
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0), 
             child: Text(
-              AppLocalizations.of(context)!.cuenta, 
+              l10n.cuenta, 
               style: const TextStyle( 
                 fontSize: 16, 
                 fontWeight: FontWeight.bold, 
@@ -33,11 +36,11 @@ class SettingsScreen extends StatelessWidget {
                 backgroundColor: Color(0xFF1E88E5), 
                 child: Icon(Icons.person_outline, color: Colors.white, size: 28),
               ),
-              title: const Text(
-                'Inicia Sesión o Regístrate',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Text(
+                l10n.iniciaSesion,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text('Guarda tus gráficos y chats en la nube'),
+              subtitle: Text(l10n.iniciaSesionSub),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -52,11 +55,11 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // --- SECCIÓN DE PREFERENCIAS ---
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0, bottom: 8.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Text(
-              'Preferencias',
-              style: TextStyle(
+              l10n.preferencias,
+              style: const TextStyle(
                 fontSize: 16, 
                 fontWeight: FontWeight.bold, 
                 color: Colors.blueGrey
@@ -71,7 +74,7 @@ class SettingsScreen extends StatelessWidget {
                   builder: (context, themeProvider, child) {
                     return ListTile(
                       leading: const Icon(Icons.dark_mode_outlined),
-                      title: const Text('Tema Oscuro'),
+                      title: Text(l10n.temaOscuro),
                       trailing: Switch(
                         value: themeProvider.isDarkMode,
                         activeColor: const Color(0xFF1E88E5),
@@ -84,11 +87,9 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1, indent: 56), 
                 
-                // CONSUMER ACTUALIZADO PARA IDIOMA GLOBAL
+                // CONSUMER DE IDIOMA
                 Consumer<LanguageProvider>(
                   builder: (context, languageProvider, child) {
-                    final l10n = AppLocalizations.of(context)!; 
-
                     return ListTile(
                       leading: const Icon(Icons.language),
                       title: Text(l10n.idiomaApp), 
@@ -126,17 +127,17 @@ class SettingsScreen extends StatelessWidget {
                     );
                   },
                 ),
-              ], // <--- ESTOS CORCHETES Y PARÉNTESIS FALTABAN
+              ],
             ),
           ),
           const SizedBox(height: 24),
 
           // --- SECCIÓN ACERCA DE ---
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0, bottom: 8.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Text(
-              'Acerca de',
-              style: TextStyle(
+              l10n.acercaDe,
+              style: const TextStyle(
                 fontSize: 16, 
                 fontWeight: FontWeight.bold, 
                 color: Colors.blueGrey
@@ -146,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.info_outline),
-              title: const Text('Acerca de Math AI Studio'),
+              title: Text(l10n.acercaDeSub),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {},
             ),
