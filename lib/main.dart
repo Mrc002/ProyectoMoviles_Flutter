@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart'; 
+import 'firebase_options.dart'; 
+
 import 'l10n/app_localizations.dart';
 import 'features/editor/logic/editor_provider.dart';
 import 'features/settings/logic/language_provider.dart';
 import 'features/settings/logic/theme_provider.dart';
 import 'chat/logic/chat_provider.dart';
+import 'features/auth/logic/auth_provider.dart'; 
 
 // Screens
 import 'features/home/screens/home_screen.dart';
+import 'features/auth/screens/login_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
+  // <--- 5. INICIALIZA FIREBASE (Vital para que no crashee)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()), 
         ChangeNotifierProvider(create: (_) => EditorProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
@@ -35,9 +46,7 @@ class MyApp extends StatelessWidget {
     final languageProvider = context.watch<LanguageProvider>();
     final themeProvider = context.watch<ThemeProvider>();
 
-    // ¡De vuelta a tu azul original!
     const primaryColor = Color(0xFF1E88E5); 
-    // Un azul ligeramente más claro para que no se pierda en el modo oscuro
     const darkPrimaryColor = Color(0xFF64B5F6); 
 
     return MaterialApp(
@@ -79,7 +88,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212), 
         colorScheme: const ColorScheme.dark(
-          primary: darkPrimaryColor, // Usamos el azul claro aquí
+          primary: darkPrimaryColor, 
           surface: Color(0xFF1E1E1E), 
           onSurface: Colors.white, 
         ),
@@ -103,18 +112,37 @@ class MyApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: darkPrimaryColor), // Bordes azules al escribir
+            borderSide: const BorderSide(color: darkPrimaryColor), 
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Color(0xFF1E1E1E),
-          selectedItemColor: darkPrimaryColor, // Iconos del menú en azul
+          selectedItemColor: darkPrimaryColor, 
           unselectedItemColor: Colors.grey,
         ),
       ),
       
       themeMode: themeProvider.themeMode,
-      home: const HomeScreen(),
+      
+      // <--- 7. USAMOS EL GUARDIA PARA QUE PASE POR EL LOGIN PRIMERO
+      home: const AuthWrapper(),
     );
+  }
+}
+
+// <--- 8. EL GUARDIA (Decide qué pantalla mostrar)
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
+    // Si el usuario ya inició sesión (o entró como invitado), va al Home. Si no, al Login.
+    if (authProvider.user != null) {
+      return const HomeScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }
