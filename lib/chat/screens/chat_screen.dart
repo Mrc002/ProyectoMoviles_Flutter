@@ -3,6 +3,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
 import '../../features/editor/logic/editor_provider.dart';
+import '../../features/settings/logic/language_provider.dart';
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -103,11 +105,16 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text;
     if (text.trim().isEmpty) return;
 
-    // Obtenemos la ecuación que está en el EditorProvider
+    // Obtenemos la ecuación y el idioma actual
     final currentEquation = context.read<EditorProvider>().equation;
+    final languageCode = context.read<LanguageProvider>().appLocale.languageCode;
 
-    // Enviamos el mensaje junto con la ecuación como contexto
-    context.read<ChatProvider>().sendMessage(text, currentEquation: currentEquation);
+    // Enviamos el mensaje junto con la ecuación y el idioma como contexto
+    context.read<ChatProvider>().sendMessage(
+      text, 
+      currentEquation: currentEquation,
+      languageCode: languageCode, // <-- Nuevo parámetro
+    );
 
     _controller.clear();
   }

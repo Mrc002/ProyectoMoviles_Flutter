@@ -44,8 +44,8 @@ class ChatProvider extends ChangeNotifier {
     ]);
   }
 
-  // Función para enviar mensajes
-  Future<void> sendMessage(String text, {String? currentEquation}) async {
+// Función para enviar mensajes (Ahora recibe languageCode)
+  Future<void> sendMessage(String text, {String? currentEquation, required String languageCode}) async {
     if (text.isEmpty) return;
 
     _isLoading = true;
@@ -55,21 +55,33 @@ class ChatProvider extends ChangeNotifier {
       // 1. Mostrar mensaje del usuario
       _messages.add(ChatMessage(text: text, isUser: true));
       
-      // 2. Construir el prompt con contexto (le "chivamos" la ecuación actual)
+      // 2. Construir el prompt con contexto de la ecuación y el IDIOMA
       String promptToSend = text;
+      bool isEnglish = languageCode == 'en';
+
       if (currentEquation != null && currentEquation.isNotEmpty) {
-        promptToSend = "El usuario está analizando la función: $currentEquation. Pregunta: $text";
+        promptToSend = isEnglish
+            ? "The user is analyzing the mathematical function: $currentEquation. Question: $text. IMPORTANT: You must answer exclusively in English."
+            : "El usuario está analizando la función matemática: $currentEquation. Pregunta: $text. IMPORTANTE: Debes responder exclusivamente en Español.";
+      } else {
+        promptToSend = isEnglish
+            ? "$text\n\n(IMPORTANT: You must answer exclusively in English)"
+            : "$text\n\n(IMPORTANTE: Debes responder exclusivamente en Español)";
       }
 
       // 3. Enviar a Gemini
       final response = await _chat.sendMessage(Content.text(promptToSend));
-      final responseText = response.text ?? "No pude generar una respuesta.";
+      
+      final errorMsg = isEnglish ? "I couldn't generate a response." : "No pude generar una respuesta.";
+      final responseText = response.text ?? errorMsg;
 
       // 4. Mostrar respuesta de la IA
       _messages.add(ChatMessage(text: responseText, isUser: false));
 
     } catch (e) {
-      _messages.add(ChatMessage(text: "Error de conexión: $e", isUser: false));
+      bool isEnglish = languageCode == 'en';
+      final errorPrefix = isEnglish ? "Connection error" : "Error de conexión";
+      _messages.add(ChatMessage(text: "$errorPrefix: $e", isUser: false));
     } finally {
       _isLoading = false;
       notifyListeners();

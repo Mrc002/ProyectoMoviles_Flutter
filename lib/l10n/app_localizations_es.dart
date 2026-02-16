@@ -31,4 +31,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get acercaDeSub => 'Acerca de Math AI Studio';
+
+  @override
+  String get editorModo3D => 'Modo 3D';
+
+  @override
+  String get errorConexion => 'Error de conexión';
+
+  @override
+  String get errorGenerar => 'No pude generar una respuesta.';
 }

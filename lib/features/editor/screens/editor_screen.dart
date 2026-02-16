@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/editor_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class EditorScreen extends StatelessWidget {
   const EditorScreen({super.key});
@@ -51,7 +52,7 @@ class EditorScreen extends StatelessWidget {
                 ],
               ),
               child: provider.is3DMode
-                  ? _build3DPlaceholder()
+                  ? _build3DPlaceholder(context)
                   : GestureDetector(
                       // Gestos para mover y hacer zoom
                       onScaleStart: (details) => provider.startGesture(details),
@@ -119,14 +120,17 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
-  Widget _build3DPlaceholder() {
+  Widget _build3DPlaceholder(BuildContext context) {
+    // Usamos el l10n aquí también
+    final l10n = AppLocalizations.of(context)!; // Asegúrate de que context esté disponible, o pásalo como parámetro
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.view_in_ar, size: 80, color: Colors.grey[200]),
           const SizedBox(height: 10),
-          Text("Modo 3D", style: TextStyle(color: Colors.grey[400], fontSize: 20)),
+          Text(l10n.editorModo3D, style: TextStyle(color: Colors.grey[400], fontSize: 20)), // <-- Traducido
         ],
       ),
     );

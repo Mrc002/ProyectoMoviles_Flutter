@@ -145,6 +145,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Acerca de Math AI Studio'**
   String get acercaDeSub;
+
+  /// No description provided for @editorModo3D.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo 3D'**
+  String get editorModo3D;
+
+  /// No description provided for @errorConexion.
+  ///
+  /// In es, this message translates to:
+  /// **'Error de conexión'**
+  String get errorConexion;
+
+  /// No description provided for @errorGenerar.
+  ///
+  /// In es, this message translates to:
+  /// **'No pude generar una respuesta.'**
+  String get errorGenerar;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../editor/screens/editor_screen.dart';
 import '../../../chat/screens/chat_screen.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../../../l10n/app_localizations.dart'; // <-- 1. Importación del traductor
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 2. Instanciamos el traductor para usarlo en esta pantalla
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       // Mantenemos el AppBar limpio
       appBar: AppBar(
@@ -48,18 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Estudio', // Tu graficadora unificada
+            icon: const Icon(Icons.show_chart),
+            label: l10n.navEstudio, // <-- 3. Usamos la variable de traducción
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.psychology),
-            label: 'Asistente IA',
+            icon: const Icon(Icons.psychology),
+            label: l10n.navAsistente, // <-- Usamos la variable de traducción
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Ajustes',
+            icon: const Icon(Icons.settings),
+            label: l10n.navAjustes, // <-- Usamos la variable de traducción
           ),
         ],
       ),

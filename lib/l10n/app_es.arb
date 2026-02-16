@@ -7,5 +7,9 @@
   "temaOscuro": "Tema Oscuro",
   "idiomaApp": "Idioma de la App",
   "acercaDe": "Acerca de",
-  "acercaDeSub": "Acerca de Math AI Studio"
+  "acercaDeSub": "Acerca de Math AI Studio",
+  
+  "editorModo3D": "Modo 3D",
+  "errorConexion": "Error de conexión",
+  "errorGenerar": "No pude generar una respuesta."
 }
