@@ -20,18 +20,24 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
     final l10n = AppLocalizations.of(context)!;
-    // Corrección 1: Se eliminó la variable 'editorProvider' que no se usaba aquí.
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Colores para los mensajes
+    final userMsgColor = theme.colorScheme.primary;
+    final aiMsgColor = theme.colorScheme.surface; // Se adaptará a oscuro/claro
+    final aiMsgTextColor = theme.colorScheme.onSurface;
 
     return Column(
       children: [
         // --- LISTA DE MENSAJES ---
         Expanded(
           child: chatProvider.messages.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     l10n.chatVacio,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: isDark ? Colors.white54 : Colors.grey),
                   ),
                 )
               : ListView.builder(
@@ -46,21 +52,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         padding: const EdgeInsets.all(12),
                         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
                         decoration: BoxDecoration(
-                          color: msg.isUser ? Theme.of(context).primaryColor : Colors.white,
+                          // Usamos los colores dinámicos
+                          color: msg.isUser ? userMsgColor : aiMsgColor,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             if (!msg.isUser)
                               BoxShadow(
-                                // Corrección 2: Usar withValues(alpha: ...) en lugar de withOpacity
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                                 blurRadius: 5,
                               )
                           ],
                         ),
                         child: msg.isUser
+                            // El texto del usuario siempre es blanco porque el color primario es oscuro
                             ? Text(msg.text, style: const TextStyle(color: Colors.white))
-                            // Usamos Markdown para la respuesta de la IA
-                            : MarkdownBody(data: msg.text),
+                            // El texto de la IA se adapta al tema usando Markdown
+                            : MarkdownBody(
+                                data: msg.text,
+                                styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                                  p: TextStyle(color: aiMsgTextColor)
+                                ),
+                              ),
                       ),
                     );
                   },
@@ -69,31 +81,32 @@ class _ChatScreenState extends State<ChatScreen> {
 
         // --- INDICADOR DE CARGA ---
         if (chatProvider.isLoading)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: LinearProgressIndicator(),
+           Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LinearProgressIndicator(color: theme.colorScheme.primary),
           ),
 
         // --- INPUT DE TEXTO ---
         Container(
           padding: const EdgeInsets.all(8),
-          color: Colors.white,
+          // El fondo del input container también se adapta
+          color: theme.colorScheme.surface,
           child: Row(
             children: [
               Expanded(
+                // El TextField ya toma el estilo del main.dart automáticamente
                 child: TextField(
                   controller: _controller,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: l10n.chatHint,
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                   onSubmitted: (_) => _sendMessage(context),
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.send),
-                color: Theme.of(context).primaryColor,
+                color: theme.colorScheme.primary,
                 onPressed: () => _sendMessage(context),
               ),
             ],
@@ -107,15 +120,13 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text;
     if (text.trim().isEmpty) return;
 
-    // Obtenemos la ecuación y el idioma actual
     final currentEquation = context.read<EditorProvider>().equation;
     final languageCode = context.read<LanguageProvider>().appLocale.languageCode;
 
-    // Enviamos el mensaje junto con la ecuación y el idioma como contexto
     context.read<ChatProvider>().sendMessage(
       text, 
       currentEquation: currentEquation,
-      languageCode: languageCode, // <-- Nuevo parámetro
+      languageCode: languageCode, 
     );
 
     _controller.clear();
