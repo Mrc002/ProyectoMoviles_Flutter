@@ -3,52 +3,51 @@ import 'package:provider/provider.dart';
 import '../logic/theme_provider.dart';
 import '../logic/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/logic/auth_provider.dart'; 
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Declaramos l10n aquí arriba para usarlo en toda la pantalla
     final l10n = AppLocalizations.of(context)!;
+    
+    // 1. Obtenemos al usuario actual
+    final authProvider = context.watch<AuthProvider>();
+    final user = authProvider.user;
+    
+    // 2. Verificamos si es invitado (nulo o anónimo)
+    final isGuest = user == null || user.isAnonymous;
 
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // --- SECCIÓN DE CUENTA ---
+          // --- SECCIÓN DE CUENTA DINÁMICA ---
           Padding( 
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0), 
             child: Text(
               l10n.cuenta, 
-              style: const TextStyle( 
-                fontSize: 16, 
-                fontWeight: FontWeight.bold, 
-                color: Colors.blueGrey
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
             ),
           ),
           Card(
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 radius: 24,
-                backgroundColor: Color(0xFF1E88E5), 
-                child: Icon(Icons.person_outline, color: Colors.white, size: 28),
+                backgroundColor: isGuest ? Colors.grey : const Color(0xFF1E88E5), 
+                child: Icon(isGuest ? Icons.person_outline : Icons.person, color: Colors.white, size: 28),
               ),
               title: Text(
-                l10n.iniciaSesion,
+                // CORRECCIÓN 1: Usamos user!.email porque Dart ya sabe que no es nulo aquí
+                isGuest ? l10n.iniciaSesion : (user.email ?? 'Usuario de Math AI'),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text(l10n.iniciaSesionSub),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Próximamente: Integración de cuentas'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              subtitle: Text(isGuest ? l10n.iniciaSesionSub : 'Cerrar sesión'),
+              trailing: Icon(isGuest ? Icons.arrow_forward_ios : Icons.logout, size: 16, color: isGuest ? Colors.grey : Colors.red),
+              onTap: () async {
+                await authProvider.signOut();
               },
             ),
           ),
@@ -59,17 +58,12 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Text(
               l10n.preferencias,
-              style: const TextStyle(
-                fontSize: 16, 
-                fontWeight: FontWeight.bold, 
-                color: Colors.blueGrey
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
             ),
           ),
           Card(
             child: Column(
               children: [
-                // CONSUMER DEL TEMA OSCURO
                 Consumer<ThemeProvider>(
                   builder: (context, themeProvider, child) {
                     return ListTile(
@@ -77,7 +71,8 @@ class SettingsScreen extends StatelessWidget {
                       title: Text(l10n.temaOscuro),
                       trailing: Switch(
                         value: themeProvider.isDarkMode,
-                        activeColor: const Color(0xFF1E88E5),
+                        // CORRECCIÓN 2: Se usa activeThumbColor en lugar de activeColor
+                        activeThumbColor: const Color(0xFF1E88E5),
                         onChanged: (bool value) {
                           themeProvider.toggleTheme(value);
                         },
@@ -86,8 +81,6 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
                 const Divider(height: 1, indent: 56), 
-                
-                // CONSUMER DE IDIOMA
                 Consumer<LanguageProvider>(
                   builder: (context, languageProvider, child) {
                     return ListTile(
@@ -137,11 +130,7 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Text(
               l10n.acercaDe,
-              style: const TextStyle(
-                fontSize: 16, 
-                fontWeight: FontWeight.bold, 
-                color: Colors.blueGrey
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
             ),
           ),
           Card(
