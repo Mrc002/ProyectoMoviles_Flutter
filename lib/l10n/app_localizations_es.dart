@@ -40,4 +40,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorGenerar => 'No pude generar una respuesta.';
+
+  @override
+  String get navEstudio => 'Estudio';
+
+  @override
+  String get navAsistente => 'Asistente IA';
+
+  @override
+  String get navAjustes => 'Ajustes';
+
+  @override
+  String get editorFuncion2D => 'Función f(x)';
+
+  @override
+  String get editorFuncion3D => 'Función f(x, y)';
+
+  @override
+  String get editorHint2D => 'Ej. sin(x) * x';
+
+  @override
+  String get editorHint3D => 'Ej. x^2 + y^2';
+
+  @override
+  String get chatVacio =>
+      '¡Pregúntame sobre tu función!\nEj: ¿Cuál es el dominio?';
+
+  @override
+  String get chatHint => 'Escribe tu duda...';
 }

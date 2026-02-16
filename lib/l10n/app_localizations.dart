@@ -163,6 +163,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No pude generar una respuesta.'**
   String get errorGenerar;
+
+  /// No description provided for @navEstudio.
+  ///
+  /// In es, this message translates to:
+  /// **'Estudio'**
+  String get navEstudio;
+
+  /// No description provided for @navAsistente.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistente IA'**
+  String get navAsistente;
+
+  /// No description provided for @navAjustes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get navAjustes;
+
+  /// No description provided for @editorFuncion2D.
+  ///
+  /// In es, this message translates to:
+  /// **'Función f(x)'**
+  String get editorFuncion2D;
+
+  /// No description provided for @editorFuncion3D.
+  ///
+  /// In es, this message translates to:
+  /// **'Función f(x, y)'**
+  String get editorFuncion3D;
+
+  /// No description provided for @editorHint2D.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej. sin(x) * x'**
+  String get editorHint2D;
+
+  /// No description provided for @editorHint3D.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej. x^2 + y^2'**
+  String get editorHint3D;
+
+  /// No description provided for @chatVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Pregúntame sobre tu función!\nEj: ¿Cuál es el dominio?'**
+  String get chatVacio;
+
+  /// No description provided for @chatHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu duda...'**
+  String get chatHint;
 }
 
 class _AppLocalizationsDelegate

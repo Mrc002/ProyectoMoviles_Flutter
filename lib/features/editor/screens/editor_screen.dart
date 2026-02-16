@@ -12,6 +12,7 @@ class EditorScreen extends StatelessWidget {
     // Usamos 'watch' para que la pantalla se redibuje con los cambios
     final provider = context.watch<EditorProvider>();
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!; // <--- AGREGA ESTA LÍNEA AQUÍ
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -103,8 +104,8 @@ class EditorScreen extends StatelessWidget {
           TextField(
             onChanged: (value) => provider.updateEquation(value),
             decoration: InputDecoration(
-              labelText: provider.is3DMode ? 'Función f(x, y)' : 'Función f(x)',
-              hintText: provider.is3DMode ? 'Ej. x^2 + y^2' : 'Ej. sin(x) * x',
+              labelText: provider.is3DMode ? l10n.editorFuncion3D : l10n.editorFuncion2D,
+              hintText: provider.is3DMode ? l10n.editorHint3D : l10n.editorHint2D,
               filled: true,
               fillColor: Colors.white,
               prefixIcon: Icon(Icons.functions, color: provider.isValid ? theme.primaryColor : Colors.red),

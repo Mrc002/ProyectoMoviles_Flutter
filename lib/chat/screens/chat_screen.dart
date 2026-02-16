@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
 import '../../features/editor/logic/editor_provider.dart';
 import '../../features/settings/logic/language_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -18,6 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
+    final l10n = AppLocalizations.of(context)!;
     // Corrección 1: Se eliminó la variable 'editorProvider' que no se usaba aquí.
 
     return Column(
@@ -27,7 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: chatProvider.messages.isEmpty
               ? const Center(
                   child: Text(
-                    "¡Pregúntame sobre tu función!\nEj: ¿Cuál es el dominio?",
+                    l10n.chatVacio,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey),
                   ),
@@ -82,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: TextField(
                   controller: _controller,
                   decoration: const InputDecoration(
-                    hintText: "Escribe tu duda...",
+                    hintText: l10n.chatHint,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
