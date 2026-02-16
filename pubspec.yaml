@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
   # --- Iconos base ---
   cupertino_icons: ^1.0.6
@@ -30,11 +33,11 @@ dependencies:
   # --- Inteligencia Artificial ---
   # He actualizado esta también para asegurar compatibilidad
   google_generative_ai: ^0.4.0
-  flutter_dotenv: ^5.1.0
-
+  
   # --- UI / Diseño ---
   flutter_markdown: ^0.7.7+1
   google_fonts: ^8.0.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -43,10 +46,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   
   assets:
     - .env
-    
+
   # Aquí agregaremos las imágenes cuando las tengas
   # assets:
   #   - assets/images/

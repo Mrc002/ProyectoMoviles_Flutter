@@ -2,29 +2,38 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/editor_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class EditorScreen extends StatelessWidget {
   const EditorScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Usamos 'watch' para que la pantalla se redibuje con los cambios
     final provider = context.watch<EditorProvider>();
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark; // Detectamos si es modo oscuro
+    final l10n = AppLocalizations.of(context)!;
+
+    // Colores dinámicos según el tema
+    final containerColor = theme.colorScheme.surface;
+    final borderColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
+    final gridLineColor = isDark ? Colors.white10 : Colors.grey.shade200;
+    final mainAxisLineColor = isDark ? Colors.white54 : Colors.black;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // --- BOTÓN TOGGLE 2D / 3D (Solicitado) ---
+          // --- BOTÓN TOGGLE 2D / 3D ---
           Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              // Usamos el color de superficie del tema en lugar de grey[100]
+              color: isDark ? Colors.black26 : Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: borderColor),
             ),
             child: Row(
               children: [
@@ -34,27 +43,26 @@ class EditorScreen extends StatelessWidget {
             ),
           ),
 
-          // --- LIENZO INFINITO (Estilo Desmos) ---
+          // --- LIENZO INFINITO ---
           Expanded(
             child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: Colors.white,
+                // Usamos el color de superficie dinámico en lugar de Colors.white
+                color: containerColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
-                    // CORRECCIÓN 1: withValues en lugar de withOpacity
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   )
                 ],
               ),
               child: provider.is3DMode
-                  ? _build3DPlaceholder()
+                  ? _build3DPlaceholder(context)
                   : GestureDetector(
-                      // Gestos para mover y hacer zoom
                       onScaleStart: (details) => provider.startGesture(details),
                       onScaleUpdate: (details) {
                         final size = context.size ?? Size.zero;
@@ -67,15 +75,15 @@ class EditorScreen extends StatelessWidget {
                           clipData: const FlClipData.all(),
                           gridData: FlGridData(
                             show: true,
-                            // Cuadrícula dinámica que se adapta al zoom
                             horizontalInterval: (provider.maxY - provider.minY) / 6,
                             verticalInterval: (provider.maxX - provider.minX) / 6,
+                            // Líneas de la cuadrícula dinámicas
                             getDrawingHorizontalLine: (value) => FlLine(
-                              color: value.abs() < 0.1 ? Colors.black : Colors.grey.shade200,
+                              color: value.abs() < 0.1 ? mainAxisLineColor : gridLineColor,
                               strokeWidth: value.abs() < 0.1 ? 2 : 1,
                             ),
                             getDrawingVerticalLine: (value) => FlLine(
-                              color: value.abs() < 0.1 ? Colors.black : Colors.grey.shade200,
+                              color: value.abs() < 0.1 ? mainAxisLineColor : gridLineColor,
                               strokeWidth: value.abs() < 0.1 ? 2 : 1,
                             ),
                           ),
@@ -85,13 +93,13 @@ class EditorScreen extends StatelessWidget {
                             LineChartBarData(
                               spots: provider.points,
                               isCurved: true,
-                              color: theme.primaryColor,
+                              color: theme.colorScheme.primary,
                               barWidth: 3,
                               dotData: const FlDotData(show: false),
                             ),
                           ],
                         ),
-                        duration: Duration.zero, // Sin animación para respuesta inmediata
+                        duration: Duration.zero, 
                       ),
                     ),
             ),
@@ -100,18 +108,16 @@ class EditorScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // --- CAMPO DE FÓRMULA ---
+          // Ya no necesitamos configurar colores aquí porque los definimos en el main.dart
           TextField(
             onChanged: (value) => provider.updateEquation(value),
             decoration: InputDecoration(
-              labelText: provider.is3DMode ? 'Función f(x, y)' : 'Función f(x)',
-              hintText: provider.is3DMode ? 'Ej. x^2 + y^2' : 'Ej. sin(x) * x',
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.functions, color: provider.isValid ? theme.primaryColor : Colors.red),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(16),
+              labelText: provider.is3DMode ? l10n.editorFuncion3D : l10n.editorFuncion2D,
+              hintText: provider.is3DMode ? l10n.editorHint3D : l10n.editorHint2D,
+              prefixIcon: Icon(
+                Icons.functions, 
+                // El icono también se adapta
+                color: provider.isValid ? theme.colorScheme.primary : theme.colorScheme.error
               ),
             ),
           ),
@@ -120,21 +126,26 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
-  Widget _build3DPlaceholder() {
+  Widget _build3DPlaceholder(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.view_in_ar, size: 80, color: Colors.grey[200]),
+          Icon(Icons.view_in_ar, size: 80, color: isDark ? Colors.white24 : Colors.grey[200]),
           const SizedBox(height: 10),
-          Text("Modo 3D", style: TextStyle(color: Colors.grey[400], fontSize: 20)),
+          Text(
+            l10n.editorModo3D, 
+            style: TextStyle(color: isDark ? Colors.white54 : Colors.grey[400], fontSize: 20)
+          ),
         ],
       ),
     );
   }
 }
 
-// Botón personalizado para el toggle superior
 class _ModeButton extends StatelessWidget {
   final String label;
   final bool isActive;
@@ -143,6 +154,17 @@ class _ModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Color del texto del botón
+    final textColor = isActive 
+        ? (isDark ? theme.colorScheme.onSurface : Colors.black87)
+        : (isDark ? Colors.white54 : Colors.grey[500]);
+
+    // Color del fondo del botón activo
+    final activeBackgroundColor = isDark ? theme.colorScheme.surface : Colors.white;
+
     return GestureDetector(
       onTap: () {
         if (!isActive) context.read<EditorProvider>().toggleMode();
@@ -151,17 +173,16 @@ class _ModeButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.transparent,
+          color: isActive ? activeBackgroundColor : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          // CORRECCIÓN 2: withValues aquí también
-          boxShadow: isActive ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
+          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 4)] : null,
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isActive ? Colors.black87 : Colors.grey[500],
+            color: textColor,
           ),
         ),
       ),

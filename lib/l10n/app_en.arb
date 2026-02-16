@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "cuenta": "Account",
+  "iniciaSesion": "Log In or Sign Up",
+  "iniciaSesionSub": "Save your graphs and chats in the cloud",
+  "preferencias": "Preferences",
+  "temaOscuro": "Dark Theme",
+  "idiomaApp": "App Language",
+  "acercaDe": "About",
+  "acercaDeSub": "About Math AI Studio",
+  "editorModo3D": "3D Mode",
+  "errorConexion": "Connection error",
+  "errorGenerar": "I couldn't generate a response.",
+  "navEstudio": "Studio",
+  "navAsistente": "AI Assistant",
+  "navAjustes": "Settings",
+  "editorFuncion2D": "Function f(x)",
+  "editorFuncion3D": "Function f(x, y)",
+  "editorHint2D": "Ex. sin(x) * x",
+  "editorHint3D": "Ex. x^2 + y^2",
+  "chatVacio": "Ask me about your function!\nEx: What is the domain?",
+  "chatHint": "Type your question..."
+}

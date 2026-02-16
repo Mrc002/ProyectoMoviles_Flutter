@@ -1,0 +1,23 @@
+{
+  "@@locale": "es",
+  "cuenta": "Cuenta",
+  "iniciaSesion": "Inicia Sesión o Regístrate",
+  "iniciaSesionSub": "Guarda tus gráficos y chats en la nube",
+  "preferencias": "Preferencias",
+  "temaOscuro": "Tema Oscuro",
+  "idiomaApp": "Idioma de la App",
+  "acercaDe": "Acerca de",
+  "acercaDeSub": "Acerca de Math AI Studio",
+  "editorModo3D": "Modo 3D",
+  "errorConexion": "Error de conexión",
+  "errorGenerar": "No pude generar una respuesta.",
+  "navEstudio": "Estudio",
+  "navAsistente": "Asistente IA",
+  "navAjustes": "Ajustes",
+  "editorFuncion2D": "Función f(x)",
+  "editorFuncion3D": "Función f(x, y)",
+  "editorHint2D": "Ej. sin(x) * x",
+  "editorHint3D": "Ej. x^2 + y^2",
+  "chatVacio": "¡Pregúntame sobre tu función!\nEj: ¿Cuál es el dominio?",
+  "chatHint": "Escribe tu duda..."
+}

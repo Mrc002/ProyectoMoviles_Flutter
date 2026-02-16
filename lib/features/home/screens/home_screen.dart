@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../editor/screens/editor_screen.dart';
-import '../../chat/screens/chat_screen.dart';
+import '../../../chat/screens/chat_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../../l10n/app_localizations.dart'; // <-- 1. Importación del traductor
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,32 +14,28 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // --- CORRECCIÓN AQUÍ ---
-  // Quitamos el "const" global de la lista para evitar conflictos si alguna pantalla no lo es.
-  // Quitamos el "Center" y el "style" que sobraban en ChatScreen.
-  final List<Widget> _screens = [
-    const EditorScreen(), 
-    const ChatScreen(), 
-    const Center(
-      child: Text(
-        'Ajustes y Perfil', 
-        style: TextStyle(fontSize: 18, color: Colors.grey),
-      ),
-    ),
+  // Lista de pantallas. La primera es tu Editor con zoom infinito.
+  final List<Widget> _screens = const [
+    EditorScreen(), 
+    ChatScreen(),
+    SettingsScreen(), 
   ];
 
   @override
   Widget build(BuildContext context) {
+    // 2. Instanciamos el traductor para usarlo en esta pantalla
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      // AppBar limpio
+      // Mantenemos el AppBar limpio
       appBar: AppBar(
         title: const Text('Math AI Studio', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
       ),
       
-      // IndexedStack mantiene el estado de las pantallas (no se borran al cambiar de pestaña)
+      // Aquí se muestra la pantalla seleccionada
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -50,22 +48,22 @@ class _HomeScreenState extends State<HomeScreen> {
             _selectedIndex = index;
           });
         },
-        type: BottomNavigationBarType.fixed,
+        type: BottomNavigationBarType.fixed, // Para que no se muevan los iconos
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Estudio',
+            icon: const Icon(Icons.show_chart),
+            label: l10n.navEstudio, // <-- 3. Usamos la variable de traducción
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.psychology), // Icono de cerebro/IA
-            label: 'Asistente IA',
+            icon: const Icon(Icons.psychology),
+            label: l10n.navAsistente, // <-- Usamos la variable de traducción
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Ajustes',
+            icon: const Icon(Icons.settings),
+            label: l10n.navAjustes, // <-- Usamos la variable de traducción
           ),
         ],
       ),
