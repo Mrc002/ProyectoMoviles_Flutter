@@ -8,7 +8,7 @@ import 'l10n/app_localizations.dart';
 import 'features/editor/logic/editor_provider.dart';
 import 'features/settings/logic/language_provider.dart';
 import 'features/settings/logic/theme_provider.dart';
-import 'chat/logic/chat_provider.dart';
+import 'features/chat/logic/chat_provider.dart';
 import 'features/auth/logic/auth_provider.dart'; 
 
 // Screens
@@ -17,7 +17,7 @@ import 'features/auth/screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env", isOptional: true);
 
   // <--- 5. INICIALIZA FIREBASE (Vital para que no crashee)
   await Firebase.initializeApp(
