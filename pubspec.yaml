@@ -14,6 +14,8 @@ dependencies:
     sdk: flutter
   intl: any
 
+  http: ^1.2.0
+
   # --- Iconos base ---
   cupertino_icons: ^1.0.6
 
@@ -32,7 +34,7 @@ dependencies:
 
   # --- Inteligencia Artificial ---
   # He actualizado esta también para asegurar compatibilidad
-  google_generative_ai: ^0.4.0
+  google_generative_ai: ^0.4.6
   
   # --- UI / Diseño ---
   flutter_markdown: ^0.7.7+1
