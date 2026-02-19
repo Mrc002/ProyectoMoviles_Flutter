@@ -26,6 +26,74 @@ class ChatProvider extends ChangeNotifier {
       'Ayuda a explicar funciones, dominios, rangos, raíces y comportamiento de gráficas. '
       'Sé conciso y claro. Usa notación matemática cuando sea útil.';
 
+//Debug: Mostrar el error técnico real en el chat para diagnóstico
+/*Future<void> sendMessage(String text,
+      {String? currentEquation}) async {
+    if (text.isEmpty) return;
+
+    _isLoading = true;
+    _messages.add(ChatMessage(text: text, isUser: true));
+    notifyListeners();
+
+    // 🕵️ DIAGNÓSTICO: Listar modelos disponibles
+    final apiKey = dotenv.env['GEMINI_API_KEY'];
+    final urlModels = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey');
+    try {
+      final resp = await http.get(urlModels);
+      print("📋 LISTA DE MODELOS: ${resp.body}");
+    } catch (e) {
+      print("Error listando modelos: $e");
+    }
+
+    try {
+      // Construir el prompt con contexto de la ecuación actual
+      String promptToSend = text;
+      if (currentEquation != null && currentEquation.isNotEmpty) {
+        promptToSend =
+            'El usuario está analizando la función: f(x) = $currentEquation. '
+            'Pregunta: $text';
+      }
+
+      // Agregar al historial
+      _history.add({
+        'role': 'user',
+        'parts': [
+          {'text': promptToSend}
+        ],
+      });
+
+      final responseText = await _callGeminiAPI();
+
+      // Agregar respuesta al historial
+      _history.add({
+        'role': 'model',
+        'parts': [
+          {'text': responseText}
+        ],
+      });
+
+      _messages.add(ChatMessage(text: responseText, isUser: false));
+    
+    } catch (e) {
+      // 🚨 MODO DEBUG TEMPORAL:
+      // Esto mostrará el error técnico real directamente en el chat
+      print("ERROR ORIGINAL: $e"); 
+      
+      _messages.add(ChatMessage(
+        text: "DETALLE TÉCNICO: $e", 
+        isUser: false
+      ));
+
+      // Remover del historial si falló
+      if (_history.isNotEmpty && _history.last['role'] == 'user') {
+        _history.removeLast();
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  } */
+
   Future<void> sendMessage(String text,
       {String? currentEquation}) async {
     if (text.isEmpty) return;
@@ -74,7 +142,7 @@ class ChatProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  }
+  } 
 
   Future<String> _callGeminiAPI() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
@@ -83,7 +151,9 @@ class ChatProvider extends ChangeNotifier {
     }
 
     // Endpoint REST directo — sin SDK, sin problemas de versiones
-    const model = 'gemini-2.0-flash';
+    const model = 'gemini-flash-latest';
+    // Opción B: Si la anterior falla por cuota, usa esta versión ligera:
+    //const model = 'gemini-flash-lite-latest';
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
     );
