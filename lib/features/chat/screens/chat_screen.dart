@@ -103,19 +103,9 @@ class _ChatScreenState extends State<ChatScreen> {
             width: 110,
             child: BotAvatar(size: 110, animate: true),
           ),
-          const SizedBox(height: 20),
-          Text(
-            AppLocalizations.of(context)!.chatTitle,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : const Color(0xFF1A2D4A),
-            ),
-          ),
-        
           const SizedBox(height: 8),
           Text(
-            'Pregúntame sobre tu función\no escribe una ecuación para analizar',
+            AppLocalizations.of(context)!.chatEmptySubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -431,7 +421,7 @@ class _ChatInput extends StatelessWidget {
                     fontSize: 15,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Pregunta sobre tu función...',
+                    hintText: AppLocalizations.of(context)!.chatInputHint,
                     hintStyle: TextStyle(
                       color: isDark ? Colors.white30 : const Color(0xFFB0CDE8),
                       fontSize: 15,
