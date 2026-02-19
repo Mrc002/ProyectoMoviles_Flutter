@@ -217,6 +217,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Escribe tu duda...'**
   String get chatHint;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistente de Matemáticas'**
+  String get chatTitle;
+
+  /// No description provided for @chatEmptySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pregúntame sobre tu función\no escribe una ecuación para analizar'**
+  String get chatEmptySubtitle;
+
+  /// No description provided for @chatSuggestionDomain.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuál es el dominio?'**
+  String get chatSuggestionDomain;
+
+  /// No description provided for @chatSuggestionIntersect.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dónde corta al eje Y?'**
+  String get chatSuggestionIntersect;
+
+  /// No description provided for @chatSuggestionExplain.
+  ///
+  /// In es, this message translates to:
+  /// **'Explica la función'**
+  String get chatSuggestionExplain;
+
+  /// No description provided for @chatInputHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pregunta sobre tu función...'**
+  String get chatInputHint;
 }
 
 class _AppLocalizationsDelegate

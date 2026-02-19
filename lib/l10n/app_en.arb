@@ -19,5 +19,11 @@
   "editorHint2D": "Ex. sin(x) * x",
   "editorHint3D": "Ex. x^2 + y^2",
   "chatVacio": "Ask me about your function!\nEx: What is the domain?",
-  "chatHint": "Type your question..."
+  "chatHint": "Type your question...",
+  "chatTitle": "Math Assistant",
+  "chatEmptySubtitle": "Ask me about your function\nor type an equation to analyze",
+  "chatSuggestionDomain": "What is the domain?",
+  "chatSuggestionIntersect": "Where does it cross the Y-axis?",
+  "chatSuggestionExplain": "Explain the function",
+  "chatInputHint": "Ask about your function..."
 }

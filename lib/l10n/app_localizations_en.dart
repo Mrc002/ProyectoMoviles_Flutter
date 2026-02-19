@@ -68,4 +68,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatHint => 'Type your question...';
+
+  @override
+  String get chatTitle => 'Math Assistant';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Ask me about your function\nor type an equation to analyze';
+
+  @override
+  String get chatSuggestionDomain => 'What is the domain?';
+
+  @override
+  String get chatSuggestionIntersect => 'Where does it cross the Y-axis?';
+
+  @override
+  String get chatSuggestionExplain => 'Explain the function';
+
+  @override
+  String get chatInputHint => 'Ask about your function...';
 }

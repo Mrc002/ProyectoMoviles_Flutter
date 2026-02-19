@@ -19,5 +19,11 @@
   "editorHint2D": "Ej. sin(x) * x",
   "editorHint3D": "Ej. x^2 + y^2",
   "chatVacio": "¡Pregúntame sobre tu función!\nEj: ¿Cuál es el dominio?",
-  "chatHint": "Escribe tu duda..."
+  "chatHint": "Escribe tu duda...",
+  "chatTitle": "Asistente de Matemáticas",
+  "chatEmptySubtitle": "Pregúntame sobre tu función\no escribe una ecuación para analizar",
+  "chatSuggestionDomain": "¿Cuál es el dominio?",
+  "chatSuggestionIntersect": "¿Dónde corta al eje Y?",
+  "chatSuggestionExplain": "Explica la función",
+  "chatInputHint": "Pregunta sobre tu función..."
 }
