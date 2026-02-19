@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
 import '../../editor/logic/editor_provider.dart';
 import '../../../shared/widgets/bot_avatar.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -104,13 +105,14 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Asistente de Matemáticas',
+            AppLocalizations.of(context)!.chatTitle,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: isDark ? Colors.white : const Color(0xFF1A2D4A),
             ),
           ),
+        
           const SizedBox(height: 8),
           Text(
             'Pregúntame sobre tu función\no escribe una ecuación para analizar',
@@ -124,13 +126,11 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(height: 28),
           // Sugerencias rápidas
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
+            // ...
             children: [
-              '¿Cuál es el dominio?',
-              '¿Dónde corta al eje Y?',
-              'Explica la función',
+              AppLocalizations.of(context)!.chatSuggestionDomain,
+              AppLocalizations.of(context)!.chatSuggestionIntersect,
+              AppLocalizations.of(context)!.chatSuggestionExplain,
             ].map((hint) => _SuggestionChip(hint: hint, isDark: isDark)).toList(),
           ),
         ],
