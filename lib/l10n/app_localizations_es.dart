@@ -113,10 +113,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get continuarInvitado => 'Continuar como invitado';
 
   @override
-  String get noTienesCuenta => '¿No tienes cuenta? ';
+  String get noTienesCuenta => '¿No tienes cuenta?';
 
   @override
-  String get yaTienesCuenta => '¿Ya tienes cuenta? ';
+  String get yaTienesCuenta => '¿Ya tienes cuenta?';
 
   @override
   String get registrateAccion => 'Regístrate';

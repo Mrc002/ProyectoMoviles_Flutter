@@ -4,6 +4,7 @@ import '../logic/theme_provider.dart';
 import '../logic/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/logic/auth_provider.dart';
+import 'profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -141,6 +142,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
     return _SettingsCard(
       isDark: isDark,
       children: [
@@ -212,24 +214,30 @@ class _AccountCard extends StatelessWidget {
 
               // Acción
               GestureDetector(
-                onTap: onTap,
+                onTap: () async {
+                  if (isGuest) {
+                    // Si es invitado, el botón sirve para mandarlo al Login (cerrando sesión anónima)
+                    await authProvider.signOut();
+                  } else {
+                    // Si es un usuario registrado, lo llevamos a su Pantalla de Perfil
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    );
+                  }
+                },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isGuest
-                        ? const Color(0xFF5B9BD5)
-                        : const Color(0xFFFFEBEE),
+                    color: isGuest ? const Color(0xFF5B9BD5) : const Color(0xFFD6E8F7), // Cambio visual del botón
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    isGuest ? l10n.entrar : l10n.salir,
+                    isGuest ? l10n.entrar : 'Ver Perfil', // <-- Cambiamos "Salir" por "Ver Perfil"
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isGuest
-                          ? Colors.white
-                          : const Color(0xFFE53935),
+                      color: isGuest ? Colors.white : const Color(0xFF5B9BD5),
                     ),
                   ),
                 ),

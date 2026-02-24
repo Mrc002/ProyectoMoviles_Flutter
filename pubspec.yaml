@@ -38,6 +38,8 @@ dependencies:
   
   # --- UI / Diseño ---
   flutter_markdown: ^0.7.7+1
+  flutter_markdown_latex: any
+  markdown: any
   google_fonts: ^8.0.1
   flutter_dotenv: ^5.1.0
 

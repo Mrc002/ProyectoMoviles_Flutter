@@ -113,10 +113,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continuarInvitado => 'Continue as guest';
 
   @override
-  String get noTienesCuenta => 'Don\'t have an account? ';
+  String get noTienesCuenta => 'Don\'t have an account?';
 
   @override
-  String get yaTienesCuenta => 'Already have an account? ';
+  String get yaTienesCuenta => 'Already have an account?';
 
   @override
   String get registrateAccion => 'Sign Up';

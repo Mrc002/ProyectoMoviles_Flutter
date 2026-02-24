@@ -26,7 +26,6 @@
   "chatSuggestionIntersect": "Where does it cross the Y-axis?",
   "chatSuggestionExplain": "Explain the function",
   "chatInputHint": "Ask about your function...",
-
   "graficaAnaliza": "Graph, analyze, and learn with AI",
   "iniciarSesionBtn": "Log In",
   "crearCuentaBtn": "Create account",
@@ -35,8 +34,8 @@
   "contrasena": "Password",
   "registrarseBtn": "Sign Up",
   "continuarInvitado": "Continue as guest",
-  "noTienesCuenta": "Don't have an account? ",
-  "yaTienesCuenta": "Already have an account? ",
+  "noTienesCuenta": "Don't have an account?",
+  "yaTienesCuenta": "Already have an account?",
   "registrateAccion": "Sign Up",
   "iniciaSesionAccion": "Log In",
   "ingresaFuncion": "Enter a function to graph",

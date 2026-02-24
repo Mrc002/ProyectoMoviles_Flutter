@@ -26,7 +26,6 @@
   "chatSuggestionIntersect": "¿Dónde corta al eje Y?",
   "chatSuggestionExplain": "Explica la función",
   "chatInputHint": "Pregunta sobre tu función...",
-
   "graficaAnaliza": "Grafica, analiza y aprende con IA",
   "iniciarSesionBtn": "Iniciar sesión",
   "crearCuentaBtn": "Crear cuenta",
@@ -35,8 +34,8 @@
   "contrasena": "Contraseña",
   "registrarseBtn": "Registrarse",
   "continuarInvitado": "Continuar como invitado",
-  "noTienesCuenta": "¿No tienes cuenta? ",
-  "yaTienesCuenta": "¿Ya tienes cuenta? ",
+  "noTienesCuenta": "¿No tienes cuenta?",
+  "yaTienesCuenta": "¿Ya tienes cuenta?",
   "registrateAccion": "Regístrate",
   "iniciaSesionAccion": "Inicia sesión",
   "ingresaFuncion": "Ingresa una función para graficar",

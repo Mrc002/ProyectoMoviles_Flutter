@@ -305,13 +305,13 @@ abstract class AppLocalizations {
   /// No description provided for @noTienesCuenta.
   ///
   /// In es, this message translates to:
-  /// **'¿No tienes cuenta? '**
+  /// **'¿No tienes cuenta?'**
   String get noTienesCuenta;
 
   /// No description provided for @yaTienesCuenta.
   ///
   /// In es, this message translates to:
-  /// **'¿Ya tienes cuenta? '**
+  /// **'¿Ya tienes cuenta?'**
   String get yaTienesCuenta;
 
   /// No description provided for @registrateAccion.
