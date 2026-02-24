@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -83,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     final auth   = context.watch<AuthProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n   = AppLocalizations.of(context)!;
 
     return Scaffold(
       // Fondo con gradiente azul suave como la referencia
@@ -110,11 +112,11 @@ class _LoginScreenState extends State<LoginScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // ── LOGO / HEADER ────────────────────────────────────
-                      _buildHeader(isDark),
+                      _buildHeader(isDark, l10n),
                       const SizedBox(height: 36),
 
                       // ── CARD FORMULARIO ──────────────────────────────────
-                      _buildFormCard(auth, isDark),
+                      _buildFormCard(auth, isDark, l10n),
                     ],
                   ),
                 ),
@@ -127,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
-  Widget _buildHeader(bool isDark) {
+  Widget _buildHeader(bool isDark, AppLocalizations l10n) {
     return Column(
       children: [
         // Ícono con fondo azul como en la referencia
@@ -159,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         const SizedBox(height: 6),
         Text(
-          'Grafica, analiza y aprende con IA',
+          l10n.graficaAnaliza,
           style: TextStyle(
             fontSize: 14,
             color: isDark ? Colors.white54 : const Color(0xFF6B8CAE),
@@ -171,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   // ── CARD FORMULARIO ─────────────────────────────────────────────────────────
-  Widget _buildFormCard(AuthProvider auth, bool isDark) {
+  Widget _buildFormCard(AuthProvider auth, bool isDark, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C3350) : Colors.white,
@@ -198,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen>
         children: [
           // Título del modo
           Text(
-            _isLoginMode ? 'Iniciar sesión' : 'Crear cuenta',
+            _isLoginMode ? l10n.iniciarSesionBtn : l10n.crearCuentaBtn,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -211,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen>
           if (!_isLoginMode) ...[
             _buildField(
               controller: _nameController,
-              label: 'Nombre completo',
+              label: l10n.nombreCompleto,
               icon: Icons.person_outline_rounded,
               isDark: isDark,
             ),
@@ -221,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen>
           // Email
           _buildField(
             controller: _emailController,
-            label: 'Correo electrónico',
+            label: l10n.correoElectronico,
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             isDark: isDark,
@@ -231,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen>
           // Contraseña
           _buildField(
             controller: _passwordController,
-            label: 'Contraseña',
+            label: l10n.contrasena,
             icon: Icons.lock_outline_rounded,
             obscureText: _obscurePass,
             isDark: isDark,
@@ -261,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 )
               : _buildPrimaryButton(
-                  label: _isLoginMode ? 'Iniciar sesión' : 'Registrarse',
+                  label: _isLoginMode ? l10n.iniciarSesionBtn : l10n.registrarseBtn,
                   onTap: _submit,
                 ),
 
@@ -270,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen>
           // Continuar como invitado (solo en login)
           if (_isLoginMode && !auth.isLoading)
             _buildSecondaryButton(
-              label: 'Continuar como invitado',
+              label: l10n.continuarInvitado,
               onTap: () async {
                 final error = await auth.signInAsGuest();
                 if (error != null && mounted) {
@@ -315,11 +317,11 @@ class _LoginScreenState extends State<LoginScreen>
                   children: [
                     TextSpan(
                       text: _isLoginMode
-                          ? '¿No tienes cuenta? '
-                          : '¿Ya tienes cuenta? ',
+                          ? l10n.noTienesCuenta
+                          : l10n.yaTienesCuenta,
                     ),
                     TextSpan(
-                      text: _isLoginMode ? 'Regístrate' : 'Inicia sesión',
+                      text: _isLoginMode ? l10n.registrateAccion : l10n.iniciaSesionAccion,
                       style: const TextStyle(
                         color: Color(0xFF5B9BD5),
                         fontWeight: FontWeight.w700,
