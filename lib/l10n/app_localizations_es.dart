@@ -87,4 +87,70 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chatInputHint => 'Pregunta sobre tu función...';
+
+  @override
+  String get graficaAnaliza => 'Grafica, analiza y aprende con IA';
+
+  @override
+  String get iniciarSesionBtn => 'Iniciar sesión';
+
+  @override
+  String get crearCuentaBtn => 'Crear cuenta';
+
+  @override
+  String get nombreCompleto => 'Nombre completo';
+
+  @override
+  String get correoElectronico => 'Correo electrónico';
+
+  @override
+  String get contrasena => 'Contraseña';
+
+  @override
+  String get registrarseBtn => 'Registrarse';
+
+  @override
+  String get continuarInvitado => 'Continuar como invitado';
+
+  @override
+  String get noTienesCuenta => '¿No tienes cuenta?';
+
+  @override
+  String get yaTienesCuenta => '¿Ya tienes cuenta?';
+
+  @override
+  String get registrateAccion => 'Regístrate';
+
+  @override
+  String get iniciaSesionAccion => 'Inicia sesión';
+
+  @override
+  String get ingresaFuncion => 'Ingresa una función para graficar';
+
+  @override
+  String get proximamente => 'Próximamente';
+
+  @override
+  String get funcionValida => 'Válida ✓';
+
+  @override
+  String get funcionInvalida => 'Inválida';
+
+  @override
+  String get cuentaRegistrada => 'Cuenta registrada';
+
+  @override
+  String get usuario => 'Usuario';
+
+  @override
+  String get entrar => 'Entrar';
+
+  @override
+  String get salir => 'Salir';
+
+  @override
+  String get seleccionarIdioma => 'Seleccionar idioma';
+
+  @override
+  String get valorarApp => 'Valorar la app';
 }

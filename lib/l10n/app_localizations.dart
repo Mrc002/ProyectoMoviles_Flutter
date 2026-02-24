@@ -253,6 +253,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pregunta sobre tu función...'**
   String get chatInputHint;
+
+  /// No description provided for @graficaAnaliza.
+  ///
+  /// In es, this message translates to:
+  /// **'Grafica, analiza y aprende con IA'**
+  String get graficaAnaliza;
+
+  /// No description provided for @iniciarSesionBtn.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar sesión'**
+  String get iniciarSesionBtn;
+
+  /// No description provided for @crearCuentaBtn.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear cuenta'**
+  String get crearCuentaBtn;
+
+  /// No description provided for @nombreCompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre completo'**
+  String get nombreCompleto;
+
+  /// No description provided for @correoElectronico.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo electrónico'**
+  String get correoElectronico;
+
+  /// No description provided for @contrasena.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña'**
+  String get contrasena;
+
+  /// No description provided for @registrarseBtn.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrarse'**
+  String get registrarseBtn;
+
+  /// No description provided for @continuarInvitado.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar como invitado'**
+  String get continuarInvitado;
+
+  /// No description provided for @noTienesCuenta.
+  ///
+  /// In es, this message translates to:
+  /// **'¿No tienes cuenta?'**
+  String get noTienesCuenta;
+
+  /// No description provided for @yaTienesCuenta.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Ya tienes cuenta?'**
+  String get yaTienesCuenta;
+
+  /// No description provided for @registrateAccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Regístrate'**
+  String get registrateAccion;
+
+  /// No description provided for @iniciaSesionAccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión'**
+  String get iniciaSesionAccion;
+
+  /// No description provided for @ingresaFuncion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresa una función para graficar'**
+  String get ingresaFuncion;
+
+  /// No description provided for @proximamente.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximamente'**
+  String get proximamente;
+
+  /// No description provided for @funcionValida.
+  ///
+  /// In es, this message translates to:
+  /// **'Válida ✓'**
+  String get funcionValida;
+
+  /// No description provided for @funcionInvalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Inválida'**
+  String get funcionInvalida;
+
+  /// No description provided for @cuentaRegistrada.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta registrada'**
+  String get cuentaRegistrada;
+
+  /// No description provided for @usuario.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario'**
+  String get usuario;
+
+  /// No description provided for @entrar.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar'**
+  String get entrar;
+
+  /// No description provided for @salir.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get salir;
+
+  /// No description provided for @seleccionarIdioma.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar idioma'**
+  String get seleccionarIdioma;
+
+  /// No description provided for @valorarApp.
+  ///
+  /// In es, this message translates to:
+  /// **'Valorar la app'**
+  String get valorarApp;
 }
 
 class _AppLocalizationsDelegate

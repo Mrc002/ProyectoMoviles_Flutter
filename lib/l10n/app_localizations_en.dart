@@ -87,4 +87,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatInputHint => 'Ask about your function...';
+
+  @override
+  String get graficaAnaliza => 'Graph, analyze, and learn with AI';
+
+  @override
+  String get iniciarSesionBtn => 'Log In';
+
+  @override
+  String get crearCuentaBtn => 'Create account';
+
+  @override
+  String get nombreCompleto => 'Full name';
+
+  @override
+  String get correoElectronico => 'Email address';
+
+  @override
+  String get contrasena => 'Password';
+
+  @override
+  String get registrarseBtn => 'Sign Up';
+
+  @override
+  String get continuarInvitado => 'Continue as guest';
+
+  @override
+  String get noTienesCuenta => 'Don\'t have an account?';
+
+  @override
+  String get yaTienesCuenta => 'Already have an account?';
+
+  @override
+  String get registrateAccion => 'Sign Up';
+
+  @override
+  String get iniciaSesionAccion => 'Log In';
+
+  @override
+  String get ingresaFuncion => 'Enter a function to graph';
+
+  @override
+  String get proximamente => 'Coming soon';
+
+  @override
+  String get funcionValida => 'Valid ✓';
+
+  @override
+  String get funcionInvalida => 'Invalid';
+
+  @override
+  String get cuentaRegistrada => 'Registered account';
+
+  @override
+  String get usuario => 'User';
+
+  @override
+  String get entrar => 'Enter';
+
+  @override
+  String get salir => 'Log Out';
+
+  @override
+  String get seleccionarIdioma => 'Select language';
+
+  @override
+  String get valorarApp => 'Rate the app';
 }
