@@ -173,7 +173,7 @@ class _GraphCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Ingresa una función para graficar',
+                          l10n.ingresaFuncion,
                           style: TextStyle(
                             color: isDark
                                 ? Colors.white24
@@ -222,7 +222,7 @@ class _GraphCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Próximamente',
+            l10n.proximamente,
             style: TextStyle(
               color: isDark ? Colors.white24 : const Color(0xFFD6E8F7),
               fontSize: 12,
@@ -342,7 +342,7 @@ class _BottomPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isValid ? 'Válida ✓' : 'Inválida',
+                  isValid ? l10n.funcionValida : l10n.funcionInvalida,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
