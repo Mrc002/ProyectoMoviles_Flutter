@@ -12,9 +12,33 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   bool get isLoading => _isLoading;
 
+  bool _isPremium = false;
+  String _userName = '';
+
+  bool get isPremium => _isPremium;
+  String get userName => _userName;
+
   AuthProvider() {
-    _auth.authStateChanges().listen((user) {
+    _auth.authStateChanges().listen((user) async {
       _user = user;
+      
+      // Si el usuario se loguea y NO es invitado, buscamos sus datos en Firestore
+      if (user != null && !user.isAnonymous) {
+        try {
+          DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+            _isPremium = data['isPremium'] ?? false;
+            _userName = data['name'] ?? 'Usuario';
+          }
+        } catch (e) {
+          debugPrint("Error leyendo datos del usuario: $e");
+        }
+      } else {
+        // Si es invitado o se desloguea, limpiamos los datos
+        _isPremium = false;
+        _userName = '';
+      }
       notifyListeners();
     });
   }

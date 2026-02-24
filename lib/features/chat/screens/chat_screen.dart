@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_latex/flutter_markdown_latex.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
 import '../../editor/logic/editor_provider.dart';
@@ -50,14 +52,12 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatProvider = context.watch<ChatProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Auto-scroll cuando llegan mensajes nuevos
     if (chatProvider.messages.isNotEmpty) _scrollToBottom();
 
     return Container(
       color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
       child: Column(
         children: [
-          // ── LISTA DE MENSAJES ──────────────────────────────────────────
           Expanded(
             child: chatProvider.messages.isEmpty
                 ? _buildEmptyState(isDark)
@@ -77,11 +77,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
           ),
 
-          // ── INDICADOR TYPING ──────────────────────────────────────────
           if (chatProvider.isLoading)
             _TypingIndicator(isDark: isDark),
 
-          // ── INPUT ─────────────────────────────────────────────────────
           _ChatInput(
             controller: _controller,
             isDark: isDark,
@@ -92,13 +90,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ── ESTADO VACÍO ────────────────────────────────────────────────────────────
   Widget _buildEmptyState(bool isDark) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Robot animado grande
           const SizedBox(
             width: 110,
             child: BotAvatar(size: 110, animate: true),
@@ -114,9 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           const SizedBox(height: 28),
-          // Sugerencias rápidas
           Wrap(
-            // ...
             children: [
               AppLocalizations.of(context)!.chatSuggestionDomain,
               AppLocalizations.of(context)!.chatSuggestionIntersect,
@@ -129,7 +123,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-// ── BURBUJA DE MENSAJE ────────────────────────────────────────────────────────
 class _MessageBubble extends StatelessWidget {
   final String text;
   final bool isUser;
@@ -152,13 +145,11 @@ class _MessageBubble extends StatelessWidget {
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          // Avatar del asistente
           if (!isUser) ...[
             _AvatarBot(isDark: isDark),
             const SizedBox(width: 8),
           ],
 
-          // Burbuja
           Flexible(
             child: Container(
               constraints: BoxConstraints(
@@ -166,7 +157,6 @@ class _MessageBubble extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                // Usuario: azul sólido | Bot: blanco/card
                 gradient: isUser
                     ? const LinearGradient(
                         colors: [Color(0xFF5B9BD5), Color(0xFF3A7FC1)],
@@ -214,12 +204,40 @@ class _MessageBubble extends StatelessWidget {
                     )
                   : MarkdownBody(
                       data: text,
+                      selectable: false, // <--- ¡AQUÍ ESTÁ LA SOLUCIÓN!
+                      builders: {
+                        'latex': LatexElementBuilder(
+                          textStyle: const TextStyle(
+                            color: Color(0xFF5B9BD5),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      },
+                      extensionSet: md.ExtensionSet(
+                        <md.BlockSyntax>[
+                          LatexBlockSyntax(),
+                          ...md.ExtensionSet.gitHubFlavored.blockSyntaxes
+                        ],
+                        <md.InlineSyntax>[
+                          LatexInlineSyntax(),
+                          ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
+                        ],
+                      ),
                       styleSheet: MarkdownStyleSheet(
                         p: TextStyle(
                           color: isDark ? Colors.white : const Color(0xFF1A2D4A),
                           fontSize: 15,
                           height: 1.5,
                         ),
+                        tableBorder: TableBorder.all(
+                          color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
+                          width: 1,
+                        ),
+                        tableHead: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFF5B9BD5) : const Color(0xFF3A7FC1),
+                        ),
+                        tableCellsPadding: const EdgeInsets.all(8),
                         code: TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 13,
@@ -229,14 +247,10 @@ class _MessageBubble extends StatelessWidget {
                           color: const Color(0xFF5B9BD5),
                         ),
                         codeblockDecoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF0F1E2E)
-                              : const Color(0xFFEBF4FC),
+                          color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF234060)
-                                : const Color(0xFFD6E8F7),
+                            color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
                           ),
                         ),
                         strong: const TextStyle(
@@ -248,7 +262,6 @@ class _MessageBubble extends StatelessWidget {
             ),
           ),
 
-          // Espacio para alinear el mensaje del usuario
           if (isUser) const SizedBox(width: 8),
         ],
       ),
@@ -256,7 +269,6 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-// Avatar robot pequeño para las burbujas
 class _AvatarBot extends StatelessWidget {
   final bool isDark;
   const _AvatarBot({required this.isDark});
@@ -270,7 +282,6 @@ class _AvatarBot extends StatelessWidget {
   }
 }
 
-// ── INDICADOR TYPING ──────────────────────────────────────────────────────────
 class _TypingIndicator extends StatefulWidget {
   final bool isDark;
   const _TypingIndicator({required this.isDark});
@@ -354,7 +365,6 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   }
 }
 
-// ── INPUT BAR ─────────────────────────────────────────────────────────────────
 class _ChatInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isDark;
@@ -395,7 +405,6 @@ class _ChatInput extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Campo de texto
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -433,10 +442,7 @@ class _ChatInput extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(width: 10),
-
-            // Botón enviar
             GestureDetector(
               onTap: onSend,
               child: Container(
@@ -471,7 +477,6 @@ class _ChatInput extends StatelessWidget {
   }
 }
 
-// ── CHIP DE SUGERENCIA ────────────────────────────────────────────────────────
 class _SuggestionChip extends StatelessWidget {
   final String hint;
   final bool isDark;

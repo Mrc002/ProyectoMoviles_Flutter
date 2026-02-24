@@ -4,6 +4,7 @@ import '../logic/theme_provider.dart';
 import '../logic/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/logic/auth_provider.dart';
+import 'profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -141,6 +142,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
     return _SettingsCard(
       isDark: isDark,
       children: [
@@ -189,7 +191,7 @@ class _AccountCard extends StatelessWidget {
                     Text(
                       isGuest
                           ? l10n.iniciaSesion
-                          : (user?.email ?? 'Usuario'),
+                          : (user?.email ?? l10n.usuario),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -198,7 +200,7 @@ class _AccountCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      isGuest ? l10n.iniciaSesionSub : 'Cuenta registrada',
+                      isGuest ? l10n.iniciaSesionSub : l10n.cuentaRegistrada,
                       style: TextStyle(
                         fontSize: 13,
                         color: isDark
@@ -212,24 +214,30 @@ class _AccountCard extends StatelessWidget {
 
               // Acción
               GestureDetector(
-                onTap: onTap,
+                onTap: () async {
+                  if (isGuest) {
+                    // Si es invitado, el botón sirve para mandarlo al Login (cerrando sesión anónima)
+                    await authProvider.signOut();
+                  } else {
+                    // Si es un usuario registrado, lo llevamos a su Pantalla de Perfil
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    );
+                  }
+                },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isGuest
-                        ? const Color(0xFF5B9BD5)
-                        : const Color(0xFFFFEBEE),
+                    color: isGuest ? const Color(0xFF5B9BD5) : const Color(0xFFD6E8F7), // Cambio visual del botón
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    isGuest ? 'Entrar' : 'Salir',
+                    isGuest ? l10n.entrar : 'Ver Perfil', // <-- Cambiamos "Salir" por "Ver Perfil"
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isGuest
-                          ? Colors.white
-                          : const Color(0xFFE53935),
+                      color: isGuest ? Colors.white : const Color(0xFF5B9BD5),
                     ),
                   ),
                 ),
@@ -285,7 +293,7 @@ class _PreferencesCard extends StatelessWidget {
                 color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
               ),
               showDivider: false,
-              onTap: () => _showLanguageDialog(context, languageProvider),
+              onTap: () => _showLanguageDialog(context, languageProvider, l10n),
             );
           },
         ),
@@ -294,7 +302,7 @@ class _PreferencesCard extends StatelessWidget {
   }
 
   void _showLanguageDialog(
-      BuildContext context, LanguageProvider languageProvider) {
+      BuildContext context, LanguageProvider languageProvider, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
@@ -312,7 +320,7 @@ class _PreferencesCard extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Seleccionar idioma',
+          l10n.seleccionarIdioma,
           style: TextStyle(
             fontWeight: FontWeight.w700,
             color: isDark ? Colors.white : const Color(0xFF1A2D4A),
@@ -377,7 +385,7 @@ class _AboutCard extends StatelessWidget {
           isDark: isDark,
           icon: Icons.star_outline_rounded,
           iconColor: const Color(0xFFF5A623),
-          title: 'Valorar la app',
+          title: l10n.valorarApp,
           trailing: Icon(
             Icons.chevron_right_rounded,
             color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
@@ -497,7 +505,7 @@ class _StyledSwitch extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      activeColor: Colors.white,
+      activeThumbColor: Colors.white,
       activeTrackColor: const Color(0xFF5B9BD5),
       inactiveThumbColor: Colors.white,
       inactiveTrackColor: const Color(0xFFD6E8F7),
