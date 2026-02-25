@@ -46,23 +46,33 @@ lib/
 │   ├── theme/                 # Estilos, Paleta de colores
 │   └── utils/                 # Validadores, Helpers matemáticos
 ├── features/                  # 📦 Módulos funcionales (La lógica principal)
+│   ├── algebra/               # ➗ Lógica y UI para Álgebra y Funciones
+│   │   ├── logic/             # AlgebraProvider (Estado y fórmulas)
+│   │   └── screens/           # UI de Álgebra
 │   ├── auth/                  # 🔐 Login, Registro, Recuperación de contraseña
 │   │   ├── logic/             # AuthProvider (Estado)
 │   │   └── screens/           # UI de Autenticación
 │   ├── chat/                  # 🤖 Interfaz de chat con Gemini AI
 │   │   ├── logic/             # ChatProvider (Gestión de mensajes)
 │   │   └── screens/           # Vista del chat
-│   ├── editor/                # ✏️ Input de ecuaciones y parseo matemático
+│   ├── ecuaciones_diferenciales/ # 📈 Lógica y UI para Ecuaciones Diferenciales
+│   │   ├── logic/             # EcuacionesProvider (Estado y resolución)
+│   │   └── screens/           # UI de Ecuaciones
+│   ├── editor/                # ✏️ Input de ecuaciones y parseo matemático general
 │   │   ├── logic/             # EditorProvider
 │   │   └── screens/           # Teclado matemático custom
-│   ├── visualizer/            # 📊 Motores de renderizado (Gráficas)
-│   │   └── screens/           # Canvas 2D y 3D
-│   ├── home/                  # 🏠 Pantalla principal y navegación (Dashboard)
-│   └── settings/              # ⚙️ Configuración de usuario (Idioma/Tema)
+│   ├── home/                  # 🏠 Pantalla principal, navegación (BottomNav) y Menú Lateral
+│   ├── mecanica_vectorial/    # 📐 Lógica y UI para Mecánica Vectorial Estática
+│   │   ├── logic/             # MecanicaProvider (Vectores, estática)
+│   │   └── screens/           # UI de Mecánica Vectorial
+│   ├── settings/              # ⚙️ Configuración de usuario (Idioma/Tema)
+│   └── visualizer/            # 📊 Motores de renderizado (Gráficas)
+│       └── screens/           # Canvas 2D y 3D
 └── l10n/                      # 🌍 Archivos de traducción (.arb)
     ├── app_en.arb
     └── app_es.arb
 ```
+
 ## 🚀 Instalación y Configuración
 
 ### 1. Prerrequisitos

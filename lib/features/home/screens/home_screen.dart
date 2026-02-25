@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // ── HEADER DEL MENÚ ──
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Color(0xFF5B9BD5), // El azul principal de tu app
+              color: Color(0xFF5B9BD5), 
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
