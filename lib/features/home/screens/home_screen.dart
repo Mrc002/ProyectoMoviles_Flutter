@@ -30,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: _buildAppBar(context, l10n, isDark, isEditor),
+      // AÑADE ESTA LÍNEA PARA EL MENÚ LATERAL:
+      drawer: _buildDrawer(context, isDark),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -282,3 +284,115 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+// ── MENÚ LATERAL (DRAWER) ───────────────────────────────────────────────────
+  Widget _buildDrawer(BuildContext context, bool isDark) {
+    return Drawer(
+      backgroundColor: isDark ? const Color(0xFF152840) : Colors.white,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          // ── HEADER DEL MENÚ ──
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFF5B9BD5), // El azul principal de tu app
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.functions, color: Colors.white, size: 36),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Math AI Studio',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── OPCIONES DEL MENÚ ──
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.calculate_rounded,
+            title: 'Álgebra y Funciones',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context); // Cierra el menú
+              // Si ya estás en Álgebra, no haces nada adicional.
+            },
+          ),
+          
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.architecture_rounded,
+            title: 'Mecánica Vectorial Estática',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context); // Cierra el menú primero
+              // TODO: Navegar a la pantalla que creaste de Mecánica Vectorial
+              /*
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MecanicaVectorialScreen()),
+              );
+              */
+            },
+          ),
+
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.show_chart_rounded, // o Icons.waves
+            title: 'Ecuaciones Diferenciales',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: Navegar a la pantalla de Ecuaciones Diferenciales
+              /*
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EcuacionesDiferencialesScreen()),
+              );
+              */
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget auxiliar para estilizar cada elemento de la lista del menú
+  Widget _buildDrawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isDark ? Colors.white70 : const Color(0xFF6B8CAE),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
