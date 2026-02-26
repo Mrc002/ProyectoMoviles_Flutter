@@ -153,4 +153,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get valorarApp => 'Rate the app';
+
+  @override
+  String get perfilAppbar => 'Profile';
+
+  @override
+  String get iniciaSesionPerfil => 'Log in to view your profile.';
+
+  @override
+  String get miPerfilTitulo => 'My Profile';
+
+  @override
+  String get estadoCuentaInfo => 'Account Status';
+
+  @override
+  String get usuarioPremium => 'PREMIUM User';
+
+  @override
+  String get usuarioBasico => 'Basic User (Free)';
+
+  @override
+  String get proximamenteMejorar => 'Coming soon: Upgrade to Premium';
+
+  @override
+  String get btnMejorarPremium => 'Upgrade to Premium';
+
+  @override
+  String get btnCerrarSesion => 'Log Out';
 }

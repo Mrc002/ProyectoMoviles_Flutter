@@ -385,6 +385,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Valorar la app'**
   String get valorarApp;
+
+  /// No description provided for @perfilAppbar.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil'**
+  String get perfilAppbar;
+
+  /// No description provided for @iniciaSesionPerfil.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para ver tu perfil.'**
+  String get iniciaSesionPerfil;
+
+  /// No description provided for @miPerfilTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi Perfil'**
+  String get miPerfilTitulo;
+
+  /// No description provided for @estadoCuentaInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado de la Cuenta'**
+  String get estadoCuentaInfo;
+
+  /// No description provided for @usuarioPremium.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario PREMIUM'**
+  String get usuarioPremium;
+
+  /// No description provided for @usuarioBasico.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario Básico (Gratis)'**
+  String get usuarioBasico;
+
+  /// No description provided for @proximamenteMejorar.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximamente: Mejorar a Premium'**
+  String get proximamenteMejorar;
+
+  /// No description provided for @btnMejorarPremium.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejorar a Premium'**
+  String get btnMejorarPremium;
+
+  /// No description provided for @btnCerrarSesion.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar Sesión'**
+  String get btnCerrarSesion;
 }
 
 class _AppLocalizationsDelegate
