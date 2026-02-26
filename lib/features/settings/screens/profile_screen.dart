@@ -16,8 +16,8 @@ class ProfileScreen extends StatelessWidget {
     // Si por alguna razón un invitado llega aquí, le mostramos un aviso
     if (user == null || user.isAnonymous) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Perfil')),
-        body: const Center(child: Text('Inicia sesión para ver tu perfil.')),
+        appBar: AppBar(title: Text(l10n.perfilAppbar)),
+        body: Center(child: Text(l10n.iniciaSesionPerfil)),
       );
     }
 
@@ -28,7 +28,7 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         iconTheme: IconThemeData(color: isDark ? Colors.white : const Color(0xFF1A2D4A)),
         title: Text(
-          'Mi Perfil',
+          l10n.miPerfilTitulo,
           style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontWeight: FontWeight.bold),
         ),
       ),
@@ -93,11 +93,11 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Estado de la Cuenta',
+                          l10n.estadoCuentaInfo,
                           style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey),
                         ),
                         Text(
-                          authProvider.isPremium ? 'Usuario PREMIUM' : 'Usuario Básico (Gratis)',
+                          authProvider.isPremium ? l10n.usuarioPremium : l10n.usuarioBasico,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -119,14 +119,14 @@ class ProfileScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // TODO: Aquí pondremos la pantalla de pago después
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Próximamente: Mejorar a Premium')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.proximamenteMejorar)));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5B9BD5),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
-                  child: const Text('Mejorar a Premium', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text(l10n.btnMejorarPremium, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
             
@@ -139,7 +139,7 @@ class ProfileScreen extends StatelessWidget {
                 await authProvider.signOut(); // Cerramos sesión
               },
               icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Cerrar Sesión', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              label: Text(l10n.btnCerrarSesion, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             )
           ],
         ),

@@ -153,4 +153,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get valorarApp => 'Valorar la app';
+
+  @override
+  String get perfilAppbar => 'Perfil';
+
+  @override
+  String get iniciaSesionPerfil => 'Inicia sesión para ver tu perfil.';
+
+  @override
+  String get miPerfilTitulo => 'Mi Perfil';
+
+  @override
+  String get estadoCuentaInfo => 'Estado de la Cuenta';
+
+  @override
+  String get usuarioPremium => 'Usuario PREMIUM';
+
+  @override
+  String get usuarioBasico => 'Usuario Básico (Gratis)';
+
+  @override
+  String get proximamenteMejorar => 'Próximamente: Mejorar a Premium';
+
+  @override
+  String get btnMejorarPremium => 'Mejorar a Premium';
+
+  @override
+  String get btnCerrarSesion => 'Cerrar Sesión';
 }

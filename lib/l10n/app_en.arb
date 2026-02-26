@@ -47,5 +47,14 @@
   "entrar": "Enter",
   "salir": "Log Out",
   "seleccionarIdioma": "Select language",
-  "valorarApp": "Rate the app"
+  "valorarApp": "Rate the app",
+  "perfilAppbar": "Profile",
+  "iniciaSesionPerfil": "Log in to view your profile.",
+  "miPerfilTitulo": "My Profile",
+  "estadoCuentaInfo": "Account Status",
+  "usuarioPremium": "PREMIUM User",
+  "usuarioBasico": "Basic User (Free)",
+  "proximamenteMejorar": "Coming soon: Upgrade to Premium",
+  "btnMejorarPremium": "Upgrade to Premium",
+  "btnCerrarSesion": "Log Out"
 }
