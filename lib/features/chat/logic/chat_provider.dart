@@ -30,7 +30,7 @@ class ChatProvider extends ChangeNotifier {
       '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.';
 
   Future<void> sendMessage(String text,
-      {String? currentEquation}) async {
+      {String? currentEquation, String languageCode = 'es'}) async {
     if (text.isEmpty) return;
 
     _isLoading = true;
@@ -38,12 +38,18 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Construir el prompt con contexto de la ecuación actual
+      // Construir el prompt con contexto de la ecuación actual y el idioma
       String promptToSend = text;
       if (currentEquation != null && currentEquation.isNotEmpty) {
-        promptToSend =
-            'El usuario está analizando la función: f(x) = $currentEquation. '
-            'Pregunta: $text';
+        if (languageCode == 'en') {
+          promptToSend =
+              'The user is analyzing the function: f(x) = $currentEquation. '
+              'Question: $text';
+        } else {
+          promptToSend =
+              'El usuario está analizando la función: f(x) = $currentEquation. '
+              'Pregunta: $text';
+        }
       }
 
       // Agregar al historial
@@ -54,7 +60,8 @@ class ChatProvider extends ChangeNotifier {
         ],
       });
 
-      final responseText = await _callGeminiAPI();
+      // Pasar el idioma a la llamada de la API
+      final responseText = await _callGeminiAPI(languageCode);
 
       // Agregar respuesta al historial
       _history.add({
@@ -79,23 +86,29 @@ class ChatProvider extends ChangeNotifier {
     }
   } 
 
-  Future<String> _callGeminiAPI() async {
+  Future<String> _callGeminiAPI(String languageCode) async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
-    // Endpoint REST directo — sin SDK, sin problemas de versiones
-    const model = 'gemini-3-flash-preview'; // Te recomiendo usar el nombre oficial 1.5-flash
+    // Endpoint REST directo usando la versión anterior que funcionaba sin dar 404
+    const model = 'gemini-3-flash-preview'; 
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
     );
+
+    // Determinar el idioma que le pediremos a Gemini
+    final langInstruction = languageCode == 'en' ? 'English' : 'Español';
+    
+    // Concatenar una regla dinámica al final de las instrucciones
+    final dynamicSystemInstruction = '$_systemInstruction\n5. IMPORTANTE: Responde SIEMPRE en $langInstruction.';
 
     final body = jsonEncode({
       // Instrucción de sistema
       'system_instruction': {
         'parts': [
-          {'text': _systemInstruction}
+          {'text': dynamicSystemInstruction}
         ]
       },
       // Historial de conversación
