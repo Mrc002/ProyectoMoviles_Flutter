@@ -5,6 +5,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:provider/provider.dart';
 import '../logic/chat_provider.dart';
 import '../../editor/logic/editor_provider.dart';
+import '../../settings/logic/language_provider.dart'; // Importación agregada
 import '../../../shared/widgets/bot_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -41,8 +42,16 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage(BuildContext context) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    
     final currentEquation = context.read<EditorProvider>().equation;
-    context.read<ChatProvider>().sendMessage(text, currentEquation: currentEquation);
+    final languageCode = context.read<LanguageProvider>().appLocale.languageCode; // Leemos el idioma
+    
+    context.read<ChatProvider>().sendMessage(
+      text, 
+      currentEquation: currentEquation,
+      languageCode: languageCode, // Pasamos el idioma al provider
+    );
+    
     _controller.clear();
     _scrollToBottom();
   }
@@ -204,7 +213,7 @@ class _MessageBubble extends StatelessWidget {
                     )
                   : MarkdownBody(
                       data: text,
-                      selectable: false, // <--- ¡AQUÍ ESTÁ LA SOLUCIÓN!
+                      selectable: false,
                       builders: {
                         'latex': LatexElementBuilder(
                           textStyle: const TextStyle(
@@ -489,7 +498,13 @@ class _SuggestionChip extends StatelessWidget {
       onTap: () {
         final chatProvider = context.read<ChatProvider>();
         final equation = context.read<EditorProvider>().equation;
-        chatProvider.sendMessage(hint, currentEquation: equation);
+        final languageCode = context.read<LanguageProvider>().appLocale.languageCode; // Leemos el idioma
+        
+        chatProvider.sendMessage(
+          hint, 
+          currentEquation: equation,
+          languageCode: languageCode, // Lo pasamos al provider
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
