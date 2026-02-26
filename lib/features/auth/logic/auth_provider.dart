@@ -73,13 +73,13 @@ class AuthProvider with ChangeNotifier {
   Future<String?> createUserWithEmailAndPassword(String email, String password, String name) async {
     try {
       _setLoading(true);
-      // 1. Crear usuario en Firebase Auth
+      // 2. Guardar en Firestore la información de negocio
       UserCredential cred = await _auth.createUserWithEmailAndPassword(
         email: email, 
         password: password
       );
 
-      // 2. Guardar en Firestore la información de negocio
+      // 2. Guardamos en Firestore la información de negocio
       if (cred.user != null) {
         await _firestore.collection('users').doc(cred.user!.uid).set({
           'uid': cred.user!.uid,
