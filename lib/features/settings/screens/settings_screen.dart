@@ -5,6 +5,7 @@ import '../logic/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/logic/auth_provider.dart';
 import 'profile_screen.dart';
+import 'dart:convert';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -22,8 +23,7 @@ class SettingsScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
         children: [
-
-          // ── CARD DE CUENTA ──────────────────────────────────────────────
+          // ── CARD DE CUENTA ──
           _SectionLabel(label: l10n.cuenta, isDark: isDark),
           const SizedBox(height: 10),
           _AccountCard(
@@ -36,21 +36,21 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // ── PREFERENCIAS ────────────────────────────────────────────────
+          // ── PREFERENCIAS ──
           _SectionLabel(label: l10n.preferencias, isDark: isDark),
           const SizedBox(height: 10),
           _PreferencesCard(isDark: isDark, l10n: l10n),
 
           const SizedBox(height: 24),
 
-          // ── ACERCA DE ───────────────────────────────────────────────────
+          // ── ACERCA DE ──
           _SectionLabel(label: l10n.acercaDe, isDark: isDark),
           const SizedBox(height: 10),
           _AboutCard(isDark: isDark, l10n: l10n),
 
           const SizedBox(height: 32),
 
-          // ── VERSIÓN ─────────────────────────────────────────────────────
+          // ── VERSIÓN ──
           Center(
             child: Text(
               'Math AI Studio v1.0.0',
@@ -66,7 +66,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-// ── LABEL DE SECCIÓN ──────────────────────────────────────────────────────────
 class _SectionLabel extends StatelessWidget {
   final String label;
   final bool isDark;
@@ -90,7 +89,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ── CARD BASE ─────────────────────────────────────────────────────────────────
 class _SettingsCard extends StatelessWidget {
   final bool isDark;
   final List<Widget> children;
@@ -117,14 +115,12 @@ class _SettingsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }
 
-// ── CARD DE CUENTA ────────────────────────────────────────────────────────────
+// ── CARD DE CUENTA ACTUALIZADO PARA BASE64 ──
 class _AccountCard extends StatelessWidget {
   final bool isGuest;
   final dynamic user;
@@ -140,9 +136,21 @@ class _AccountCard extends StatelessWidget {
     required this.onTap,
   });
 
+  // Función para decidir cómo dibujar la imagen
+  ImageProvider? _getImageProvider(String photoData) {
+    if (photoData.isEmpty) return null;
+    if (photoData.startsWith('http')) {
+      return NetworkImage(photoData); 
+    } else {
+      return MemoryImage(base64Decode(photoData)); 
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = context.watch<AuthProvider>();
+    final photoUrl = authProvider.photoUrl;
+
     return _SettingsCard(
       isDark: isDark,
       children: [
@@ -150,95 +158,63 @@ class _AccountCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Avatar
               Container(
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
                   gradient: isGuest
-                      ? LinearGradient(
-                          colors: [Colors.grey.shade400, Colors.grey.shade500],
-                        )
-                      : const LinearGradient(
-                          colors: [Color(0xFF5B9BD5), Color(0xFF3A7FC1)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                      ? LinearGradient(colors: [Colors.grey.shade400, Colors.grey.shade500])
+                      : const LinearGradient(colors: [Color(0xFF5B9BD5), Color(0xFF3A7FC1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   borderRadius: BorderRadius.circular(16),
+                  
+                  // USAMOS LA FUNCIÓN AQUÍ
+                  image: !isGuest && photoUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: _getImageProvider(photoUrl)!,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                      
                   boxShadow: [
-                    BoxShadow(
-                      color: (isGuest ? Colors.grey : const Color(0xFF5B9BD5))
-                          .withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
+                    BoxShadow(color: (isGuest ? Colors.grey : const Color(0xFF5B9BD5)).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 3)),
                   ],
                 ),
-                child: Icon(
-                  isGuest ? Icons.person_outline_rounded : Icons.person_rounded,
-                  color: Colors.white,
-                  size: 26,
-                ),
+                child: (!isGuest && photoUrl.isNotEmpty)
+                    ? null
+                    : Icon(isGuest ? Icons.person_outline_rounded : Icons.person_rounded, color: Colors.white, size: 26),
               ),
-
               const SizedBox(width: 14),
-
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isGuest
-                          ? l10n.iniciaSesion
-                          : (user?.email ?? l10n.usuario),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF1A2D4A),
-                      ),
+                      isGuest ? l10n.iniciaSesion : authProvider.userName,
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1A2D4A)),
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      isGuest ? l10n.iniciaSesionSub : l10n.cuentaRegistrada,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark
-                            ? Colors.white38
-                            : const Color(0xFF6B8CAE),
-                      ),
+                      isGuest ? l10n.iniciaSesionSub : (user?.email ?? l10n.cuentaRegistrada),
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, color: isDark ? Colors.white38 : const Color(0xFF6B8CAE)),
                     ),
                   ],
                 ),
               ),
-
-              // Acción
               GestureDetector(
                 onTap: () async {
                   if (isGuest) {
-                    // Si es invitado, el botón sirve para mandarlo al Login (cerrando sesión anónima)
                     await authProvider.signOut();
                   } else {
-                    // Si es un usuario registrado, lo llevamos a su Pantalla de Perfil
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
                   }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isGuest ? const Color(0xFF5B9BD5) : const Color(0xFFD6E8F7), // Cambio visual del botón
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  decoration: BoxDecoration(color: isGuest ? const Color(0xFF5B9BD5) : const Color(0xFFD6E8F7), borderRadius: BorderRadius.circular(10)),
                   child: Text(
-                    isGuest ? l10n.entrar : 'Ver Perfil', // <-- Cambiamos "Salir" por "Ver Perfil"
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: isGuest ? Colors.white : const Color(0xFF5B9BD5),
-                    ),
+                    isGuest ? l10n.entrar : 'Ver Perfil',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: isGuest ? Colors.white : const Color(0xFF5B9BD5)),
                   ),
                 ),
               ),
@@ -250,7 +226,6 @@ class _AccountCard extends StatelessWidget {
   }
 }
 
-// ── CARD DE PREFERENCIAS ──────────────────────────────────────────────────────
 class _PreferencesCard extends StatelessWidget {
   final bool isDark;
   final AppLocalizations l10n;
@@ -262,7 +237,6 @@ class _PreferencesCard extends StatelessWidget {
     return _SettingsCard(
       isDark: isDark,
       children: [
-        // Tema oscuro
         Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
             return _SettingsTile(
@@ -278,8 +252,6 @@ class _PreferencesCard extends StatelessWidget {
             );
           },
         ),
-
-        // Idioma
         Consumer<LanguageProvider>(
           builder: (context, languageProvider, _) {
             return _SettingsTile(
@@ -301,31 +273,17 @@ class _PreferencesCard extends StatelessWidget {
     );
   }
 
-  void _showLanguageDialog(
-      BuildContext context, LanguageProvider languageProvider, AppLocalizations l10n) {
+  void _showLanguageDialog(BuildContext context, LanguageProvider languageProvider, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor:
-            isDark ? const Color(0xFF1C3350) : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isDark
-                ? const Color(0xFF234060)
-                : const Color(0xFFD6E8F7),
-            width: 1.5,
-          ),
+          side: BorderSide(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7), width: 1.5),
         ),
-        title: Text(
-          l10n.seleccionarIdioma,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: isDark ? Colors.white : const Color(0xFF1A2D4A),
-          ),
-        ),
+        title: Text(l10n.seleccionarIdioma, style: TextStyle(fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1A2D4A))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -334,10 +292,7 @@ class _PreferencesCard extends StatelessWidget {
               label: 'Español',
               isSelected: languageProvider.languageName == 'Español',
               isDark: isDark,
-              onTap: () {
-                languageProvider.changeLanguage('es');
-                Navigator.pop(context);
-              },
+              onTap: () { languageProvider.changeLanguage('es'); Navigator.pop(context); },
             ),
             const SizedBox(height: 8),
             _LanguageOption(
@@ -345,10 +300,7 @@ class _PreferencesCard extends StatelessWidget {
               label: 'English',
               isSelected: languageProvider.languageName == 'English',
               isDark: isDark,
-              onTap: () {
-                languageProvider.changeLanguage('en');
-                Navigator.pop(context);
-              },
+              onTap: () { languageProvider.changeLanguage('en'); Navigator.pop(context); },
             ),
           ],
         ),
@@ -357,7 +309,6 @@ class _PreferencesCard extends StatelessWidget {
   }
 }
 
-// ── CARD ACERCA DE ────────────────────────────────────────────────────────────
 class _AboutCard extends StatelessWidget {
   final bool isDark;
   final AppLocalizations l10n;
@@ -374,10 +325,7 @@ class _AboutCard extends StatelessWidget {
           icon: Icons.info_outline_rounded,
           iconColor: const Color(0xFF5B9BD5),
           title: l10n.acercaDeSub,
-          trailing: Icon(
-            Icons.chevron_right_rounded,
-            color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
-          ),
+          trailing: Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white38 : const Color(0xFFB0CDE8)),
           showDivider: true,
           onTap: () {},
         ),
@@ -386,10 +334,7 @@ class _AboutCard extends StatelessWidget {
           icon: Icons.star_outline_rounded,
           iconColor: const Color(0xFFF5A623),
           title: l10n.valorarApp,
-          trailing: Icon(
-            Icons.chevron_right_rounded,
-            color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
-          ),
+          trailing: Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white38 : const Color(0xFFB0CDE8)),
           showDivider: false,
           onTap: () {},
         ),
@@ -398,7 +343,6 @@ class _AboutCard extends StatelessWidget {
   }
 }
 
-// ── TILE GENÉRICO ─────────────────────────────────────────────────────────────
 class _SettingsTile extends StatelessWidget {
   final bool isDark;
   final IconData icon;
@@ -410,14 +354,8 @@ class _SettingsTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _SettingsTile({
-    required this.isDark,
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    required this.showDivider,
-    this.onTap,
+    required this.isDark, required this.icon, required this.iconColor, required this.title,
+    this.subtitle, this.trailing, required this.showDivider, this.onTap,
   });
 
   @override
@@ -431,69 +369,36 @@ class _SettingsTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                // Ícono con fondo de color
                 Container(
                   width: 38,
                   height: 38,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
                   child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: 14),
-
-                // Texto
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF1A2D4A),
-                        ),
-                      ),
+                      Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFF1A2D4A))),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          subtitle!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? Colors.white38
-                                : const Color(0xFF6B8CAE),
-                          ),
-                        ),
+                        Text(subtitle!, style: TextStyle(fontSize: 13, color: isDark ? Colors.white38 : const Color(0xFF6B8CAE))),
                       ],
                     ],
                   ),
                 ),
-
                 if (trailing != null) trailing!,
               ],
             ),
           ),
         ),
-        if (showDivider)
-          Divider(
-            height: 1,
-            indent: 68,
-            endIndent: 16,
-            color: isDark
-                ? const Color(0xFF234060)
-                : const Color(0xFFEBF4FC),
-          ),
+        if (showDivider) Divider(height: 1, indent: 68, endIndent: 16, color: isDark ? const Color(0xFF234060) : const Color(0xFFEBF4FC)),
       ],
     );
   }
 }
 
-// Switch con estilo custom
 class _StyledSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -513,7 +418,6 @@ class _StyledSwitch extends StatelessWidget {
   }
 }
 
-// Opción de idioma en el dialog
 class _LanguageOption extends StatelessWidget {
   final String flag;
   final String label;
@@ -522,11 +426,7 @@ class _LanguageOption extends StatelessWidget {
   final VoidCallback onTap;
 
   const _LanguageOption({
-    required this.flag,
-    required this.label,
-    required this.isSelected,
-    required this.isDark,
-    required this.onTap,
+    required this.flag, required this.label, required this.isSelected, required this.isDark, required this.onTap,
   });
 
   @override
@@ -537,41 +437,17 @@ class _LanguageOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF5B9BD5).withValues(alpha: 0.12)
-              : (isDark ? const Color(0xFF152840) : const Color(0xFFF0F7FF)),
+          color: isSelected ? const Color(0xFF5B9BD5).withValues(alpha: 0.12) : (isDark ? const Color(0xFF152840) : const Color(0xFFF0F7FF)),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFF5B9BD5)
-                : (isDark
-                    ? const Color(0xFF234060)
-                    : const Color(0xFFD6E8F7)),
-            width: 1.5,
-          ),
+          border: Border.all(color: isSelected ? const Color(0xFF5B9BD5) : (isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7)), width: 1.5),
         ),
         child: Row(
           children: [
             Text(flag, style: const TextStyle(fontSize: 22)),
             const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? const Color(0xFF5B9BD5)
-                    : (isDark ? Colors.white : const Color(0xFF1A2D4A)),
-              ),
-            ),
+            Text(label, style: TextStyle(fontSize: 15, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? const Color(0xFF5B9BD5) : (isDark ? Colors.white : const Color(0xFF1A2D4A)))),
             const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFF5B9BD5),
-                size: 20,
-              ),
+            if (isSelected) const Icon(Icons.check_circle_rounded, color: Color(0xFF5B9BD5), size: 20),
           ],
         ),
       ),

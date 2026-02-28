@@ -2,12 +2,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Modelo simple para guardar los mensajes en memoria
 class ChatMessage {
   final String text;
   final bool isUser;
   ChatMessage({required this.text, required this.isUser});
+}
+
+// Crea un modelo simple para la sesión de chat en el menú
+class ChatSession {
+  final String id;
+  final String title;
+  ChatSession({required this.id, required this.title});
 }
 
 class ChatProvider extends ChangeNotifier {
@@ -20,7 +29,40 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage> get messages => _messages;
   bool get isLoading => _isLoading;
 
-  // --- NUEVA INSTRUCCIÓN DE SISTEMA (MARKDOWN Y LATEX) ---
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String? _currentChatId; // Para saber en qué chat estamos escribiendo
+  List<ChatSession> _chatSessions = []; // La lista que aparecerá en el menú lateral
+
+  List<ChatSession> get chatSessions => _chatSessions;
+
+  // Llama a esto cuando inicies la app o cuando inicie sesión un usuario registrado
+  Future<void> fetchUserChats() async {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('chats')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      _chatSessions = snapshot.docs.map((doc) {
+        return ChatSession(
+          id: doc.id,
+          title: doc['title'] ?? 'Nuevo Chat',
+        );
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error obteniendo chats: $e");
+    }
+  }
+
+  // --- INSTRUCCIÓN DE SISTEMA (MARKDOWN Y LATEX) ---
   static const _systemInstruction = 
       'Eres un profesor de matemáticas experto y amigable en una app de graficación.\n'
       'Reglas:\n'
@@ -29,8 +71,7 @@ class ChatProvider extends ChangeNotifier {
       '3. Usa negritas y viñetas para organizar tu texto.\n'
       '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.';
 
-  Future<void> sendMessage(String text,
-      {String? currentEquation, String languageCode = 'es'}) async {
+  Future<void> sendMessage(String text, {String? currentEquation}) async {
     if (text.isEmpty) return;
 
     _isLoading = true;
@@ -38,18 +79,12 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Construir el prompt con contexto de la ecuación actual y el idioma
+      // Construir el prompt con contexto de la ecuación actual
       String promptToSend = text;
       if (currentEquation != null && currentEquation.isNotEmpty) {
-        if (languageCode == 'en') {
-          promptToSend =
-              'The user is analyzing the function: f(x) = $currentEquation. '
-              'Question: $text';
-        } else {
-          promptToSend =
-              'El usuario está analizando la función: f(x) = $currentEquation. '
-              'Pregunta: $text';
-        }
+        promptToSend =
+            'El usuario está analizando la función: f(x) = $currentEquation. '
+            'Pregunta: $text';
       }
 
       // Agregar al historial
@@ -60,8 +95,7 @@ class ChatProvider extends ChangeNotifier {
         ],
       });
 
-      // Pasar el idioma a la llamada de la API
-      final responseText = await _callGeminiAPI(languageCode);
+      final responseText = await _callGeminiAPI();
 
       // Agregar respuesta al historial
       _history.add({
@@ -72,6 +106,13 @@ class ChatProvider extends ChangeNotifier {
       });
 
       _messages.add(ChatMessage(text: responseText, isUser: false));
+
+      // --- NUEVO: GUARDAR EN FIREBASE ---
+      final user = _auth.currentUser;
+      if (user != null && !user.isAnonymous) {
+        await _saveChatToFirestore(text, responseText, user.uid);
+      }
+
     } catch (e) {
       // Mensaje de error amigable según el tipo
       String errorMsg = _parseError(e.toString());
@@ -86,34 +127,92 @@ class ChatProvider extends ChangeNotifier {
     }
   } 
 
-  Future<String> _callGeminiAPI(String languageCode) async {
+  // --- NUEVO: Lógica para guardar en Firestore ---
+  Future<void> _saveChatToFirestore(String userText, String botResponse, String uid) async {
+    final chatRef = _firestore.collection('users').doc(uid).collection('chats');
+
+    try {
+      if (_currentChatId == null) {
+        // Es una conversación nueva
+        final newChat = await chatRef.add({
+          'title': userText, // Usamos el primer mensaje como título de la conversación
+          'createdAt': FieldValue.serverTimestamp(),
+          'messages': [
+            {'text': userText, 'isUser': true},
+            {'text': botResponse, 'isUser': false},
+          ]
+        });
+        _currentChatId = newChat.id;
+        await fetchUserChats(); // Actualizamos la lista del menú lateral
+      } else {
+        // La conversación ya existe, solo agregamos los mensajes al arreglo
+        await chatRef.doc(_currentChatId).update({
+          'messages': FieldValue.arrayUnion([
+            {'text': userText, 'isUser': true},
+            {'text': botResponse, 'isUser': false},
+          ])
+        });
+      }
+    } catch (e) {
+      debugPrint("Error guardando en Firestore: $e");
+    }
+  }
+
+  // --- NUEVO: Cargar un chat antiguo desde el menú lateral ---
+  Future<void> loadChatSession(String chatId) async {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    _isLoading = true;
+    _currentChatId = chatId;
+    _messages.clear();
+    _history.clear();
+    notifyListeners();
+
+    try {
+      final doc = await _firestore.collection('users').doc(user.uid).collection('chats').doc(chatId).get();
+      
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        final msgs = data['messages'] as List<dynamic>;
+        
+        for (var msg in msgs) {
+          final text = msg['text'] as String;
+          final isUser = msg['isUser'] as bool;
+          
+          _messages.add(ChatMessage(text: text, isUser: isUser));
+          _history.add({
+            'role': isUser ? 'user' : 'model',
+            'parts': [{'text': text}],
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error cargando historial de chat: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<String> _callGeminiAPI() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
-    // Endpoint REST directo usando la versión anterior que funcionaba sin dar 404
     const model = 'gemini-3-flash-preview'; 
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
     );
 
-    // Determinar el idioma que le pediremos a Gemini
-    final langInstruction = languageCode == 'en' ? 'English' : 'Español';
-    
-    // Concatenar una regla dinámica al final de las instrucciones
-    final dynamicSystemInstruction = '$_systemInstruction\n5. IMPORTANTE: Responde SIEMPRE en $langInstruction.';
-
     final body = jsonEncode({
-      // Instrucción de sistema
       'system_instruction': {
         'parts': [
-          {'text': dynamicSystemInstruction}
+          {'text': _systemInstruction}
         ]
       },
-      // Historial de conversación
       'contents': _history,
-      // Configuración de generación
       'generationConfig': {
         'temperature': 0.7,
         'maxOutputTokens': 1024,
@@ -139,7 +238,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // Convierte errores técnicos en mensajes amigables
   String _parseError(String error) {
     if (error.contains('429') || error.contains('quota') || error.contains('RESOURCE_EXHAUSTED')) {
       return '⏳ Demasiadas solicitudes seguidas. Espera unos segundos e intenta de nuevo.';
@@ -153,8 +251,9 @@ class ChatProvider extends ChangeNotifier {
     return '❌ Ocurrió un error. Intenta de nuevo en unos momentos.';
   }
 
-  // Limpiar el historial del chat
+  // --- MODIFICADO: Limpiar el historial para iniciar un nuevo chat ---
   void clearChat() {
+    _currentChatId = null; // Al ser null, el próximo mensaje creará un documento nuevo en Firestore
     _messages.clear();
     _history.clear();
     notifyListeners();
