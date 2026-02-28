@@ -47,5 +47,14 @@
   "entrar": "Entrar",
   "salir": "Salir",
   "seleccionarIdioma": "Seleccionar idioma",
-  "valorarApp": "Valorar la app"
+  "valorarApp": "Valorar la app",
+  "perfilAppbar": "Perfil",
+  "iniciaSesionPerfil": "Inicia sesión para ver tu perfil.",
+  "miPerfilTitulo": "Mi Perfil",
+  "estadoCuentaInfo": "Estado de la Cuenta",
+  "usuarioPremium": "Usuario PREMIUM",
+  "usuarioBasico": "Usuario Básico (Gratis)",
+  "proximamenteMejorar": "Próximamente: Mejorar a Premium",
+  "btnMejorarPremium": "Mejorar a Premium",
+  "btnCerrarSesion": "Cerrar Sesión"
 }
