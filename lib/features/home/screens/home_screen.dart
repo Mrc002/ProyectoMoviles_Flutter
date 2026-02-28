@@ -5,6 +5,8 @@ import '../../settings/screens/settings_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../editor/logic/editor_provider.dart';
 import 'package:provider/provider.dart';
+import '../../auth/logic/auth_provider.dart';
+import '../../chat/logic/chat_provider.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: _buildAppBar(context, l10n, isDark, isEditor),
+      drawer: _buildDrawer(context, isDark),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -50,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       titleSpacing: 20,
 
-      // Título con ícono
       title: Row(
         children: [
           Container(
@@ -75,13 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // Toggle 2D/3D en el AppBar (como en la referencia) — solo visible en Editor
       actions: [
         if (isEditor) _build2D3DToggle(context),
         const SizedBox(width: 12),
       ],
 
-      // Línea decorativa inferior
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
@@ -241,7 +241,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Píldora indicadora
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: isActive ? 48 : 0,
@@ -279,6 +278,207 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ── MENÚ LATERAL (DRAWER) ───────────────────────────────────────────────────
+  Widget _buildDrawer(BuildContext context, bool isDark) {
+    final authProvider = context.watch<AuthProvider>();
+    final isGuest = authProvider.user == null || authProvider.user!.isAnonymous;
+    final userName = isGuest ? 'Invitado' : authProvider.userName;
+
+    return Drawer(
+      backgroundColor: isDark ? const Color(0xFF152840) : Colors.white,
+      child: Column(
+        children: [
+          // ── HEADER DEL MENÚ ──
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 60, bottom: 20, left: 16, right: 16),
+            decoration: const BoxDecoration(
+              color: Color(0xFF5B9BD5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white, size: 36),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Hola, $userName',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── OPCIONES FIJAS (Tus herramientas) ──
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.calculate_rounded,
+            title: 'Álgebra y Funciones',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context); 
+            },
+          ),
+          
+          // ¡AQUÍ ESTÁN DE VUELTA TUS DOS APARTADOS!
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.architecture_rounded,
+            title: 'Mecánica Vectorial Estática',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context); // Cierra el menú primero
+              // TODO: Navegar a la pantalla que creaste de Mecánica Vectorial
+            },
+          ),
+
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.show_chart_rounded, // o Icons.waves
+            title: 'Ecuaciones Diferenciales',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: Navegar a la pantalla de Ecuaciones Diferenciales
+            },
+          ),
+          
+          const Divider(),
+
+          // ── SECCIÓN DE HISTORIAL DE IA ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Historial de IA',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black54,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (!isGuest)
+                  IconButton(
+                    icon: Icon(Icons.add_circle_outline, color: isDark ? Colors.white70 : const Color(0xFF5B9BD5)),
+                    tooltip: 'Nuevo Chat',
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<ChatProvider>().clearChat();
+                      setState(() => _selectedIndex = 1);
+                    },
+                  )
+              ],
+            ),
+          ),
+
+          // ── LÓGICA DE INVITADO VS REGISTRADO ──
+          if (isGuest)
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.history_toggle_off, size: 48, color: isDark ? Colors.white30 : Colors.black26),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Inicia sesión o regístrate para guardar tu historial de conversaciones.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isDark ? Colors.white60 : Colors.black87,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: Consumer<ChatProvider>(
+                builder: (context, chatProvider, child) {
+                  
+                  if (chatProvider.chatSessions.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No hay chats recientes',
+                        style: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                      )
+                    );
+                  }
+                  
+                  return ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: chatProvider.chatSessions.length,
+                    itemBuilder: (context, index) {
+                      final session = chatProvider.chatSessions[index];
+                      return ListTile(
+                        leading: Icon(
+                          Icons.chat_bubble_outline, 
+                          color: isDark ? Colors.white70 : const Color(0xFF6B8CAE)
+                        ),
+                        title: Text(
+                          session.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context); // Cierra el menú
+                          chatProvider.loadChatSession(session.id); // Carga la conversación
+                          
+                          // Cambia a la pestaña del chat si no estás en ella
+                          setState(() => _selectedIndex = 1);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Widget auxiliar para estilizar cada elemento de la lista del menú
+  Widget _buildDrawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isDark ? Colors.white70 : const Color(0xFF6B8CAE),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
