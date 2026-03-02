@@ -32,8 +32,9 @@ class ChatProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  String? _currentChatId; // Para saber en qué chat estamos escribiendo
-  List<ChatSession> _chatSessions = []; // La lista que aparecerá en el menú lateral
+  String? _currentChatId;
+  List<ChatSession> _chatSessions = [];
+  String _currentLanguage = 'es'; // Variable para el idioma
 
   List<ChatSession> get chatSessions => _chatSessions;
 
@@ -62,17 +63,24 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- INSTRUCCIÓN DE SISTEMA (MARKDOWN Y LATEX) ---
-  static const _systemInstruction = 
+  // --- INSTRUCCIÓN DE SISTEMA DINÁMICA (usa el idioma actual) ---
+  String get _systemInstruction =>
       'Eres un profesor de matemáticas experto y amigable en una app de graficación.\n'
+      'Responde SIEMPRE en el idioma con código: $_currentLanguage.\n'
       'Reglas:\n'
       '1. Explica los conceptos de forma clara, didáctica y conversacional.\n'
       '2. Si tienes que mostrar una fórmula matemática, fracciones, integrales o ecuaciones, SIEMPRE usa el formato LaTeX envuelto en símbolos de dólar. Por ejemplo: \$x^2 + y^2 = r^2\$ o \$\$\\frac{1}{2}\$\$.\n'
       '3. Usa negritas y viñetas para organizar tu texto.\n'
       '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.';
 
-  Future<void> sendMessage(String text, {String? currentEquation}) async {
+  // --- PARÁMETRO languageCode AGREGADO ---
+  Future<void> sendMessage(String text, {String? currentEquation, String? languageCode}) async {
     if (text.isEmpty) return;
+
+    // Actualizar el idioma si se proporciona
+    if (languageCode != null && languageCode.isNotEmpty) {
+      _currentLanguage = languageCode;
+    }
 
     _isLoading = true;
     _messages.add(ChatMessage(text: text, isUser: true));
@@ -107,17 +115,15 @@ class ChatProvider extends ChangeNotifier {
 
       _messages.add(ChatMessage(text: responseText, isUser: false));
 
-      // --- NUEVO: GUARDAR EN FIREBASE ---
+      // Guardar en Firebase
       final user = _auth.currentUser;
       if (user != null && !user.isAnonymous) {
         await _saveChatToFirestore(text, responseText, user.uid);
       }
 
     } catch (e) {
-      // Mensaje de error amigable según el tipo
       String errorMsg = _parseError(e.toString());
       _messages.add(ChatMessage(text: errorMsg, isUser: false));
-      // Remover del historial si falló
       if (_history.isNotEmpty && _history.last['role'] == 'user') {
         _history.removeLast();
       }
@@ -125,17 +131,16 @@ class ChatProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  } 
+  }
 
-  // --- NUEVO: Lógica para guardar en Firestore ---
+  // --- Lógica para guardar en Firestore ---
   Future<void> _saveChatToFirestore(String userText, String botResponse, String uid) async {
     final chatRef = _firestore.collection('users').doc(uid).collection('chats');
 
     try {
       if (_currentChatId == null) {
-        // Es una conversación nueva
         final newChat = await chatRef.add({
-          'title': userText, // Usamos el primer mensaje como título de la conversación
+          'title': userText,
           'createdAt': FieldValue.serverTimestamp(),
           'messages': [
             {'text': userText, 'isUser': true},
@@ -143,9 +148,8 @@ class ChatProvider extends ChangeNotifier {
           ]
         });
         _currentChatId = newChat.id;
-        await fetchUserChats(); // Actualizamos la lista del menú lateral
+        await fetchUserChats();
       } else {
-        // La conversación ya existe, solo agregamos los mensajes al arreglo
         await chatRef.doc(_currentChatId).update({
           'messages': FieldValue.arrayUnion([
             {'text': userText, 'isUser': true},
@@ -158,7 +162,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- NUEVO: Cargar un chat antiguo desde el menú lateral ---
+  // --- Cargar un chat antiguo desde el menú lateral ---
   Future<void> loadChatSession(String chatId) async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -201,7 +205,7 @@ class ChatProvider extends ChangeNotifier {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
-    const model = 'gemini-3-flash-preview'; 
+    const model = 'gemini-3-flash-preview';
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
     );
@@ -209,7 +213,7 @@ class ChatProvider extends ChangeNotifier {
     final body = jsonEncode({
       'system_instruction': {
         'parts': [
-          {'text': _systemInstruction}
+          {'text': _systemInstruction} // Ahora usa el getter dinámico
         ]
       },
       'contents': _history,
@@ -251,9 +255,9 @@ class ChatProvider extends ChangeNotifier {
     return '❌ Ocurrió un error. Intenta de nuevo en unos momentos.';
   }
 
-  // --- MODIFICADO: Limpiar el historial para iniciar un nuevo chat ---
+  // Limpiar el historial para iniciar un nuevo chat
   void clearChat() {
-    _currentChatId = null; // Al ser null, el próximo mensaje creará un documento nuevo en Firestore
+    _currentChatId = null;
     _messages.clear();
     _history.clear();
     notifyListeners();
