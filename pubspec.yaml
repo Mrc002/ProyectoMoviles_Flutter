@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0' # Actualizado para soportar las últimas librerías
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -29,11 +29,13 @@ dependencies:
   # --- Visualización (Gráficos) ---
   fl_chart: ^1.1.1
   
-  #Para visualización 3D sencilla en Canvas (OpenGL ligero)
-  ditredi: ^2.0.2 
+  # 3D con ditredi (se sigue usando como fallback si quieres)
+  ditredi: ^2.0.2
+
+  # 3D mejorado: WebView para Three.js (WebGL real)
+  webview_flutter: ^4.13.0
 
   # --- Inteligencia Artificial ---
-  # He actualizado esta también para asegurar compatibilidad
   google_generative_ai: ^0.4.6
   
   # --- UI / Diseño ---
@@ -43,7 +45,7 @@ dependencies:
   google_fonts: ^8.0.1
   flutter_dotenv: ^5.1.0
 
- # --- Firebase ---
+  # --- Firebase ---
   firebase_core: ^2.27.2
   firebase_auth: ^4.18.0
   cloud_firestore: ^4.15.10
@@ -61,7 +63,3 @@ flutter:
   
   assets:
     - .env
-
-  # Aquí agregaremos las imágenes cuando las tengas
-  # assets:
-  #   - assets/images/
