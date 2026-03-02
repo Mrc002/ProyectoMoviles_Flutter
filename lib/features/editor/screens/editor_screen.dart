@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/editor_provider.dart';
+import '../widgets/graph_3d_view.dart';
 import '../../../l10n/app_localizations.dart';
 
 class EditorScreen extends StatelessWidget {
@@ -10,8 +11,7 @@ class EditorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<EditorProvider>();
-    final theme    = Theme.of(context);
-    final isDark   = theme.brightness == Brightness.dark;
+    final isDark   = Theme.of(context).brightness == Brightness.dark;
     final l10n     = AppLocalizations.of(context)!;
 
     return Container(
@@ -21,16 +21,11 @@ class EditorScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── LIENZO DE GRÁFICA ─────────────────────────────────────────
             Expanded(
               child: _GraphCard(provider: provider, isDark: isDark, l10n: l10n),
             ),
-
             const SizedBox(height: 16),
-
-            // ── PANEL INFERIOR: Fórmula + Info ───────────────────────────
             _BottomPanel(provider: provider, isDark: isDark, l10n: l10n),
-
             const SizedBox(height: 8),
           ],
         ),
@@ -39,7 +34,7 @@ class EditorScreen extends StatelessWidget {
   }
 }
 
-// ── CARD DE LA GRÁFICA ────────────────────────────────────────────────────────
+// ── CARD DE LA GRÁFICA ───────────────────────────────────────────────────────
 class _GraphCard extends StatelessWidget {
   final EditorProvider provider;
   final bool isDark;
@@ -66,9 +61,7 @@ class _GraphCard extends StatelessWidget {
         color: isDark ? const Color(0xFF1C3350) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark
-              ? const Color(0xFF234060)
-              : const Color(0xFFD6E8F7),
+          color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
           width: 1.5,
         ),
         boxShadow: [
@@ -82,10 +75,9 @@ class _GraphCard extends StatelessWidget {
         ],
       ),
       child: provider.is3DMode
-          ? _build3DPlaceholder(context)
+          ? Graph3DView(isDark: isDark, l10n: l10n)
           : Stack(
               children: [
-                // Gráfica
                 Positioned.fill(
                   child: GestureDetector(
                     onScaleStart: provider.startGesture,
@@ -104,10 +96,8 @@ class _GraphCard extends StatelessWidget {
                           clipData: const FlClipData.all(),
                           gridData: FlGridData(
                             show: true,
-                            horizontalInterval:
-                                (provider.maxY - provider.minY) / 8,
-                            verticalInterval:
-                                (provider.maxX - provider.minX) / 8,
+                            horizontalInterval: (provider.maxY - provider.minY) / 8,
+                            verticalInterval: (provider.maxX - provider.minX) / 8,
                             getDrawingHorizontalLine: (value) => FlLine(
                               color: value.abs() < 0.1 ? axisColor : gridColor,
                               strokeWidth: value.abs() < 0.1 ? 1.5 : 1,
@@ -123,11 +113,8 @@ class _GraphCard extends StatelessWidget {
                             LineChartBarData(
                               spots: provider.points,
                               isCurved: true,
-                              gradient: LinearGradient(
-                                colors: [
-                                  const Color(0xFF5B9BD5),
-                                  const Color(0xFF3A7FC1),
-                                ],
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF5B9BD5), Color(0xFF3A7FC1)],
                               ),
                               barWidth: 3,
                               dotData: const FlDotData(show: false),
@@ -151,14 +138,14 @@ class _GraphCard extends StatelessWidget {
                   ),
                 ),
 
-                // Badge con el modo actual
+                // Badge "2D"
                 Positioned(
                   top: 12,
                   left: 12,
                   child: _GraphBadge(isDark: isDark),
                 ),
 
-                // Hint de zoom
+                // Estado vacío
                 if (provider.points.isEmpty)
                   Center(
                     child: Column(
@@ -167,17 +154,13 @@ class _GraphCard extends StatelessWidget {
                         Icon(
                           Icons.show_chart_rounded,
                           size: 56,
-                          color: isDark
-                              ? Colors.white12
-                              : const Color(0xFFD6E8F7),
+                          color: isDark ? Colors.white12 : const Color(0xFFD6E8F7),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.ingresaFuncion,
                           style: TextStyle(
-                            color: isDark
-                                ? Colors.white24
-                                : const Color(0xFFB0CDE8),
+                            color: isDark ? Colors.white24 : const Color(0xFFB0CDE8),
                             fontSize: 13,
                           ),
                         ),
@@ -188,53 +171,8 @@ class _GraphCard extends StatelessWidget {
             ),
     );
   }
-
-  Widget _build3DPlaceholder(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF234060)
-                  : const Color(0xFFEBF4FC),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.view_in_ar_rounded,
-              size: 40,
-              color: isDark
-                  ? Colors.white24
-                  : const Color(0xFFB0CDE8),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.editorModo3D,
-            style: TextStyle(
-              color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.proximamente,
-            style: TextStyle(
-              color: isDark ? Colors.white24 : const Color(0xFFD6E8F7),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-// Badge "2D" o "3D" encima de la gráfica
 class _GraphBadge extends StatelessWidget {
   final bool isDark;
   const _GraphBadge({required this.isDark});
@@ -247,9 +185,7 @@ class _GraphBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF5B9BD5).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: const Color(0xFF5B9BD5).withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: const Color(0xFF5B9BD5).withValues(alpha: 0.3)),
       ),
       child: Text(
         provider.is3DMode ? '3D' : '2D',
@@ -264,8 +200,8 @@ class _GraphBadge extends StatelessWidget {
   }
 }
 
-// ── PANEL INFERIOR ────────────────────────────────────────────────────────────
-class _BottomPanel extends StatelessWidget {
+// ── PANEL INFERIOR ───────────────────────────────────────────────────────────
+class _BottomPanel extends StatefulWidget {
   final EditorProvider provider;
   final bool isDark;
   final AppLocalizations l10n;
@@ -277,23 +213,60 @@ class _BottomPanel extends StatelessWidget {
   });
 
   @override
+  State<_BottomPanel> createState() => _BottomPanelState();
+}
+
+class _BottomPanelState extends State<_BottomPanel> {
+  // ⚠️ CLAVE: el controller se maneja aquí, no se recrea en cada build
+  late TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(
+      text: widget.provider.is3DMode
+          ? widget.provider.equation3D
+          : widget.provider.equation,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _BottomPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Si cambió el modo (2D↔3D), actualizar el texto del campo
+    if (oldWidget.provider.is3DMode != widget.provider.is3DMode) {
+      final newText = widget.provider.is3DMode
+          ? widget.provider.equation3D
+          : widget.provider.equation;
+      _textController.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isValid = provider.isValid;
+    final isValid = widget.provider.isValid;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C3350) : Colors.white,
+        color: widget.isDark ? const Color(0xFF1C3350) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark
-              ? const Color(0xFF234060)
-              : const Color(0xFFD6E8F7),
+          color: widget.isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: isDark
+            color: widget.isDark
                 ? Colors.black.withValues(alpha: 0.2)
                 : const Color(0xFF5B9BD5).withValues(alpha: 0.08),
             blurRadius: 16,
@@ -305,36 +278,30 @@ class _BottomPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Etiqueta
+          // Etiqueta + indicador válido/inválido
           Row(
             children: [
               Icon(
                 Icons.functions_rounded,
                 size: 16,
-                color: isValid
-                    ? const Color(0xFF5B9BD5)
-                    : const Color(0xFFE53935),
+                color: isValid ? const Color(0xFF5B9BD5) : const Color(0xFFE53935),
               ),
               const SizedBox(width: 6),
               Text(
-                provider.is3DMode
-                    ? l10n.editorFuncion3D
-                    : l10n.editorFuncion2D,
+                widget.provider.is3DMode
+                    ? widget.l10n.editorFuncion3D
+                    : widget.l10n.editorFuncion2D,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? Colors.white54
-                      : const Color(0xFF6B8CAE),
+                  color: widget.isDark ? Colors.white54 : const Color(0xFF6B8CAE),
                   letterSpacing: 0.3,
                 ),
               ),
               const Spacer(),
-              // Indicador válido/inválido
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: isValid
                       ? const Color(0xFF5B9BD5).withValues(alpha: 0.1)
@@ -342,13 +309,11 @@ class _BottomPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isValid ? l10n.funcionValida : l10n.funcionInvalida,
+                  isValid ? widget.l10n.funcionValida : widget.l10n.funcionInvalida,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: isValid
-                        ? const Color(0xFF5B9BD5)
-                        : const Color(0xFFE53935),
+                    color: isValid ? const Color(0xFF5B9BD5) : const Color(0xFFE53935),
                   ),
                 ),
               ),
@@ -357,33 +322,34 @@ class _BottomPanel extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Campo de texto
+          // Campo de texto — usa el controller del State, no se recrea
           TextField(
-            onChanged: provider.updateEquation,
+            controller: _textController,
+            onChanged: widget.provider.updateEquation,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+              color: widget.isDark ? Colors.white : const Color(0xFF1A2D4A),
               fontFamily: 'monospace',
             ),
             decoration: InputDecoration(
-              hintText: provider.is3DMode
-                  ? l10n.editorHint3D
-                  : l10n.editorHint2D,
+              hintText: widget.provider.is3DMode
+                  ? 'Ej: sin(x)*cos(y), x^2-y^2'
+                  : widget.l10n.editorHint2D,
               hintStyle: TextStyle(
-                color: isDark ? Colors.white24 : const Color(0xFFB0CDE8),
+                color: widget.isDark ? Colors.white24 : const Color(0xFFB0CDE8),
                 fontFamily: 'monospace',
               ),
               filled: true,
-              fillColor: isDark
+              fillColor: widget.isDark
                   ? const Color(0xFF152840)
                   : const Color(0xFFF0F7FF),
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: isDark
+                  color: widget.isDark
                       ? const Color(0xFF234060)
                       : const Color(0xFFD6E8F7),
                   width: 1.5,
@@ -392,7 +358,7 @@ class _BottomPanel extends StatelessWidget {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: isDark
+                  color: widget.isDark
                       ? const Color(0xFF234060)
                       : const Color(0xFFD6E8F7),
                   width: 1.5,
@@ -400,38 +366,62 @@ class _BottomPanel extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFF5B9BD5),
-                  width: 2,
-                ),
+                borderSide:
+                    const BorderSide(color: Color(0xFF5B9BD5), width: 2),
               ),
-              suffixIcon: provider.equation.isNotEmpty
+              suffixIcon: _textController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.close_rounded, size: 18),
                       color: const Color(0xFF6B8CAE),
-                      onPressed: () => provider.updateEquation(''),
+                      onPressed: () {
+                        _textController.clear();
+                        widget.provider.updateEquation('');
+                      },
                     )
                   : null,
             ),
           ),
 
-          // Info rápida del rango
-          if (isValid) ...[
+          // Chips de sugerencia para 3D
+          if (widget.provider.is3DMode) ...[
+            const SizedBox(height: 10),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: EditorProvider.example3DFunctions
+                    .map((fn) => _FunctionChip(
+                          fn: fn,
+                          isDark: widget.isDark,
+                          onTap: () {
+                            _textController.value = TextEditingValue(
+                              text: fn,
+                              selection: TextSelection.collapsed(offset: fn.length),
+                            );
+                            widget.provider.updateEquation(fn);
+                          },
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
+
+          // Rango X/Y en modo 2D
+          if (isValid && !widget.provider.is3DMode) ...[
             const SizedBox(height: 10),
             Row(
               children: [
                 _RangeChip(
                   label: 'X',
                   range:
-                      '${provider.minX.toStringAsFixed(1)} → ${provider.maxX.toStringAsFixed(1)}',
-                  isDark: isDark,
+                      '${widget.provider.minX.toStringAsFixed(1)} → ${widget.provider.maxX.toStringAsFixed(1)}',
+                  isDark: widget.isDark,
                 ),
                 const SizedBox(width: 8),
                 _RangeChip(
                   label: 'Y',
                   range:
-                      '${provider.minY.toStringAsFixed(1)} → ${provider.maxY.toStringAsFixed(1)}',
-                  isDark: isDark,
+                      '${widget.provider.minY.toStringAsFixed(1)} → ${widget.provider.maxY.toStringAsFixed(1)}',
+                  isDark: widget.isDark,
                 ),
               ],
             ),
@@ -442,52 +432,72 @@ class _BottomPanel extends StatelessWidget {
   }
 }
 
-// Chip de rango X / Y
+class _FunctionChip extends StatelessWidget {
+  final String fn;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _FunctionChip({required this.fn, required this.isDark, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF152840) : const Color(0xFFEBF4FC),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
+          ),
+        ),
+        child: Text(
+          fn,
+          style: TextStyle(
+            fontSize: 11,
+            fontFamily: 'monospace',
+            color: isDark ? const Color(0xFF5B9BD5) : const Color(0xFF3A7FC1),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _RangeChip extends StatelessWidget {
   final String label;
   final String range;
   final bool isDark;
 
-  const _RangeChip({
-    required this.label,
-    required this.range,
-    required this.isDark,
-  });
+  const _RangeChip({required this.label, required this.range, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF152840)
-            : const Color(0xFFEBF4FC),
+        color: isDark ? const Color(0xFF152840) : const Color(0xFFEBF4FC),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark
-              ? const Color(0xFF234060)
-              : const Color(0xFFD6E8F7),
+          color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF5B9BD5),
-            ),
-          ),
-          Text(
-            range,
-            style: TextStyle(
-              fontSize: 11,
-              color: isDark ? Colors.white54 : const Color(0xFF6B8CAE),
-              fontFamily: 'monospace',
-            ),
-          ),
+          Text('$label: ',
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF5B9BD5))),
+          Text(range,
+              style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white54 : const Color(0xFF6B8CAE),
+                  fontFamily: 'monospace')),
         ],
       ),
     );
