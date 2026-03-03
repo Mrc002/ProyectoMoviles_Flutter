@@ -77,10 +77,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemBuilder: (context, index) {
                       final msg = chatProvider.messages[index];
                       return _MessageBubble(
+                        index: index, // <-- Pasamos el index
                         text: msg.text,
                         isUser: msg.isUser,
                         isDark: isDark,
                         isLast: index == chatProvider.messages.length - 1,
+                        isTranslating: msg.isTranslating, // <-- Pasamos el estado de carga
                       );
                     },
                   ),
@@ -133,16 +135,20 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
+  final int index;
   final String text;
   final bool isUser;
   final bool isDark;
   final bool isLast;
+  final bool isTranslating;
 
   const _MessageBubble({
+    required this.index,
     required this.text,
     required this.isUser,
     required this.isDark,
     required this.isLast,
+    required this.isTranslating,
   });
 
   @override
@@ -202,72 +208,106 @@ class _MessageBubble extends StatelessWidget {
                   ),
                 ],
               ),
-              child: isUser
-                  ? Text(
-                      text,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        height: 1.4,
-                      ),
-                    )
-                  : MarkdownBody(
-                      data: text,
-                      selectable: false,
-                      builders: {
-                        'latex': LatexElementBuilder(
-                          textStyle: const TextStyle(
-                            color: Color(0xFF5B9BD5),
-                            fontWeight: FontWeight.w600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  isUser
+                      ? Text(
+                          text,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            height: 1.4,
+                          ),
+                        )
+                      : MarkdownBody(
+                          data: text,
+                          selectable: false,
+                          builders: <String, MarkdownElementBuilder>{
+                            'latex': LatexElementBuilder(
+                              textStyle: const TextStyle(
+                                color: Color(0xFF5B9BD5),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          },
+                          extensionSet: md.ExtensionSet(
+                            <md.BlockSyntax>[
+                              LatexBlockSyntax(),
+                              ...md.ExtensionSet.gitHubFlavored.blockSyntaxes
+                            ],
+                            <md.InlineSyntax>[
+                              LatexInlineSyntax(),
+                              ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
+                            ],
+                          ),
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(
+                              color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+                              fontSize: 15,
+                              height: 1.5,
+                            ),
+                            tableBorder: TableBorder.all(
+                              color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
+                              width: 1,
+                            ),
+                            tableHead: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? const Color(0xFF5B9BD5) : const Color(0xFF3A7FC1),
+                            ),
+                            tableCellsPadding: const EdgeInsets.all(8),
+                            code: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 13,
+                              backgroundColor: isDark
+                                  ? const Color(0xFF0F1E2E)
+                                  : const Color(0xFFEBF4FC),
+                              color: const Color(0xFF5B9BD5),
+                            ),
+                            codeblockDecoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
+                              ),
+                            ),
+                            strong: const TextStyle(
+                              color: Color(0xFF5B9BD5),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      },
-                      extensionSet: md.ExtensionSet(
-                        <md.BlockSyntax>[
-                          LatexBlockSyntax(),
-                          ...md.ExtensionSet.gitHubFlavored.blockSyntaxes
-                        ],
-                        <md.InlineSyntax>[
-                          LatexInlineSyntax(),
-                          ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes
-                        ],
-                      ),
-                      styleSheet: MarkdownStyleSheet(
-                        p: TextStyle(
-                          color: isDark ? Colors.white : const Color(0xFF1A2D4A),
-                          fontSize: 15,
-                          height: 1.5,
-                        ),
-                        tableBorder: TableBorder.all(
-                          color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
-                          width: 1,
-                        ),
-                        tableHead: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFF5B9BD5) : const Color(0xFF3A7FC1),
-                        ),
-                        tableCellsPadding: const EdgeInsets.all(8),
-                        code: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 13,
-                          backgroundColor: isDark
-                              ? const Color(0xFF0F1E2E)
-                              : const Color(0xFFEBF4FC),
-                          color: const Color(0xFF5B9BD5),
-                        ),
-                        codeblockDecoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
-                          ),
-                        ),
-                        strong: const TextStyle(
-                          color: Color(0xFF5B9BD5),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                  
+                  // --- BOTÓN DE TRADUCCIÓN ---
+                  if (!isUser) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: isTranslating
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF5B9BD5),
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: () {
+                                final langCode = context.read<LanguageProvider>().appLocale.languageCode;
+                                context.read<ChatProvider>().translateLocalMessage(index, langCode);
+                              },
+                              child: Icon(
+                                Icons.g_translate_rounded,
+                                size: 18,
+                                color: isDark ? Colors.white38 : const Color(0xFFB0CDE8),
+                              ),
+                            ),
                     ),
+                  ],
+                ],
+              ),
             ),
           ),
 
