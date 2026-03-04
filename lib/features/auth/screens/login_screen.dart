@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import 'package:app_links/app_links.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,6 +23,9 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _animController;
   late Animation<double>   _fadeAnim;
   late Animation<Offset>   _slideAnim;
+  // --- NUEVAS VARIABLES PARA LOS LINKS ---
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -35,10 +40,117 @@ class _LoginScreenState extends State<LoginScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
+    // Iniciar el escuchador de enlaces profundos
+    _initDeepLinks();
+  }
+
+  // --- NUEVA LÓGICA PARA ESCUCHAR EL CORREO ---
+  void _initDeepLinks() {
+    _appLinks = AppLinks();
+
+    // 1. Escuchar si la app ya estaba abierta de fondo y tocan el link
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+
+    // 2. Escuchar si la app estaba completamente cerrada y la abre el link
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _handleDeepLink(uri);
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    // Verificamos si el link es de Firebase
+    if (uri.host == 'math-ia-studio.firebaseapp.com' && uri.path == '/__/auth/action') {
+      final mode = uri.queryParameters['mode'];
+      final oobCode = uri.queryParameters['oobCode']; // El código secreto de Firebase
+
+      if (mode == 'resetPassword' && oobCode != null) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        // Abrimos el menú para poner la nueva contraseña
+        _showNewPasswordDialog(oobCode, isDark);
+      }
+    }
+  }
+
+  // Menú para que escriba y guarde su nueva contraseña
+  void _showNewPasswordDialog(String oobCode, bool isDark) {
+    final newPassController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Obliga al usuario a usar el menú
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7), width: 1.5),
+        ),
+        title: Text(
+          'Nueva Contraseña',
+          style: TextStyle(fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1A2D4A)),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'El código de tu correo fue validado con éxito. Por favor escribe tu nueva contraseña:',
+              style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : const Color(0xFF6B8CAE)),
+            ),
+            const SizedBox(height: 16),
+            _buildField(
+              controller: newPassController,
+              label: 'Nueva contraseña (Mín. 6 caracteres)',
+              icon: Icons.lock_reset,
+              obscureText: true,
+              isDark: isDark,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF6B8CAE))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5B9BD5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final newPass = newPassController.text.trim();
+              if (newPass.length < 6) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('La contraseña debe tener al menos 6 caracteres'), backgroundColor: Color(0xFFE53935)),
+                );
+                return;
+              }
+
+              Navigator.pop(ctx); // Cerramos el menú
+              final error = await context.read<AuthProvider>().confirmPasswordReset(oobCode, newPass);
+
+              if (!mounted) return;
+
+              if (error == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.'), backgroundColor: Colors.green),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(error), backgroundColor: const Color(0xFFE53935)),
+                );
+              }
+            },
+            child: const Text('Guardar Contraseña', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _linkSubscription?.cancel();
     _animController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -78,6 +190,109 @@ class _LoginScreenState extends State<LoginScreen>
     _animController.reset();
     setState(() => _isLoginMode = !_isLoginMode);
     _animController.forward();
+  }
+
+  // --- NUEVO: DIÁLOGO PARA RECUPERAR CONTRASEÑA ---
+  void _showForgotPasswordDialog(BuildContext context, bool isDark, AppLocalizations l10n) {
+    // Controlador independiente para no afectar el del login
+    final resetEmailController = TextEditingController(text: _emailController.text.trim());
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7),
+            width: 1.5,
+          ),
+        ),
+        title: Text(
+          'Recuperar contraseña',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.white70 : const Color(0xFF6B8CAE),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildField(
+              controller: resetEmailController,
+              label: l10n.correoElectronico,
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
+              isDark: isDark,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF6B8CAE)),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5B9BD5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final email = resetEmailController.text.trim();
+              if (email.isEmpty) return;
+
+              // Cerramos el diálogo para mostrar que está cargando/procesando
+              Navigator.pop(ctx);
+              
+              // Mostramos un SnackBar de que se está enviando
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Enviando correo...'),
+                  backgroundColor: Color(0xFF5B9BD5),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+
+              final error = await context.read<AuthProvider>().sendPasswordResetEmail(email);
+              
+              if (!mounted) return;
+
+              if (error == null) {
+                // Éxito
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('¡Correo enviado! Revisa tu bandeja de entrada o spam.'),
+                    backgroundColor: Colors.green.shade600,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                // Falló
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(error),
+                    backgroundColor: const Color(0xFFE53935),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            child: const Text('Enviar Enlace', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -248,7 +463,33 @@ class _LoginScreenState extends State<LoginScreen>
               onPressed: () => setState(() => _obscurePass = !_obscurePass),
             ),
           ),
-          const SizedBox(height: 24),
+
+          // --- NUEVO: BOTÓN DE OLVIDÉ MI CONTRASEÑA ---
+          if (_isLoginMode)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => _showForgotPasswordDialog(context, isDark, l10n),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  '¿Olvidaste tu contraseña?',
+                  style: TextStyle(
+                    color: const Color(0xFF5B9BD5),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            )
+          else 
+            // Espaciador si estamos en modo registro para mantener el tamaño
+            const SizedBox(height: 14),
+            
+          const SizedBox(height: 16),
 
           // Botón principal
           auth.isLoading
