@@ -133,6 +133,44 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // --- NUEVO: MÉTODO PARA RECUPERAR CONTRASEÑA ---
+  Future<String?> sendPasswordResetEmail(String email) async {
+    try {
+      _setLoading(true);
+      await _auth.sendPasswordResetEmail(email: email);
+      _setLoading(false);
+      return null; // Si devuelve null, significa que se envió correctamente
+    } on FirebaseAuthException catch (e) {
+      _setLoading(false);
+      // Personalizamos el mensaje de error para que sea más amigable
+      if (e.code == 'user-not-found') {
+        return 'No hay ningún usuario registrado con este correo.';
+      } else if (e.code == 'invalid-email') {
+        return 'El formato del correo no es válido.';
+      }
+      return e.message ?? 'Ocurrió un error al intentar enviar el correo.';
+    } catch (e) {
+      _setLoading(false);
+      return 'Ocurrió un error inesperado.';
+    }
+  }
+
+  // --- NUEVO: MÉTODO PARA APLICAR LA NUEVA CONTRASEÑA ---
+  Future<String?> confirmPasswordReset(String code, String newPassword) async {
+    try {
+      _setLoading(true);
+      await _auth.confirmPasswordReset(code: code, newPassword: newPassword);
+      _setLoading(false);
+      return null; // Éxito
+    } on FirebaseAuthException catch (e) {
+      _setLoading(false);
+      return e.message ?? 'Error al cambiar la contraseña. El enlace puede haber expirado.';
+    } catch (e) {
+      _setLoading(false);
+      return 'Error inesperado.';
+    }
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
   }
