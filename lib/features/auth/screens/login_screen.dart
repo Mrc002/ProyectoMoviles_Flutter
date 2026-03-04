@@ -510,6 +510,59 @@ class _LoginScreenState extends State<LoginScreen>
 
           const SizedBox(height: 12),
 
+          // --- NUEVO: BOTÓN DE GOOGLE ---
+          if (!auth.isLoading) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: Divider(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text('O continuar con', style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : const Color(0xFF6B8CAE))),
+                ),
+                Expanded(child: Divider(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            GestureDetector(
+              onTap: () async {
+                final error = await auth.signInWithGoogle();
+                if (error != null && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(error), backgroundColor: const Color(0xFFE53935)),
+                  );
+                }
+              },
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF152840) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7), width: 1.5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Usamos una pequeña imagen de internet para el logo de Google
+                    Image.network('https://cdn-icons-png.flaticon.com/512/300/300221.png', width: 24, height: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Google',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          // ------------------------------
+
           // Continuar como invitado (solo en login)
           if (_isLoginMode && !auth.isLoading)
             _buildSecondaryButton(
