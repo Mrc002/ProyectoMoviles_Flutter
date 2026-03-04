@@ -4,12 +4,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:translator/translator.dart'; // <-- IMPORTANTE: Nueva importación
 
 // Modelo simple para guardar los mensajes en memoria
 class ChatMessage {
-  final String text;
+  String text; // <-- Quitamos final para poder sobrescribir al traducir
   final bool isUser;
-  ChatMessage({required this.text, required this.isUser});
+  bool isTranslating; // <-- Estado para el loader del botón
+  
+  ChatMessage({
+    required this.text, 
+    required this.isUser,
+    this.isTranslating = false,
+  });
 }
 
 // Crea un modelo simple para la sesión de chat en el menú
@@ -22,6 +29,9 @@ class ChatSession {
 class ChatProvider extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
+
+  // Instancia del traductor local gratuito
+  final _translator = GoogleTranslator();
 
   // Historial para la API (formato que espera Gemini REST)
   final List<Map<String, dynamic>> _history = [];
@@ -154,6 +164,27 @@ class ChatProvider extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // --- NUEVO: Función para traducir localmente el mensaje ---
+  Future<void> translateLocalMessage(int index, String targetLanguageCode) async {
+    if (index < 0 || index >= _messages.length) return;
+
+    final msg = _messages[index];
+    if (msg.isUser || msg.text.isEmpty) return;
+
+    msg.isTranslating = true;
+    notifyListeners();
+
+    try {
+      final translation = await _translator.translate(msg.text, to: targetLanguageCode);
+      msg.text = translation.text;
+    } catch (e) {
+      debugPrint("Error al traducir localmente: $e");
+    } finally {
+      msg.isTranslating = false;
       notifyListeners();
     }
   }
