@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../logic/editor_provider.dart';
 import '../widgets/graph_3d_view.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../chat/logic/chat_provider.dart'; // <-- NUEVO: Importamos el cerebro de IA
 
 class EditorScreen extends StatelessWidget {
   const EditorScreen({super.key});
@@ -14,9 +15,10 @@ class EditorScreen extends StatelessWidget {
     final isDark   = Theme.of(context).brightness == Brightness.dark;
     final l10n     = AppLocalizations.of(context)!;
 
-    return Container(
-      color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
-      child: Padding(
+    // CAMBIO: Usamos Scaffold en lugar de Container para soportar el Botón Flotante
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
+      body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,11 +32,32 @@ class EditorScreen extends StatelessWidget {
           ],
         ),
       ),
+      // NUEVO: Botón Flotante del Asistente
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAssistant(context, provider),
+        backgroundColor: const Color(0xFF5B9BD5),
+        elevation: 4,
+        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+      ),
+    );
+  }
+
+  // NUEVO: Función para mostrar el Bottom Sheet
+  void _showAssistant(BuildContext context, EditorProvider editorProvider) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Permite que suba con el teclado
+      backgroundColor: Colors.transparent,
+      builder: (context) => _MiniChatAssistant(
+        currentEquation: editorProvider.is3DMode
+            ? editorProvider.equation3D
+            : editorProvider.equation,
+      ),
     );
   }
 }
 
-// ── CARD DE LA GRÁFICA ───────────────────────────────────────────────────────
+// ── CARD DE LA GRÁFICA (Intacto) ─────────────────────────────────────────────
 class _GraphCard extends StatelessWidget {
   final EditorProvider provider;
   final bool isDark;
@@ -200,7 +223,7 @@ class _GraphBadge extends StatelessWidget {
   }
 }
 
-// ── PANEL INFERIOR ───────────────────────────────────────────────────────────
+// ── PANEL INFERIOR (Intacto) ─────────────────────────────────────────────────
 class _BottomPanel extends StatefulWidget {
   final EditorProvider provider;
   final bool isDark;
@@ -217,7 +240,6 @@ class _BottomPanel extends StatefulWidget {
 }
 
 class _BottomPanelState extends State<_BottomPanel> {
-  // ⚠️ CLAVE: el controller se maneja aquí, no se recrea en cada build
   late TextEditingController _textController;
 
   @override
@@ -233,7 +255,6 @@ class _BottomPanelState extends State<_BottomPanel> {
   @override
   void didUpdateWidget(covariant _BottomPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Si cambió el modo (2D↔3D), actualizar el texto del campo
     if (oldWidget.provider.is3DMode != widget.provider.is3DMode) {
       final newText = widget.provider.is3DMode
           ? widget.provider.equation3D
@@ -278,7 +299,6 @@ class _BottomPanelState extends State<_BottomPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Etiqueta + indicador válido/inválido
           Row(
             children: [
               Icon(
@@ -319,10 +339,7 @@ class _BottomPanelState extends State<_BottomPanel> {
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // Campo de texto — usa el controller del State, no se recrea
           TextField(
             controller: _textController,
             onChanged: widget.provider.updateEquation,
@@ -381,8 +398,6 @@ class _BottomPanelState extends State<_BottomPanel> {
                   : null,
             ),
           ),
-
-          // Chips de sugerencia para 3D
           if (widget.provider.is3DMode) ...[
             const SizedBox(height: 10),
             SingleChildScrollView(
@@ -404,8 +419,6 @@ class _BottomPanelState extends State<_BottomPanel> {
               ),
             ),
           ],
-
-          // Rango X/Y en modo 2D
           if (isValid && !widget.provider.is3DMode) ...[
             const SizedBox(height: 10),
             Row(
@@ -498,6 +511,169 @@ class _RangeChip extends StatelessWidget {
                   fontSize: 11,
                   color: isDark ? Colors.white54 : const Color(0xFF6B8CAE),
                   fontFamily: 'monospace')),
+        ],
+      ),
+    );
+  }
+}
+
+// ── ASISTENTE RÁPIDO (BOTTOM SHEET NUEVO) ────────────────────────────────────
+class _MiniChatAssistant extends StatefulWidget {
+  final String currentEquation;
+  const _MiniChatAssistant({required this.currentEquation});
+
+  @override
+  State<_MiniChatAssistant> createState() => _MiniChatAssistantState();
+}
+
+class _MiniChatAssistantState extends State<_MiniChatAssistant> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chatProvider = context.watch<ChatProvider>();
+    // Obtenemos la altura del teclado para que el panel suba al escribir
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      // Altura del 65% de la pantalla + el espacio del teclado
+      height: MediaQuery.of(context).size.height * 0.65 + bottomInset,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C3350) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Header del panel
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? Colors.white12 : Colors.black12,
+                )
+              )
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.auto_graph_rounded, color: Color(0xFF5B9BD5)),
+                const SizedBox(width: 8),
+                Text(
+                  "Asistente de Gráficas",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.close_rounded, color: isDark ? Colors.white54 : Colors.black54),
+                  onPressed: () => Navigator.pop(context),
+                )
+              ],
+            ),
+          ),
+
+          // Historial de mensajes rápidos
+          Expanded(
+            child: ListView.builder(
+              reverse: false, 
+              padding: const EdgeInsets.all(16),
+              itemCount: chatProvider.messages.length,
+              itemBuilder: (context, index) {
+                final msg = chatProvider.messages[index];
+                return Align(
+                  alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: msg.isUser 
+                          ? const Color(0xFF5B9BD5) 
+                          : (isDark ? const Color(0xFF234060) : const Color(0xFFEBF4FC)),
+                      borderRadius: BorderRadius.circular(16).copyWith(
+                        bottomRight: msg.isUser ? const Radius.circular(0) : null,
+                        bottomLeft: !msg.isUser ? const Radius.circular(0) : null,
+                      ),
+                    ),
+                    child: Text(
+                      msg.text,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: msg.isUser 
+                            ? Colors.white 
+                            : (isDark ? Colors.white : const Color(0xFF1A2D4A)),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Loader
+          if (chatProvider.isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: 20, width: 20, 
+                child: CircularProgressIndicator(strokeWidth: 2)
+              ),
+            ),
+
+          // Input de texto
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
+                      hintText: widget.currentEquation.isEmpty 
+                        ? "Escribe una ecuación primero..." 
+                        : "Pregunta sobre f(x) = ${widget.currentEquation}",
+                      hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontSize: 13),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFF0F7FF),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                CircleAvatar(
+                  backgroundColor: const Color(0xFF5B9BD5),
+                  child: IconButton(
+                    icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                    onPressed: () {
+                      if (_controller.text.isNotEmpty) {
+                        // Enviamos la función matemática actual de fondo al ChatProvider
+                        chatProvider.sendMessage(
+                          _controller.text,
+                          currentEquation: widget.currentEquation,
+                        );
+                        _controller.clear();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -8,7 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:translator/translator.dart';
 import 'package:google_generative_ai/google_generative_ai.dart' as genai; 
 
-// Modelo simple para guardar los mensajes en memoria
 class ChatMessage {
   String text; 
   final bool isUser;
@@ -21,7 +20,6 @@ class ChatMessage {
   });
 }
 
-// Crea un modelo simple para la sesión de chat en el menú
 class ChatSession {
   final String id;
   final String title;
@@ -45,17 +43,17 @@ class ChatProvider extends ChangeNotifier {
   List<ChatSession> _chatSessions = [];
   String _currentLanguage = 'es'; 
 
+  // --- CONCIENCIA DE UBICACIÓN ---
+  String _currentSection = 'General'; 
+  String get currentSection => _currentSection;
+
   List<ChatSession> get chatSessions => _chatSessions;
 
-  // --- PASO 1: CONSTRUCTOR QUE ESCUCHA LA SESIÓN ---
   ChatProvider() {
-    // authStateChanges() nos avisa en tiempo real si el usuario se loguea o se sale
     _auth.authStateChanges().listen((user) {
       if (user != null && !user.isAnonymous) {
-        // Si hay un usuario real, mandamos a pedir sus chats guardados
         fetchUserChats();
       } else {
-        // Si es invitado o cerró sesión, limpiamos todo para que no vea chats de otros
         clearChat();
         _chatSessions.clear();
         notifyListeners();
@@ -63,7 +61,15 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
-  // Llama a esto cuando inicies la app o cuando inicie sesión un usuario registrado
+  // --- FUNCIÓN PARA CAMBIAR EL "SOMBRERO" DEL BOT ---
+  void setSection(String section) {
+    if (_currentSection != section) {
+      _currentSection = section;
+      debugPrint("🤖 Asistente cambió al modo: $_currentSection");
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchUserChats() async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -83,13 +89,8 @@ class ChatProvider extends ChangeNotifier {
         );
       }).toList();
       notifyListeners();
-      // --- PASO 2: AUTO-CARGAR LA ÚLTIMA CONVERSACIÓN ---
-      // Verificamos dos cosas:
-      // 1. _currentChatId == null (Significa que la pantalla de chat está vacía)
-      // 2. _chatSessions.isNotEmpty (Significa que el usuario sí tiene chats guardados)
+      
       if (_currentChatId == null && _chatSessions.isNotEmpty) {
-        // .first obtiene el chat más reciente porque en tu consulta a Firebase 
-        // le pusiste 'orderBy('createdAt', descending: true)'
         loadChatSession(_chatSessions.first.id);
       }
     } catch (e) {
@@ -97,23 +98,37 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  String get _systemInstruction =>
-      'Eres un profesor de matemáticas experto y amigable en una app de graficación.\n'
-      'Responde SIEMPRE en el idioma con código: $_currentLanguage.\n'
-      'Reglas:\n'
-      '1. Explica los conceptos de forma clara, didáctica y conversacional.\n'
-      '2. Si tienes que mostrar una fórmula matemática, fracciones, integrales o ecuaciones, SIEMPRE usa el formato LaTeX envuelto en símbolos de dólar. Por ejemplo: \$x^2 + y^2 = r^2\$ o \$\$\\frac{1}{2}\$\$.\n'
-      '3. Usa negritas y viñetas para organizar tu texto.\n'
-      '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.';
+  // --- INSTRUCCIÓN DINÁMICA SEGÚN LA SECCIÓN ---
+  String get _systemInstruction {
+    String baseInstruction = 
+        'Eres un profesor universitario experto y amigable.\n'
+        'Responde SIEMPRE en el idioma con código: $_currentLanguage.\n'
+        'Reglas:\n'
+        '1. Explica los conceptos de forma clara, didáctica y conversacional.\n'
+        '2. Si tienes que mostrar una fórmula matemática, usa SIEMPRE el formato LaTeX envuelto en símbolos de dólar (\$).\n'
+        '3. Usa negritas y viñetas para organizar tu texto.\n'
+        '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.\n\n';
 
-  // --- 1. Vectorizamos la pregunta usando el SDK OFICIAL (Actualizado 2026) ---
+    switch (_currentSection) {
+      case 'Gráficas':
+        return baseInstruction + 'Contexto Actual: Eres un experto en cálculo, álgebra y análisis de funciones 2D y 3D. Ayuda a entender la gráfica matemática actual.';
+      case 'Estadística':
+        return baseInstruction + 'Contexto Actual: Eres un profesor titular de Probabilidad y Estadística para Ingenieros. Basa tus respuestas rigurosamente en la metodología del libro "Probabilidad y Estadística para Ingenieros" de Miller y Freund (Richard A. Johnson). Utiliza teoría exacta extraída de la base de datos cuando se te proporcione.';
+      case 'Mecánica Vectorial':
+        return baseInstruction + 'Contexto Actual: Eres un experto en Física Clásica, Estática y Dinámica. Ayuda a aplicar principios de Mecánica Vectorial.';
+      case 'Ecuaciones Diferenciales':
+        return baseInstruction + 'Contexto Actual: Eres un experto en Ecuaciones Diferenciales Ordinarias y Parciales. Ayuda a resolver problemas paso a paso.';
+      default:
+        return baseInstruction + 'Contexto Actual: Eres un tutor general de matemáticas y ciencias. Responde de manera general sin asumir un tema específico a menos que se indique lo contrario.';
+    }
+  }
+
   Future<List<double>> _getEmbedding(String text) async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
-    // ✅ NUEVO MODELO OFICIAL
     final model = genai.GenerativeModel(
       model: 'gemini-embedding-001', 
       apiKey: apiKey,
@@ -123,10 +138,8 @@ class ChatProvider extends ChangeNotifier {
       final content = genai.Content.text(text);
       final result = await model.embedContent(
         content,
-        // Recomendado para sistemas RAG: mejora la precisión de la búsqueda
         taskType: genai.TaskType.retrievalQuery, 
       );
-      
       return result.embedding.values;
     } catch (e) {
       debugPrint('Error en SDK al vectorizar: $e');
@@ -134,12 +147,9 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- 2. Búsqueda Vectorial Matemática (Calculada en el teléfono) ---
   Future<String> _buscarEnLibros(List<double> vectorPregunta) async {
     try {
-      // Descargamos los fragmentos de la nube
       final querySnapshot = await _firestore.collection('knowledge_base').get();
-
       List<Map<String, dynamic>> resultados = [];
 
       for (var doc in querySnapshot.docs) {
@@ -157,7 +167,6 @@ class ChatProvider extends ChangeNotifier {
 
           if (docVector.isNotEmpty) {
              double similitud = _cosineSimilarity(vectorPregunta, docVector);
-             
              resultados.add({
                'texto': data['texto'],
                'score': similitud
@@ -166,10 +175,7 @@ class ChatProvider extends ChangeNotifier {
         }
       }
 
-      // Ordenamos para que los fragmentos más parecidos a la pregunta queden de primeros
       resultados.sort((a, b) => b['score'].compareTo(a['score']));
-
-      // Extraemos los textos de los 3 mejores fragmentos
       String contextoExtraido = "";
       for (int i = 0; i < min(3, resultados.length); i++) {
         contextoExtraido += resultados[i]['texto'] + "\n\n";
@@ -181,10 +187,8 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- Fórmula Matemática de RAG ---
   double _cosineSimilarity(List<double> a, List<double> b) {
     if (a.length != b.length) return 0.0;
-    
     double dotProduct = 0.0;
     double normA = 0.0;
     double normB = 0.0;
@@ -194,14 +198,12 @@ class ChatProvider extends ChangeNotifier {
       normA += a[i] * a[i];
       normB += b[i] * b[i];
     }
-    
     if (normA == 0 || normB == 0) return 0.0;
     return dotProduct / (sqrt(normA) * sqrt(normB));
   }
 
   Future<void> sendMessage(String text, {String? currentEquation, String? languageCode}) async {
     if (text.isEmpty) return;
-
     if (languageCode != null && languageCode.isNotEmpty) {
       _currentLanguage = languageCode;
     }
@@ -211,40 +213,42 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Convertimos la pregunta del usuario en vector
-      final vectorPregunta = await _getEmbedding(text);
-      
-      // 2. Buscamos fragmentos relevantes en Firestore matemáticamente
-      final extractoDelLibro = await _buscarEnLibros(vectorPregunta);
+      String extractoDelLibro = "";
 
-      // 3. Construimos el Prompt aumentado (RAG)
-      String promptToSend = 
-          'El usuario tiene esta pregunta: "$text".\n';
+      // FILTRO DE RAG: Búsqueda vectorial EXCLUSIVA para la sección de Estadística
+      if (_currentSection == 'Estadística') {
+        final vectorPregunta = await _getEmbedding(text);
+        extractoDelLibro = await _buscarEnLibros(vectorPregunta);
+      }
+
+      String promptToSend = 'Pregunta: "$text".\n';
           
       if (extractoDelLibro.isNotEmpty) {
         promptToSend += 
-          'Usa EXCLUSIVAMENTE esta teoría extraída de nuestros libros oficiales para responderle de forma precisa y detallada:\n'
+          'Usa EXCLUSIVAMENTE esta teoría extraída de los libros oficiales para responder de forma precisa y detallada:\n'
           '--- INICIO TEORÍA ---\n$extractoDelLibro\n--- FIN TEORÍA ---\n';
       }
 
       if (currentEquation != null && currentEquation.isNotEmpty) {
-        promptToSend += '\nEl usuario está analizando actualmente la función: f(x) = $currentEquation.';
+        if (_currentSection == 'Gráficas') {
+          promptToSend += '\nFunción matemática en análisis: f(x) = $currentEquation.';
+        } else if (_currentSection == 'Estadística') {
+          promptToSend += '\n[DATOS O CONTEXTO ESTADÍSTICO EN PANTALLA]: $currentEquation.';
+        } else {
+          promptToSend += '\n[CONTEXTO ACTUAL]: $currentEquation.';
+        }
       }
 
       _history.add({
         'role': 'user',
-        'parts': [
-          {'text': promptToSend}
-        ],
+        'parts': [{'text': promptToSend}],
       });
 
       final responseText = await _callGeminiAPI();
 
       _history.add({
         'role': 'model',
-        'parts': [
-          {'text': responseText}
-        ],
+        'parts': [{'text': responseText}],
       });
 
       _messages.add(ChatMessage(text: responseText, isUser: false));
@@ -268,7 +272,6 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> translateLocalMessage(int index, String targetLanguageCode) async {
     if (index < 0 || index >= _messages.length) return;
-
     final msg = _messages[index];
     if (msg.isUser || msg.text.isEmpty) return;
 
@@ -288,7 +291,6 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> _saveChatToFirestore(String userText, String botResponse, String uid) async {
     final chatRef = _firestore.collection('users').doc(uid).collection('chats');
-
     try {
       if (_currentChatId == null) {
         final newChat = await chatRef.add({
@@ -326,7 +328,6 @@ class ChatProvider extends ChangeNotifier {
 
     try {
       final doc = await _firestore.collection('users').doc(user.uid).collection('chats').doc(chatId).get();
-      
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
         final msgs = data['messages'] as List<dynamic>;
@@ -356,7 +357,6 @@ class ChatProvider extends ChangeNotifier {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
-    // ✅ ESTE MODELO SIGUE VIGENTE Y ES EL MÁS PODEROSO ACTUALMENTE
     const model = 'gemini-3-flash-preview';
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
@@ -400,7 +400,7 @@ class ChatProvider extends ChangeNotifier {
     } else if (error.contains('401') || error.contains('API_KEY') || error.contains('invalid')) {
       return '🔑 La API Key no es válida. Verifica tu archivo .env.';
     } else if (error.contains('timeout') || error.contains('TimeoutException')) {
-      return '🌐 La conexión tardó demasiado. Revisa tu internet e intenta de nuevo.';
+      return '🌐 La conexión tardó demasiado. Revisa la conexión a internet e intenta de nuevo.';
     } else if (error.contains('GEMINI_API_KEY')) {
       return '⚠️ No se encontró la API Key. Asegúrate de tener el archivo .env configurado.';
     }
