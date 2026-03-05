@@ -1,16 +1,18 @@
+import 'dart:math'; 
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:translator/translator.dart'; // <-- IMPORTANTE: Nueva importación
+import 'package:translator/translator.dart';
+import 'package:google_generative_ai/google_generative_ai.dart' as genai; 
 
 // Modelo simple para guardar los mensajes en memoria
 class ChatMessage {
-  String text; // <-- Quitamos final para poder sobrescribir al traducir
+  String text; 
   final bool isUser;
-  bool isTranslating; // <-- Estado para el loader del botón
+  bool isTranslating; 
   
   ChatMessage({
     required this.text, 
@@ -30,10 +32,7 @@ class ChatProvider extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
 
-  // Instancia del traductor local gratuito
   final _translator = GoogleTranslator();
-
-  // Historial para la API (formato que espera Gemini REST)
   final List<Map<String, dynamic>> _history = [];
 
   List<ChatMessage> get messages => _messages;
@@ -44,11 +43,10 @@ class ChatProvider extends ChangeNotifier {
 
   String? _currentChatId;
   List<ChatSession> _chatSessions = [];
-  String _currentLanguage = 'es'; // Variable para el idioma
+  String _currentLanguage = 'es'; 
 
   List<ChatSession> get chatSessions => _chatSessions;
 
-  // Llama a esto cuando inicies la app o cuando inicie sesión un usuario registrado
   Future<void> fetchUserChats() async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -73,7 +71,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- INSTRUCCIÓN DE SISTEMA DINÁMICA (usa el idioma actual) ---
   String get _systemInstruction =>
       'Eres un profesor de matemáticas experto y amigable en una app de graficación.\n'
       'Responde SIEMPRE en el idioma con código: $_currentLanguage.\n'
@@ -83,11 +80,102 @@ class ChatProvider extends ChangeNotifier {
       '3. Usa negritas y viñetas para organizar tu texto.\n'
       '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.';
 
-  // --- PARÁMETRO languageCode AGREGADO ---
+  // --- 1. Vectorizamos la pregunta usando el SDK OFICIAL (Actualizado 2026) ---
+  Future<List<double>> _getEmbedding(String text) async {
+    final apiKey = dotenv.env['GEMINI_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
+    }
+
+    // ✅ NUEVO MODELO OFICIAL
+    final model = genai.GenerativeModel(
+      model: 'gemini-embedding-001', 
+      apiKey: apiKey,
+    );
+
+    try {
+      final content = genai.Content.text(text);
+      final result = await model.embedContent(
+        content,
+        // Recomendado para sistemas RAG: mejora la precisión de la búsqueda
+        taskType: genai.TaskType.retrievalQuery, 
+      );
+      
+      return result.embedding.values;
+    } catch (e) {
+      debugPrint('Error en SDK al vectorizar: $e');
+      throw Exception('Error al vectorizar la pregunta');
+    }
+  }
+
+  // --- 2. Búsqueda Vectorial Matemática (Calculada en el teléfono) ---
+  Future<String> _buscarEnLibros(List<double> vectorPregunta) async {
+    try {
+      // Descargamos los fragmentos de la nube
+      final querySnapshot = await _firestore.collection('knowledge_base').get();
+
+      List<Map<String, dynamic>> resultados = [];
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        if (data.containsKey('embedding') && data.containsKey('texto')) {
+          
+          List<double> docVector = [];
+          var rawVector = data['embedding'];
+          
+          if (rawVector is List) {
+            docVector = rawVector.map((e) => (e as num).toDouble()).toList();
+          } else {
+            docVector = (rawVector as VectorValue).toArray().map((e) => (e as num).toDouble()).toList();
+          }
+
+          if (docVector.isNotEmpty) {
+             double similitud = _cosineSimilarity(vectorPregunta, docVector);
+             
+             resultados.add({
+               'texto': data['texto'],
+               'score': similitud
+             });
+          }
+        }
+      }
+
+      // Ordenamos para que los fragmentos más parecidos a la pregunta queden de primeros
+      resultados.sort((a, b) => b['score'].compareTo(a['score']));
+
+      // Extraemos los textos de los 3 mejores fragmentos
+      String contextoExtraido = "";
+      for (int i = 0; i < min(3, resultados.length); i++) {
+        contextoExtraido += resultados[i]['texto'] + "\n\n";
+      }
+      return contextoExtraido.trim();
+    } catch (e) {
+      debugPrint("Error buscando en la base de datos vectorial: $e");
+      return ""; 
+    }
+  }
+
+  // --- Fórmula Matemática de RAG ---
+  double _cosineSimilarity(List<double> a, List<double> b) {
+    if (a.length != b.length) return 0.0;
+    
+    double dotProduct = 0.0;
+    double normA = 0.0;
+    double normB = 0.0;
+    
+    for (int i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    
+    if (normA == 0 || normB == 0) return 0.0;
+    return dotProduct / (sqrt(normA) * sqrt(normB));
+  }
+
   Future<void> sendMessage(String text, {String? currentEquation, String? languageCode}) async {
     if (text.isEmpty) return;
 
-    // Actualizar el idioma si se proporciona
     if (languageCode != null && languageCode.isNotEmpty) {
       _currentLanguage = languageCode;
     }
@@ -97,15 +185,26 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Construir el prompt con contexto de la ecuación actual
-      String promptToSend = text;
-      if (currentEquation != null && currentEquation.isNotEmpty) {
-        promptToSend =
-            'El usuario está analizando la función: f(x) = $currentEquation. '
-            'Pregunta: $text';
+      // 1. Convertimos la pregunta del usuario en vector
+      final vectorPregunta = await _getEmbedding(text);
+      
+      // 2. Buscamos fragmentos relevantes en Firestore matemáticamente
+      final extractoDelLibro = await _buscarEnLibros(vectorPregunta);
+
+      // 3. Construimos el Prompt aumentado (RAG)
+      String promptToSend = 
+          'El usuario tiene esta pregunta: "$text".\n';
+          
+      if (extractoDelLibro.isNotEmpty) {
+        promptToSend += 
+          'Usa EXCLUSIVAMENTE esta teoría extraída de nuestros libros oficiales para responderle de forma precisa y detallada:\n'
+          '--- INICIO TEORÍA ---\n$extractoDelLibro\n--- FIN TEORÍA ---\n';
       }
 
-      // Agregar al historial
+      if (currentEquation != null && currentEquation.isNotEmpty) {
+        promptToSend += '\nEl usuario está analizando actualmente la función: f(x) = $currentEquation.';
+      }
+
       _history.add({
         'role': 'user',
         'parts': [
@@ -115,7 +214,6 @@ class ChatProvider extends ChangeNotifier {
 
       final responseText = await _callGeminiAPI();
 
-      // Agregar respuesta al historial
       _history.add({
         'role': 'model',
         'parts': [
@@ -125,7 +223,6 @@ class ChatProvider extends ChangeNotifier {
 
       _messages.add(ChatMessage(text: responseText, isUser: false));
 
-      // Guardar en Firebase
       final user = _auth.currentUser;
       if (user != null && !user.isAnonymous) {
         await _saveChatToFirestore(text, responseText, user.uid);
@@ -143,7 +240,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- NUEVO: Función para traducir localmente el mensaje ---
   Future<void> translateLocalMessage(int index, String targetLanguageCode) async {
     if (index < 0 || index >= _messages.length) return;
 
@@ -164,7 +260,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- Lógica para guardar en Firestore ---
   Future<void> _saveChatToFirestore(String userText, String botResponse, String uid) async {
     final chatRef = _firestore.collection('users').doc(uid).collection('chats');
 
@@ -193,7 +288,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // --- Cargar un chat antiguo desde el menú lateral ---
   Future<void> loadChatSession(String chatId) async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -236,6 +330,7 @@ class ChatProvider extends ChangeNotifier {
       throw Exception('No se encontró GEMINI_API_KEY en el archivo .env');
     }
 
+    // ✅ ESTE MODELO SIGUE VIGENTE Y ES EL MÁS PODEROSO ACTUALMENTE
     const model = 'gemini-3-flash-preview';
     final url = Uri.parse(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
@@ -244,7 +339,7 @@ class ChatProvider extends ChangeNotifier {
     final body = jsonEncode({
       'system_instruction': {
         'parts': [
-          {'text': _systemInstruction} // Ahora usa el getter dinámico
+          {'text': _systemInstruction} 
         ]
       },
       'contents': _history,
@@ -286,7 +381,6 @@ class ChatProvider extends ChangeNotifier {
     return '❌ Ocurrió un error. Intenta de nuevo en unos momentos.';
   }
 
-  // Limpiar el historial para iniciar un nuevo chat
   void clearChat() {
     _currentChatId = null;
     _messages.clear();
