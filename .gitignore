@@ -58,3 +58,7 @@ firebase_crashlytics_mapping.json
 *.jks
 *.keystore
 key.properties
+
+# Llaves de Firebase (¡No subir nunca!)
+firebase-key.json
+*.json

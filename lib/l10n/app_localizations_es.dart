@@ -180,4 +180,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get btnCerrarSesion => 'Cerrar Sesión';
+
+  @override
+  String get seleccionaAvatar => 'Selecciona un Avatar';
+
+  @override
+  String get subirGaleria => 'Subir desde la galería';
 }

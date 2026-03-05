@@ -7,6 +7,7 @@ import '../../editor/logic/editor_provider.dart';
 import 'package:provider/provider.dart';
 import '../../auth/logic/auth_provider.dart';
 import '../../chat/logic/chat_provider.dart'; 
+import '../../estadistica/screens/estadistica_screen.dart'; // <-- NUEVO: Importamos Estadística
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -284,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── MENÚ LATERAL (DRAWER) ───────────────────────────────────────────────────
   Widget _buildDrawer(BuildContext context, bool isDark) {
     final authProvider = context.watch<AuthProvider>();
+    final chatProvider = context.read<ChatProvider>(); // <-- NUEVO: Leemos el provider para avisarle a la IA
     final isGuest = authProvider.user == null || authProvider.user!.isAnonymous;
     final userName = isGuest ? 'Invitado' : authProvider.userName;
 
@@ -329,19 +331,21 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Álgebra y Funciones',
             isDark: isDark,
             onTap: () {
+              chatProvider.setSection('Gráficas'); // <-- AVISAMOS A LA IA
               Navigator.pop(context); 
+              setState(() => _selectedIndex = 0); // Vamos al Editor
             },
           ),
           
-          // ¡AQUÍ ESTÁN DE VUELTA TUS DOS APARTADOS!
           _buildDrawerItem(
             context: context,
             icon: Icons.architecture_rounded,
             title: 'Mecánica Vectorial Estática',
             isDark: isDark,
             onTap: () {
-              Navigator.pop(context); // Cierra el menú primero
-              // TODO: Navegar a la pantalla que creaste de Mecánica Vectorial
+              chatProvider.setSection('Mecánica Vectorial'); // <-- AVISAMOS A LA IA
+              Navigator.pop(context); 
+              // TODO: Navegar a la pantalla de Mecánica Vectorial
             },
           ),
 
@@ -351,11 +355,30 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Ecuaciones Diferenciales',
             isDark: isDark,
             onTap: () {
+              chatProvider.setSection('Ecuaciones Diferenciales'); // <-- AVISAMOS A LA IA
               Navigator.pop(context);
               // TODO: Navegar a la pantalla de Ecuaciones Diferenciales
             },
           ),
           
+          // --- NUEVO: SECCIÓN DE ESTADÍSTICA ---
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.bar_chart_rounded, 
+            title: 'Probabilidad y Estadística',
+            isDark: isDark,
+            onTap: () {
+              chatProvider.setSection('Estadística'); // <-- AVISAMOS A LA IA (Activa Firebase RAG)
+              Navigator.pop(context);
+              
+              // Navegar a la nueva pantalla de Estadística
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EstadisticaScreen()),
+              );
+            },
+          ),
+
           const Divider(),
 
           // ── SECCIÓN DE HISTORIAL DE IA ──

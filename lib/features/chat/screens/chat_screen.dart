@@ -44,12 +44,12 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;
 
     final currentEquation = context.read<EditorProvider>().equation;
-    final languageCode = context.read<LanguageProvider>().appLocale.languageCode; // Leemos el idioma
+    final languageCode = context.read<LanguageProvider>().appLocale.languageCode; 
 
     context.read<ChatProvider>().sendMessage(
       text,
       currentEquation: currentEquation,
-      languageCode: languageCode, // Lo pasamos al provider
+      languageCode: languageCode, 
     );
 
     _controller.clear();
@@ -67,6 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
       color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
       child: Column(
         children: [
+          // --- NUEVO: INDICADOR VISUAL DEL MODO ACTUAL ---
+          _ModeIndicator(currentSection: chatProvider.currentSection, isDark: isDark),
+
           Expanded(
             child: chatProvider.messages.isEmpty
                 ? _buildEmptyState(isDark)
@@ -77,12 +80,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemBuilder: (context, index) {
                       final msg = chatProvider.messages[index];
                       return _MessageBubble(
-                        index: index, // <-- Pasamos el index
+                        index: index, 
                         text: msg.text,
                         isUser: msg.isUser,
                         isDark: isDark,
                         isLast: index == chatProvider.messages.length - 1,
-                        isTranslating: msg.isTranslating, // <-- Pasamos el estado de carga
+                        isTranslating: msg.isTranslating, 
                       );
                     },
                   ),
@@ -134,6 +137,68 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
+// ── BANNER INDICADOR DE SECCIÓN (NUEVO) ──────────────────────────────────────
+class _ModeIndicator extends StatelessWidget {
+  final String currentSection;
+  final bool isDark;
+
+  const _ModeIndicator({required this.currentSection, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    IconData icon;
+    
+    // Elegimos el ícono dependiendo de la sección
+    switch (currentSection) {
+      case 'Gráficas':
+        icon = Icons.calculate_rounded;
+        break;
+      case 'Estadística':
+        icon = Icons.bar_chart_rounded;
+        break;
+      case 'Mecánica Vectorial':
+        icon = Icons.architecture_rounded;
+        break;
+      case 'Ecuaciones Diferenciales':
+        icon = Icons.show_chart_rounded;
+        break;
+      default:
+        icon = Icons.psychology_rounded;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF152840) : const Color(0xFFD6E8F7),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF234060) : const Color(0xFFB0CDE8).withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFF5B9BD5)),
+          const SizedBox(width: 8),
+          Text(
+            'Asistente enfocado en: $currentSection',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white70 : const Color(0xFF1A2D4A),
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── EL RESTO DEL CÓDIGO INTACTO ──────────────────────────────────────────────
 class _MessageBubble extends StatelessWidget {
   final int index;
   final String text;
@@ -279,7 +344,6 @@ class _MessageBubble extends StatelessWidget {
                           ),
                         ),
                   
-                  // --- BOTÓN DE TRADUCCIÓN ---
                   if (!isUser) ...[
                     const SizedBox(height: 8),
                     Align(
@@ -538,12 +602,12 @@ class _SuggestionChip extends StatelessWidget {
       onTap: () {
         final chatProvider = context.read<ChatProvider>();
         final equation = context.read<EditorProvider>().equation;
-        final languageCode = context.read<LanguageProvider>().appLocale.languageCode; // Leemos el idioma
+        final languageCode = context.read<LanguageProvider>().appLocale.languageCode; 
 
         chatProvider.sendMessage(
           hint,
           currentEquation: equation,
-          languageCode: languageCode, // Lo pasamos al provider
+          languageCode: languageCode, 
         );
       },
       child: Container(

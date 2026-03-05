@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:convert'; // <--- NUEVO: Para decodificar la imagen
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,9 +13,9 @@ class ProfileScreen extends StatelessWidget {
   ImageProvider? _getImageProvider(String photoData) {
     if (photoData.isEmpty) return null;
     if (photoData.startsWith('http')) {
-      return NetworkImage(photoData); // Es un robot de DiceBear
+      return NetworkImage(photoData); 
     } else {
-      return MemoryImage(base64Decode(photoData)); // Es tu foto en Base64
+      return MemoryImage(base64Decode(photoData)); 
     }
   }
 
@@ -24,11 +24,14 @@ class ProfileScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Instanciamos el diccionario de traducciones
+    final l10n = AppLocalizations.of(context)!;
 
     if (user == null || user.isAnonymous) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Perfil')),
-        body: const Center(child: Text('Inicia sesión para ver tu perfil.')),
+        appBar: AppBar(title: Text(l10n.perfilAppbar)), 
+        body: Center(child: Text(l10n.iniciaSesionPerfil)), 
       );
     }
 
@@ -39,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         iconTheme: IconThemeData(color: isDark ? Colors.white : const Color(0xFF1A2D4A)),
         title: Text(
-          'Mi Perfil',
+          l10n.miPerfilTitulo, 
           style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontWeight: FontWeight.bold),
         ),
       ),
@@ -48,9 +51,10 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             GestureDetector(
+              // Pasamos l10n a la función del BottomSheet
               onTap: () => authProvider.isLoading 
                   ? null 
-                  : _showAvatarPicker(context, authProvider, isDark),
+                  : _showAvatarPicker(context, authProvider, isDark, l10n),
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -60,7 +64,6 @@ class ProfileScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: authProvider.isPremium ? const Color(0xFFFFD700) : const Color(0xFF5B9BD5),
-                      // USAMOS NUESTRA NUEVA FUNCIÓN AQUÍ
                       image: authProvider.photoUrl.isNotEmpty
                           ? DecorationImage(
                               image: _getImageProvider(authProvider.photoUrl)!,
@@ -170,9 +173,9 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Estado de la Cuenta', style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey)),
+                        Text(l10n.estadoCuentaInfo, style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey)),
                         Text(
-                          authProvider.isPremium ? 'Usuario PREMIUM' : 'Usuario Básico (Gratis)',
+                          authProvider.isPremium ? l10n.usuarioPremium : l10n.usuarioBasico, 
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -192,7 +195,7 @@ class ProfileScreen extends StatelessWidget {
                 await authProvider.signOut(); 
               },
               icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Cerrar Sesión', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              label: Text(l10n.btnCerrarSesion, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)), 
             )
           ],
         ),
@@ -200,7 +203,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- DIÁLOGO PARA CAMBIAR CORREO ---
+  // --- DIÁLOGO PARA CAMBIAR CORREO (De la nube) ---
   void _showChangeEmailDialog(BuildContext context, AuthProvider authProvider, bool isDark) {
     final newEmailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -316,7 +319,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showAvatarPicker(BuildContext context, AuthProvider authProvider, bool isDark) {
+  // --- SELECCIONAR AVATAR (Con tu l10n local) ---
+  void _showAvatarPicker(BuildContext context, AuthProvider authProvider, bool isDark, AppLocalizations l10n) {
     final List<String> appAvatars = [
       'https://api.dicebear.com/9.x/bottts/png?seed=Math1',
       'https://api.dicebear.com/9.x/bottts/png?seed=Math2',
@@ -336,7 +340,8 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Selecciona un Avatar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A2D4A))),
+              // Usamos la nueva traducción aquí
+              Text(l10n.seleccionaAvatar, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1A2D4A))),
               const SizedBox(height: 20),
               
               SizedBox(
@@ -367,16 +372,15 @@ class ProfileScreen extends StatelessWidget {
                   decoration: BoxDecoration(color: const Color(0xFF5B9BD5).withValues(alpha: 0.2), shape: BoxShape.circle),
                   child: const Icon(Icons.photo_library, color: Color(0xFF5B9BD5)),
                 ),
-                title: Text('Subir desde la galería', style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontWeight: FontWeight.bold)),
+                // Usamos la nueva traducción aquí
+                title: Text(l10n.subirGaleria, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontWeight: FontWeight.bold)),
                 onTap: () async {
                   Navigator.pop(context); 
                   
                   final ImagePicker picker = ImagePicker();
-                  // IMPORTANTE: Comprimimos la imagen al 15% de su calidad original 
-                  // para que quepa como texto en Firestore
                   final XFile? image = await picker.pickImage(
                     source: ImageSource.gallery,
-                    imageQuality: 15, // <--- COMPRESIÓN AGREGADA
+                    imageQuality: 15, 
                   );
                   
                   if (image != null) {

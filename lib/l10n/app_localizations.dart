@@ -439,6 +439,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cerrar Sesión'**
   String get btnCerrarSesion;
+
+  /// No description provided for @seleccionaAvatar.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un Avatar'**
+  String get seleccionaAvatar;
+
+  /// No description provided for @subirGaleria.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir desde la galería'**
+  String get subirGaleria;
 }
 
 class _AppLocalizationsDelegate

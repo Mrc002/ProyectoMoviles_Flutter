@@ -56,5 +56,7 @@
   "usuarioBasico": "Basic User (Free)",
   "proximamenteMejorar": "Coming soon: Upgrade to Premium",
   "btnMejorarPremium": "Upgrade to Premium",
-  "btnCerrarSesion": "Log Out"
+  "btnCerrarSesion": "Log Out",
+  "seleccionaAvatar": "Select an Avatar",
+  "subirGaleria": "Upload from gallery"
 }
