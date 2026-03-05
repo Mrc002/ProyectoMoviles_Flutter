@@ -47,6 +47,23 @@ class ChatProvider extends ChangeNotifier {
 
   List<ChatSession> get chatSessions => _chatSessions;
 
+  // --- PASO 1: CONSTRUCTOR QUE ESCUCHA LA SESIÓN ---
+  ChatProvider() {
+    // authStateChanges() nos avisa en tiempo real si el usuario se loguea o se sale
+    _auth.authStateChanges().listen((user) {
+      if (user != null && !user.isAnonymous) {
+        // Si hay un usuario real, mandamos a pedir sus chats guardados
+        fetchUserChats();
+      } else {
+        // Si es invitado o cerró sesión, limpiamos todo para que no vea chats de otros
+        clearChat();
+        _chatSessions.clear();
+        notifyListeners();
+      }
+    });
+  }
+
+  // Llama a esto cuando inicies la app o cuando inicie sesión un usuario registrado
   Future<void> fetchUserChats() async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -66,6 +83,15 @@ class ChatProvider extends ChangeNotifier {
         );
       }).toList();
       notifyListeners();
+      // --- PASO 2: AUTO-CARGAR LA ÚLTIMA CONVERSACIÓN ---
+      // Verificamos dos cosas:
+      // 1. _currentChatId == null (Significa que la pantalla de chat está vacía)
+      // 2. _chatSessions.isNotEmpty (Significa que el usuario sí tiene chats guardados)
+      if (_currentChatId == null && _chatSessions.isNotEmpty) {
+        // .first obtiene el chat más reciente porque en tu consulta a Firebase 
+        // le pusiste 'orderBy('createdAt', descending: true)'
+        loadChatSession(_chatSessions.first.id);
+      }
     } catch (e) {
       debugPrint("Error obteniendo chats: $e");
     }

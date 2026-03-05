@@ -123,6 +123,34 @@ class ProfileScreen extends StatelessWidget {
               user.email ?? '',
               style: TextStyle(fontSize: 16, color: isDark ? Colors.white54 : const Color(0xFF6B8CAE)),
             ),
+            // --- BOTÓN DE CAMBIAR CORREO (ABAJO) ---
+            InkWell(
+              onTap: () => _showChangeEmailDialog(context, authProvider, isDark),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5B9BD5).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF5B9BD5).withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.email_outlined, size: 16, color: Color(0xFF5B9BD5)),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Cambiar correo', 
+                      style: TextStyle(
+                        fontSize: 13, 
+                        fontWeight: FontWeight.bold, 
+                        color: Color(0xFF5B9BD5)
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 30),
 
             Container(
@@ -175,7 +203,123 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Agregamos AppLocalizations l10n como parámetro
+  // --- DIÁLOGO PARA CAMBIAR CORREO (De la nube) ---
+  void _showChangeEmailDialog(BuildContext context, AuthProvider authProvider, bool isDark) {
+    final newEmailController = TextEditingController();
+    final passwordController = TextEditingController();
+    bool isObscured = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7), width: 1.5),
+            ),
+            title: Text('Cambiar Correo', style: TextStyle(fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1A2D4A))),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Por seguridad, ingresa tu contraseña actual para confirmar el cambio de correo electrónico.',
+                  style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : const Color(0xFF6B8CAE)),
+                ),
+                const SizedBox(height: 16),
+                
+                // Campo Nuevo Correo
+                TextField(
+                  controller: newEmailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Nuevo Correo',
+                    prefixIcon: const Icon(Icons.email_outlined, size: 20, color: Color(0xFF5B9BD5)),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF152840) : const Color(0xFFF0F7FF),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Campo Contraseña Actual
+                TextField(
+                  controller: passwordController,
+                  obscureText: isObscured,
+                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1A2D4A), fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Contraseña Actual',
+                    prefixIcon: const Icon(Icons.lock_outline, size: 20, color: Color(0xFF5B9BD5)),
+                    suffixIcon: IconButton(
+                      icon: Icon(isObscured ? Icons.visibility_off : Icons.visibility, size: 20, color: Colors.grey),
+                      onPressed: () => setState(() => isObscured = !isObscured),
+                    ),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF152840) : const Color(0xFFF0F7FF),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white54 : const Color(0xFF6B8CAE))),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5B9BD5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () async {
+                  final newEmail = newEmailController.text.trim();
+                  final password = passwordController.text.trim();
+
+                  if (newEmail.isEmpty || password.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Por favor llena todos los campos'), backgroundColor: Color(0xFFE53935)),
+                    );
+                    return;
+                  }
+
+                  // Mostramos un cargando manual en el snackbar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Actualizando...'), duration: Duration(seconds: 1), backgroundColor: Color(0xFF5B9BD5)),
+                  );
+
+                  Navigator.pop(ctx); // Cierra el modal
+
+                  final error = await context.read<AuthProvider>().changeUserEmail(newEmail, password);
+
+                  if (!context.mounted) return;
+
+                  if (error == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('¡Enlace enviado! Revisa la bandeja del nuevo correo para confirmar el cambio.'), 
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(error), backgroundColor: const Color(0xFFE53935)),
+                    );
+                  }
+                },
+                child: const Text('Guardar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // --- SELECCIONAR AVATAR (Con tu l10n local) ---
   void _showAvatarPicker(BuildContext context, AuthProvider authProvider, bool isDark, AppLocalizations l10n) {
     final List<String> appAvatars = [
       'https://api.dicebear.com/9.x/bottts/png?seed=Math1',
