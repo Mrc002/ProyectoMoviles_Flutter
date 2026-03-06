@@ -1,0 +1,36 @@
+// lib/shared/app_imports.dart
+
+// ─── PAQUETES EXTERNOS MUY USADOS ───
+export 'package:provider/provider.dart';
+
+// ─── LOCALIZACIÓN (IDIOMAS) ───
+export '../l10n/app_localizations.dart';
+
+// ─── WIDGETS COMPARTIDOS ───
+export 'widgets/bot_avatar.dart';
+
+// ─── PROVEEDORES DE LÓGICA (PROVIDERS) ───
+export '../features/auth/logic/auth_provider.dart';
+export '../features/chat/logic/chat_provider.dart';
+export '../features/editor/logic/editor_provider.dart';
+export '../features/settings/logic/theme_provider.dart';
+export '../features/settings/logic/language_provider.dart';
+export '../features/mecanica_vectorial/logic/logic_mvectorial.dart';
+
+// ─── PANTALLAS GENERALES (SCREENS) ───
+export '../features/auth/screens/login_screen.dart';
+export '../features/home/screens/home_screen.dart';
+export '../features/editor/screens/editor_screen.dart';
+export '../features/chat/screens/chat_screen.dart';
+export '../features/settings/screens/settings_screen.dart';
+export '../features/settings/screens/profile_screen.dart';
+
+// ─── PANTALLAS DE ESTADÍSTICA ───
+export '../features/estadistica/screens/estadistica_screen.dart';
+export '../features/estadistica/screens/scan_problem_screen.dart';
+export '../features/estadistica/screens/descriptiva_screen.dart';
+export '../features/estadistica/screens/distribuciones_continuas_screen.dart';
+export '../features/estadistica/screens/distribuciones_discretas_screen.dart';
+
+// ─── PANTALLAS DE MECÁNICA VECTORIAL ───
+export '../features/mecanica_vectorial/screens/screens_mvectorial.dart';

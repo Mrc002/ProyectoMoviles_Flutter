@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'features/auth/logic/auth_provider.dart';
-import 'features/home/screens/home_screen.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/settings/logic/theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart';
-import 'features/settings/logic/language_provider.dart';
+import 'shared/app_imports.dart';
 
 // ─── PALETA DE COLORES CENTRALIZADA ───────────────────────────────────────────
 // Inspirada en la referencia: azul cielo suave, cards blancas, acento naranja

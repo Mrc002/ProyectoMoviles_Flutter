@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import '../../editor/screens/editor_screen.dart';
-import '../../chat/screens/chat_screen.dart';
-import '../../settings/screens/settings_screen.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../editor/logic/editor_provider.dart';
-import 'package:provider/provider.dart';
-import '../../auth/logic/auth_provider.dart';
-import '../../chat/logic/chat_provider.dart'; 
-import '../../estadistica/screens/estadistica_screen.dart';
+import '../../../shared/app_imports.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

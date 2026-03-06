@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../chat/logic/chat_provider.dart';
-
-// --- IMPORTS DE TUS PANTALLAS ---
-import 'descriptiva_screen.dart';
-import 'distribuciones_discretas_screen.dart';
-import 'distribuciones_continuas_screen.dart'; 
-import 'scan_problem_screen.dart';
+import '../../../shared/app_imports.dart';
 
 class EstadisticaScreen extends StatelessWidget {
   const EstadisticaScreen({super.key});
