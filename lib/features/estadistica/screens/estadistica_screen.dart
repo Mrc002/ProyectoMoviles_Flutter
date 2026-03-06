@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../chat/logic/chat_provider.dart';
-
-// --- IMPORTS DE TUS PANTALLAS ---
-import 'descriptiva_screen.dart';
-import 'distribuciones_discretas_screen.dart';
-import 'distribuciones_continuas_screen.dart'; // <-- NUEVO IMPORT AÑADIDO
+import '../../../shared/app_imports.dart';
 
 class EstadisticaScreen extends StatelessWidget {
   const EstadisticaScreen({super.key});
@@ -32,7 +26,7 @@ class EstadisticaScreen extends StatelessWidget {
         'title': 'Distribuciones Continuas',
         'subtitle': 'Normal, Exponencial, Weibull',
         'icon': Icons.show_chart_rounded,
-        'color': const Color(0xFFFF9800), // Usamos el color naranja para este módulo
+        'color': const Color(0xFFFF9800), 
       },
       {
         'title': 'Intervalos de Confianza',
@@ -134,7 +128,7 @@ class EstadisticaScreen extends StatelessWidget {
                   color: tool['color'],
                   isDark: isDark,
                   onTap: () {
-                    // --- LÓGICA DE NAVEGACIÓN ACTUALIZADA ---
+                    // --- LÓGICA DE NAVEGACIÓN ---
                     if (tool['title'] == 'Estadística Descriptiva') {
                       Navigator.push(
                         context, 
@@ -145,7 +139,7 @@ class EstadisticaScreen extends StatelessWidget {
                         context, 
                         MaterialPageRoute(builder: (context) => const DistribucionesDiscretasScreen())
                       );
-                    } else if (tool['title'] == 'Distribuciones Continuas') { // <-- CONEXIÓN NUEVA
+                    } else if (tool['title'] == 'Distribuciones Continuas') {
                       Navigator.push(
                         context, 
                         MaterialPageRoute(builder: (context) => const DistribucionesContinuasScreen())
@@ -168,17 +162,43 @@ class EstadisticaScreen extends StatelessWidget {
         ],
       ),
 
-      // --- EL BOTÓN DEL ASISTENTE FLOTANTE ---
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAssistant(context),
-        backgroundColor: const Color(0xFF5B9BD5),
-        elevation: 4,
-        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+      // --- AQUÍ ESTÁN TUS DOS BOTONES APILADOS ---
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // BOTÓN 1: Escanear Problema (Botón extendido)
+          FloatingActionButton.extended(
+            heroTag: 'btn_escaner_estadistica',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ScanProblemScreen()),
+              );
+            },
+            backgroundColor: const Color(0xFF5B9BD5),
+            icon: const Icon(Icons.document_scanner, color: Colors.white),
+            label: const Text('Escanear Problema', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+
+          const SizedBox(height: 16), // Espacio de separación entre los dos botones
+
+          // BOTÓN 2: Tu Asistente Flotante Original
+          FloatingActionButton(
+            heroTag: 'btn_asistente_estadistica',
+            onPressed: () => _showAssistant(context),
+            backgroundColor: const Color(0xFF6B8CAE), // Un color distinto para que resalte
+            elevation: 4,
+            child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+          ),
+        ],
       ),
     );
   }
 
   void _showAssistant(BuildContext context) {
+    // 1. ANTES DE ABRIR EL CHAT, LE DECIMOS DE QUÉ VAMOS A HABLAR
+    context.read<ChatProvider>().setSection('Estadística');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

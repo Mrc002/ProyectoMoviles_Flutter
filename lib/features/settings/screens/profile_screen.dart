@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../auth/logic/auth_provider.dart';
+import '../../../shared/app_imports.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

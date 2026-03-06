@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../logic/theme_provider.dart';
-import '../logic/language_provider.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../auth/logic/auth_provider.dart';
-import 'profile_screen.dart';
 import 'dart:convert';
+import '../../../shared/app_imports.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
