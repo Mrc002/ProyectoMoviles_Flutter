@@ -43,6 +43,8 @@ class MyApp extends StatelessWidget {
       title: 'Math AI Studio',
       debugShowCheckedModeBanner: false,
 
+      themeMode: themeProvider.themeMode,
+
       // ── Localización ──────────────────────────────────────────────────────
       locale: languageProvider.appLocale,
       localizationsDelegates: const [
@@ -56,7 +58,6 @@ class MyApp extends StatelessWidget {
         Locale('en', ''),
       ],
 
-      themeMode: themeProvider.themeMode,
 
       // ── TEMA CLARO ────────────────────────────────────────────────────────
       theme: ThemeData(
