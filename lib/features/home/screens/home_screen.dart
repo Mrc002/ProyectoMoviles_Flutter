@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../../editor/screens/editor_screen.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../../settings/screens/settings_screen.dart';
@@ -7,7 +8,7 @@ import '../../editor/logic/editor_provider.dart';
 import 'package:provider/provider.dart';
 import '../../auth/logic/auth_provider.dart';
 import '../../chat/logic/chat_provider.dart'; 
-import '../../estadistica/screens/estadistica_screen.dart'; // <-- NUEVO: Importamos Estadística
+import '../../estadistica/screens/estadistica_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,17 +20,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    EditorScreen(),
-    ChatScreen(),
-    SettingsScreen(),
+  // --- 1. NUEVO: Variable para controlar la pantalla actual de la pestaña "Estudio" ---
+  Widget _currentStudyScreen = const EditorScreen();
+
+  // --- 2. ACTUALIZADO: Ahora la lista de pantallas es dinámica ---
+  List<Widget> get _screens => [
+    _currentStudyScreen, // Muestra lo que el usuario eligió en el menú
+    const ChatScreen(),
+    const SettingsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     final l10n    = AppLocalizations.of(context)!;
     final isDark  = Theme.of(context).brightness == Brightness.dark;
-    final isEditor = _selectedIndex == 0;
+    
+    // --- 3. ACTUALIZADO: Los botones 2D/3D de arriba SOLO salen si estamos en la graficadora ---
+    final isEditor = _selectedIndex == 0 && _currentStudyScreen is EditorScreen;
 
     return Scaffold(
       appBar: _buildAppBar(context, l10n, isDark, isEditor),
@@ -285,9 +292,26 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── MENÚ LATERAL (DRAWER) ───────────────────────────────────────────────────
   Widget _buildDrawer(BuildContext context, bool isDark) {
     final authProvider = context.watch<AuthProvider>();
-    final chatProvider = context.read<ChatProvider>(); // <-- NUEVO: Leemos el provider para avisarle a la IA
+    final chatProvider = context.read<ChatProvider>(); 
     final isGuest = authProvider.user == null || authProvider.user!.isAnonymous;
     final userName = isGuest ? 'Invitado' : authProvider.userName;
+
+    // --- NUEVO: LÓGICA PARA CARGAR LA FOTO DE PERFIL ---
+    final photoUrl = authProvider.photoUrl;
+    ImageProvider? imageProvider;
+    
+    if (photoUrl.isNotEmpty) {
+      if (photoUrl.startsWith('http')) {
+        imageProvider = NetworkImage(photoUrl);
+      } else {
+        try {
+          imageProvider = MemoryImage(base64Decode(photoUrl));
+        } catch (e) {
+          debugPrint("Error cargando imagen: $e");
+        }
+      }
+    }
+    // ---------------------------------------------------
 
     return Drawer(
       backgroundColor: isDark ? const Color(0xFF152840) : Colors.white,
@@ -303,14 +327,33 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // --- NUEVO: CONTENEDOR DE LA IMAGEN O ÍCONO ---
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 64,
+                  height: 64,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
+                    // Si tenemos foto, la ponemos de fondo
+                    image: imageProvider != null
+                        ? DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                    // Un pequeño borde blanco para que se vea elegante
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.4), 
+                      width: 2
+                    ),
                   ),
-                  child: const Icon(Icons.person, color: Colors.white, size: 36),
+                  // Si NO hay foto, mostramos el ícono de la persona
+                  child: imageProvider == null
+                      ? const Icon(Icons.person, color: Colors.white, size: 36)
+                      : null,
                 ),
+                // ----------------------------------------------
+                
                 const SizedBox(height: 12),
                 Text(
                   'Hola, $userName',
@@ -325,15 +368,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // ── OPCIONES FIJAS (Tus herramientas) ──
+          
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.auto_graph_rounded, 
+            title: 'Graficación 2D/3D',
+            isDark: isDark,
+            onTap: () {
+              chatProvider.setSection('Gráficas'); 
+              Navigator.pop(context); 
+              
+              // CAMBIA EL CONTENIDO DE LA PESTAÑA A GRAFICACIÓN
+              setState(() {
+                _currentStudyScreen = const EditorScreen(); 
+                _selectedIndex = 0; 
+              });
+            },
+          ),
+          
           _buildDrawerItem(
             context: context,
             icon: Icons.calculate_rounded,
             title: 'Álgebra y Funciones',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Gráficas'); // <-- AVISAMOS A LA IA
+              chatProvider.setSection('Álgebra'); 
               Navigator.pop(context); 
-              setState(() => _selectedIndex = 0); // Vamos al Editor
+              
+              // Usa la graficadora por ahora
+              setState(() {
+                _currentStudyScreen = const EditorScreen(); 
+                _selectedIndex = 0; 
+              });
             },
           ),
           
@@ -343,39 +409,38 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Mecánica Vectorial Estática',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Mecánica Vectorial'); // <-- AVISAMOS A LA IA
+              chatProvider.setSection('Mecánica Vectorial'); 
               Navigator.pop(context); 
-              // TODO: Navegar a la pantalla de Mecánica Vectorial
+              // TODO: setState(() { _currentStudyScreen = const MecanicaScreen(); _selectedIndex = 0; });
             },
           ),
 
           _buildDrawerItem(
             context: context,
-            icon: Icons.show_chart_rounded, // o Icons.waves
+            icon: Icons.show_chart_rounded, 
             title: 'Ecuaciones Diferenciales',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Ecuaciones Diferenciales'); // <-- AVISAMOS A LA IA
+              chatProvider.setSection('Ecuaciones Diferenciales'); 
               Navigator.pop(context);
-              // TODO: Navegar a la pantalla de Ecuaciones Diferenciales
+              // TODO: setState(() { _currentStudyScreen = const EcuacionesScreen(); _selectedIndex = 0; });
             },
           ),
           
-          // --- NUEVO: SECCIÓN DE ESTADÍSTICA ---
           _buildDrawerItem(
             context: context,
             icon: Icons.bar_chart_rounded, 
             title: 'Probabilidad y Estadística',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Estadística'); // <-- AVISAMOS A LA IA (Activa Firebase RAG)
+              chatProvider.setSection('Estadística'); 
               Navigator.pop(context);
               
-              // Navegar a la nueva pantalla de Estadística
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const EstadisticaScreen()),
-              );
+              // CAMBIA EL CONTENIDO DE LA PESTAÑA A ESTADÍSTICA
+              setState(() {
+                _currentStudyScreen = const EstadisticaScreen(); 
+                _selectedIndex = 0; 
+              });
             },
           ),
 
@@ -445,32 +510,111 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     );
                   }
+
+                  // 1. AGRUPAR LOS CHATS POR MATERIA (TOPIC)
+                  final groupedChats = <String, List<ChatSession>>{};
+                  for (var session in chatProvider.chatSessions) {
+                    groupedChats.putIfAbsent(session.topic, () => []).add(session);
+                  }
                   
-                  return ListView.builder(
+                  // 2. CREAR EL ACORDEÓN (EXPANSION TILE)
+                  return ListView(
                     padding: EdgeInsets.zero,
-                    itemCount: chatProvider.chatSessions.length,
-                    itemBuilder: (context, index) {
-                      final session = chatProvider.chatSessions[index];
-                      return ListTile(
-                        leading: Icon(
-                          Icons.chat_bubble_outline, 
-                          color: isDark ? Colors.white70 : const Color(0xFF6B8CAE)
-                        ),
+                    children: groupedChats.entries.map((entry) {
+                      final topic = entry.key;
+                      final sessions = entry.value;
+                      
+                      // Asignar un ícono dependiendo de la materia
+                      IconData topicIcon = Icons.folder_rounded;
+                      if (topic == 'Gráficas' || topic == 'Álgebra') topicIcon = Icons.auto_graph_rounded;
+                      if (topic == 'Mecánica Vectorial') topicIcon = Icons.architecture_rounded;
+                      if (topic == 'Estadística') topicIcon = Icons.bar_chart_rounded;
+                      if (topic == 'Ecuaciones Diferenciales') topicIcon = Icons.show_chart_rounded;
+
+                      return ExpansionTile(
+                        leading: Icon(topicIcon, color: const Color(0xFF5B9BD5)),
+                        iconColor: const Color(0xFF5B9BD5), // Color de la flechita
+                        collapsedIconColor: isDark ? Colors.white54 : Colors.black54,
                         title: Text(
-                          session.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                          topic,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+                            fontSize: 14,
+                          ),
                         ),
-                        onTap: () {
-                          Navigator.pop(context); // Cierra el menú
-                          chatProvider.loadChatSession(session.id); // Carga la conversación
-                          
-                          // Cambia a la pestaña del chat si no estás en ella
-                          setState(() => _selectedIndex = 1);
-                        },
+                        // Aquí se despliegan los chats de esta materia
+                        children: sessions.map((session) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 16.0), // Indentación para que parezca subcarpeta
+                            child: ListTile(
+                              leading: Icon(
+                                Icons.chat_bubble_outline, 
+                                size: 18,
+                                color: isDark ? Colors.white54 : const Color(0xFF6B8CAE)
+                              ),
+                              title: Text(
+                                session.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark ? Colors.white70 : Colors.black87
+                                ),
+                              ),
+                              // --- NUEVO: BOTÓN DE ELIMINAR (Bote de basura) ---
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18, color: Colors.redAccent),
+                                onPressed: () async {
+                                  // Un pequeño diálogo de seguridad antes de borrar
+                                  final confirmar = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
+                                      title: Text('Eliminar Chat', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                                      content: Text('¿Seguro que deseas eliminar este chat de tu historial?', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          child: const Text('Eliminar', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  // Si el usuario dijo que sí, ejecutamos la función de borrar
+                                  if (confirmar == true) {
+                                    chatProvider.deleteChat(session.id);
+                                  }
+                                },
+                              ),
+                              // --------------------------------------------------
+                              onTap: () {
+                                Navigator.pop(context); 
+                                chatProvider.loadChatSession(session.id); 
+                                setState(() {
+                                  // Cambiamos el canal de TV en el fondo según la materia
+                                  if (session.topic == 'Estadística') {
+                                    _currentStudyScreen = const EstadisticaScreen();
+                                  } else if (session.topic == 'Gráficas' || session.topic == 'Álgebra' || session.topic == 'General') {
+                                    _currentStudyScreen = const EditorScreen();
+                                  }
+                                  // TODO: Cuando crees las demás pantallas, las agregas aquí:
+                                  // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
+                                  
+                                  // Finalmente, te manda a la pestaña 1 (El Chat)
+                                  _selectedIndex = 1; 
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
                       );
-                    },
+                    }).toList(),
                   );
                 },
               ),

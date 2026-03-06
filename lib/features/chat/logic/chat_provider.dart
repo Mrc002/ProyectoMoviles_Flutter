@@ -23,7 +23,8 @@ class ChatMessage {
 class ChatSession {
   final String id;
   final String title;
-  ChatSession({required this.id, required this.title});
+  final String topic;
+  ChatSession({required this.id, required this.title, this.topic = 'General'});
 }
 
 class ChatProvider extends ChangeNotifier {
@@ -43,7 +44,7 @@ class ChatProvider extends ChangeNotifier {
   List<ChatSession> _chatSessions = [];
   String _currentLanguage = 'es'; 
 
-  // --- CONCIENCIA DE UBICACIÓN ---
+  // --- CONCIENCIA DE UBICACIÓN Y TOPIC ---
   String _currentSection = 'General'; 
   String get currentSection => _currentSection;
 
@@ -61,15 +62,22 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
-  // --- FUNCIÓN PARA CAMBIAR EL "SOMBRERO" DEL BOT ---
-  void setSection(String section) {
-    if (_currentSection != section) {
-      _currentSection = section;
-      debugPrint("🤖 Asistente cambió al modo: $_currentSection");
-      notifyListeners();
+  // --- NUEVO: FUNCIÓN PARA CAMBIAR EL TEMA (TOPIC) ---
+  // Esto se llama desde las pantallas (ej. EstadisticaScreen) antes de abrir el BottomSheet
+  void setSection(String topic) {
+    if (_currentSection != topic) {
+      _currentSection = topic;
+      debugPrint("🤖 Asistente cambió al modo y sección: $_currentSection");
+      
+      // 1. Limpiamos la pantalla actual
+      clearChat();
+      
+      // 2. Traemos solo los chats de esta materia específica
+      fetchUserChats(); 
     }
   }
 
+  // --- ACTUALIZADO: TRAER TODOS LOS CHATS (Para agruparlos en el menú) ---
   Future<void> fetchUserChats() async {
     final user = _auth.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -83,16 +91,15 @@ class ChatProvider extends ChangeNotifier {
           .get();
 
       _chatSessions = snapshot.docs.map((doc) {
+        final data = doc.data();
         return ChatSession(
           id: doc.id,
-          title: doc['title'] ?? 'Nuevo Chat',
+          title: data['title'] ?? 'Nuevo Chat',
+          topic: data.containsKey('topic') ? data['topic'] : 'General', // <-- NUEVO
         );
       }).toList();
       notifyListeners();
       
-      if (_currentChatId == null && _chatSessions.isNotEmpty) {
-        loadChatSession(_chatSessions.first.id);
-      }
     } catch (e) {
       debugPrint("Error obteniendo chats: $e");
     }
@@ -107,7 +114,8 @@ class ChatProvider extends ChangeNotifier {
         '1. Explica los conceptos de forma clara, didáctica y conversacional.\n'
         '2. Si tienes que mostrar una fórmula matemática, usa SIEMPRE el formato LaTeX envuelto en símbolos de dólar (\$).\n'
         '3. Usa negritas y viñetas para organizar tu texto.\n'
-        '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.\n\n';
+        '4. Si el usuario pide datos o comparaciones, genérale tablas en formato Markdown.\n'
+        '5. Si el usuario te hace una pregunta que NO tiene nada que ver con el contexto actual, dile educadamente que en este chat solo puedes hablar sobre el tema actual.\n\n';
 
     switch (_currentSection) {
       case 'Gráficas':
@@ -115,7 +123,7 @@ class ChatProvider extends ChangeNotifier {
       case 'Estadística':
         return baseInstruction + 'Contexto Actual: Eres un profesor titular de Probabilidad y Estadística para Ingenieros. Basa tus respuestas rigurosamente en la metodología del libro "Probabilidad y Estadística para Ingenieros" de Miller y Freund (Richard A. Johnson). Utiliza teoría exacta extraída de la base de datos cuando se te proporcione.';
       case 'Mecánica Vectorial':
-        return baseInstruction + 'Contexto Actual: Eres un experto en Física Clásica, Estática y Dinámica. Ayuda a aplicar principios de Mecánica Vectorial.';
+        return baseInstruction + 'Contexto Actual: Eres un profesor universitario de Física y Mecánica Vectorial (Estática y Dinámica). Basa tus respuestas en el libro de "Mecánica Vectorial para Ingenieros" de Beer & Johnston.';
       case 'Ecuaciones Diferenciales':
         return baseInstruction + 'Contexto Actual: Eres un experto en Ecuaciones Diferenciales Ordinarias y Parciales. Ayuda a resolver problemas paso a paso.';
       default:
@@ -215,7 +223,6 @@ class ChatProvider extends ChangeNotifier {
     try {
       String extractoDelLibro = "";
 
-      // FILTRO DE RAG: Búsqueda vectorial EXCLUSIVA para la sección de Estadística
       if (_currentSection == 'Estadística') {
         final vectorPregunta = await _getEmbedding(text);
         extractoDelLibro = await _buscarEnLibros(vectorPregunta);
@@ -289,12 +296,14 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  // --- ACTUALIZADO: GUARDAR CON LA ETIQUETA DEL TEMA ---
   Future<void> _saveChatToFirestore(String userText, String botResponse, String uid) async {
     final chatRef = _firestore.collection('users').doc(uid).collection('chats');
     try {
       if (_currentChatId == null) {
         final newChat = await chatRef.add({
           'title': userText,
+          'topic': _currentSection, // <--- GUARDAMOS A QUÉ MATERIA PERTENECE
           'createdAt': FieldValue.serverTimestamp(),
           'messages': [
             {'text': userText, 'isUser': true},
@@ -330,6 +339,12 @@ class ChatProvider extends ChangeNotifier {
       final doc = await _firestore.collection('users').doc(user.uid).collection('chats').doc(chatId).get();
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
+        
+        // --- NUEVO: Cambiar el tema automáticamente al cargar un chat viejo ---
+        if (data.containsKey('topic')) {
+          _currentSection = data['topic'];
+        }
+
         final msgs = data['messages'] as List<dynamic>;
         
         for (var msg in msgs) {
@@ -405,6 +420,29 @@ class ChatProvider extends ChangeNotifier {
       return '⚠️ No se encontró la API Key. Asegúrate de tener el archivo .env configurado.';
     }
     return '❌ Ocurrió un error. Intenta de nuevo en unos momentos.';
+  }
+
+  // --- NUEVO: MÉTODO PARA ELIMINAR UN CHAT DE LA BASE DE DATOS ---
+  Future<void> deleteChat(String chatId) async {
+    final user = _auth.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    try {
+      // 1. Lo borramos de Firebase Firestore
+      await _firestore.collection('users').doc(user.uid).collection('chats').doc(chatId).delete();
+
+      // 2. Lo quitamos de la lista visual al instante
+      _chatSessions.removeWhere((session) => session.id == chatId);
+
+      // 3. Si el chat que borramos era el que teníamos abierto en pantalla, la limpiamos
+      if (_currentChatId == chatId) {
+        clearChat();
+      } else {
+        notifyListeners(); // Actualizamos el menú lateral
+      }
+    } catch (e) {
+      debugPrint("Error eliminando chat: $e");
+    }
   }
 
   void clearChat() {
