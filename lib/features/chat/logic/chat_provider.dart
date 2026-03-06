@@ -126,6 +126,8 @@ class ChatProvider extends ChangeNotifier {
         return baseInstruction + 'Contexto Actual: Eres un profesor universitario de Física y Mecánica Vectorial (Estática y Dinámica). Basa tus respuestas en el libro de "Mecánica Vectorial para Ingenieros" de Beer & Johnston.';
       case 'Ecuaciones Diferenciales':
         return baseInstruction + 'Contexto Actual: Eres un experto en Ecuaciones Diferenciales Ordinarias y Parciales. Ayuda a resolver problemas paso a paso.';
+      case 'Métodos Numéricos':
+        return baseInstruction + 'Contexto Actual: Eres un experto en Métodos Numéricos y Análisis Numérico. Ayuda a resolver problemas usando algoritmos como Bisección, Newton-Raphson, Gauss-Seidel, Interpolación y Runge-Kutta. Explica las iteraciones y el cálculo de errores de forma clara.';  
       default:
         return baseInstruction + 'Contexto Actual: Eres un tutor general de matemáticas y ciencias. Responde de manera general sin asumir un tema específico a menos que se indique lo contrario.';
     }

@@ -436,6 +436,21 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
 
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.calculate_outlined, 
+            title: 'Métodos Numéricos',
+            isDark: isDark,
+            onTap: () {
+              chatProvider.setSection('Métodos Numéricos'); 
+              Navigator.pop(context);
+              setState(() {
+                _currentStudyScreen = const MetodosNumericosScreen(); 
+                _selectedIndex = 0; 
+              });
+            },
+          ),
+
           const Divider(),
 
           // ── SECCIÓN DE HISTORIAL DE IA ──
@@ -522,6 +537,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (topic == 'Mecánica Vectorial') topicIcon = Icons.architecture_rounded;
                       if (topic == 'Estadística') topicIcon = Icons.bar_chart_rounded;
                       if (topic == 'Ecuaciones Diferenciales') topicIcon = Icons.show_chart_rounded;
+                      if (topic == 'Métodos Numéricos') topicIcon = Icons.calculate_outlined;
 
                       return ExpansionTile(
                         leading: Icon(topicIcon, color: const Color(0xFF5B9BD5)),
@@ -592,6 +608,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   // Cambiamos el canal de TV en el fondo según la materia
                                   if (session.topic == 'Estadística') {
                                     _currentStudyScreen = const EstadisticaScreen();
+                                  } else if (session.topic == 'Métodos Numéricos') {
+                                    _currentStudyScreen = const MetodosNumericosScreen();
                                   } else if (session.topic == 'Gráficas' || session.topic == 'Álgebra' || session.topic == 'General') {
                                     _currentStudyScreen = const EditorScreen();
                                   }
