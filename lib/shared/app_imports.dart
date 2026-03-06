@@ -34,3 +34,7 @@ export '../features/estadistica/screens/distribuciones_discretas_screen.dart';
 
 // ─── PANTALLAS DE MECÁNICA VECTORIAL ───
 export '../features/mecanica_vectorial/screens/screens_mvectorial.dart';
+
+// ─── PANTALLAS DE MÉTODOS NUMÉRICOS ───
+export '../features/metodos_numericos/screens/metodos_numericos_screen.dart';
+export '../features/metodos_numericos/screens/biseccion_screen.dart';
