@@ -1,10 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../logic/editor_provider.dart';
 import '../widgets/graph_3d_view.dart';
-import '../../../l10n/app_localizations.dart';
-import '../../chat/logic/chat_provider.dart'; // <-- NUEVO: Importamos el cerebro de IA
+import '../../../shared/app_imports.dart';
 
 class EditorScreen extends StatelessWidget {
   const EditorScreen({super.key});

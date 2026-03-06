@@ -1,8 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import '../../chat/logic/chat_provider.dart';
+import '../../../shared/app_imports.dart';
 
 class DescriptivaScreen extends StatefulWidget {
   const DescriptivaScreen({super.key});

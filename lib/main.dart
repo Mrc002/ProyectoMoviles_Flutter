@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart'; 
 import 'firebase_options.dart'; 
-
-import 'l10n/app_localizations.dart';
-import 'features/editor/logic/editor_provider.dart';
-import 'features/settings/logic/language_provider.dart';
-import 'features/settings/logic/theme_provider.dart';
-import 'features/chat/logic/chat_provider.dart';
-import 'features/auth/logic/auth_provider.dart'; 
-
-// Screens
-import 'features/home/screens/home_screen.dart';
-import 'features/auth/screens/login_screen.dart'; 
+import 'shared/app_imports.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

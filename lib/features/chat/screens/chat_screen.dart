@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_markdown_latex/flutter_markdown_latex.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:provider/provider.dart';
-import '../logic/chat_provider.dart';
-import '../../editor/logic/editor_provider.dart';
-import '../../settings/logic/language_provider.dart';
-import '../../../shared/widgets/bot_avatar.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../shared/app_imports.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
