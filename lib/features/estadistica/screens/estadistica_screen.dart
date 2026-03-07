@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../shared/app_imports.dart';
 
+// Importamos todas las pantallas de estadística que hemos creado
+import 'descriptiva_screen.dart';
+import 'distribuciones_discretas_screen.dart';
+import 'distribuciones_continuas_screen.dart';
+import 'intervalos_confianza_screen.dart';
+import 'pruebas_hipotesis_screen.dart';
+import 'regresion_correlacion_screen.dart';
+import 'anova_screen.dart';
+import 'scan_problem_screen.dart';
+import 'control_calidad_screen.dart';
+
 class EstadisticaScreen extends StatelessWidget {
   const EstadisticaScreen({super.key});
 
@@ -128,31 +139,33 @@ class EstadisticaScreen extends StatelessWidget {
                   color: tool['color'],
                   isDark: isDark,
                   onTap: () {
-                    // --- LÓGICA DE NAVEGACIÓN ---
-                    if (tool['title'] == 'Estadística Descriptiva') {
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const DescriptivaScreen())
-                      );
-                    } else if (tool['title'] == 'Distribuciones Discretas') {
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const DistribucionesDiscretasScreen())
-                      );
-                    } else if (tool['title'] == 'Distribuciones Continuas') {
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const DistribucionesContinuasScreen())
-                      );
-                    } else {
-                      // Mensaje temporal para las que aún no hemos programado
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Módulo de ${tool['title']} en desarrollo...'),
-                          backgroundColor: const Color(0xFF5B9BD5),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
+                    // --- NAVEGACIÓN REFACTORIZADA CON SWITCH ---
+                    switch (tool['title']) {
+                      case 'Estadística Descriptiva':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const DescriptivaScreen()));
+                      case 'Distribuciones Discretas':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const DistribucionesDiscretasScreen()));
+                      case 'Distribuciones Continuas':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const DistribucionesContinuasScreen()));
+                      case 'Intervalos de Confianza':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const IntervalosConfianzaScreen()));
+                      case 'Pruebas de Hipótesis':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const PruebasHipotesisScreen()));
+                      case 'Regresión y Correlación':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const RegresionCorrelacionScreen()));
+                      case 'Análisis de Varianza':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AnovaScreen()));
+                      case 'Control de Calidad':
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ControlCalidadScreen()));
+                      
+                      default:
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Módulo de ${tool['title']} en desarrollo...'),
+                            backgroundColor: const Color(0xFF5B9BD5),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
                     }
                   },
                 );
@@ -162,12 +175,10 @@ class EstadisticaScreen extends StatelessWidget {
         ],
       ),
 
-      // --- AQUÍ ESTÁN TUS DOS BOTONES APILADOS ---
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // BOTÓN 1: Escanear Problema (Botón extendido)
           FloatingActionButton.extended(
             heroTag: 'btn_escaner_estadistica',
             onPressed: () {
@@ -180,14 +191,11 @@ class EstadisticaScreen extends StatelessWidget {
             icon: const Icon(Icons.document_scanner, color: Colors.white),
             label: const Text('Escanear Problema', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
-
-          const SizedBox(height: 16), // Espacio de separación entre los dos botones
-
-          // BOTÓN 2: Tu Asistente Flotante Original
+          const SizedBox(height: 16),
           FloatingActionButton(
             heroTag: 'btn_asistente_estadistica',
             onPressed: () => _showAssistant(context),
-            backgroundColor: const Color(0xFF6B8CAE), // Un color distinto para que resalte
+            backgroundColor: const Color(0xFF6B8CAE),
             elevation: 4,
             child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
           ),
@@ -197,7 +205,6 @@ class EstadisticaScreen extends StatelessWidget {
   }
 
   void _showAssistant(BuildContext context) {
-    // 1. ANTES DE ABRIR EL CHAT, LE DECIMOS DE QUÉ VAMOS A HABLAR
     context.read<ChatProvider>().setSection('Estadística');
     showModalBottomSheet(
       context: context,
