@@ -73,14 +73,6 @@ class EstadisticaScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
-      appBar: AppBar(
-        title: const Text(
-          'Estadística Avanzada',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        backgroundColor: const Color(0xFF5B9BD5),
-        elevation: 0,
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -100,7 +92,7 @@ class EstadisticaScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Herramientas de Ingeniería',
+                  'Probabilidad y Estadistica Avanzada',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

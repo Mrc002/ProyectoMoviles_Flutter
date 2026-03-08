@@ -55,18 +55,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       title: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8), // Bordes redondeados
+            child: Image.asset(
+              'assets/app_icon.png',
+              width: 34,
+              height: 34,
+              fit: BoxFit.cover,
             ),
-            child: const Icon(Icons.functions, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           const Text(
-            'Math AI Studio',
+            'Graph Math AI Studio',
             style: TextStyle(
               color: Colors.white,
               fontSize: 19,

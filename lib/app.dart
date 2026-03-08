@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
     final languageProvider = Provider.of<LanguageProvider>(context);
 
     return MaterialApp(
-      title: 'Math AI Studio',
+      title: 'Graph Math AI Studio',
       debugShowCheckedModeBanner: false,
 
       themeMode: themeProvider.themeMode,
