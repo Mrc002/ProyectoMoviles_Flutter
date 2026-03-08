@@ -125,11 +125,6 @@ class _BiseccionScreenState extends State<BiseccionScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
-      appBar: AppBar(
-        title: const Text('Método de Bisección', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: primaryColor,
-        elevation: 0,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
