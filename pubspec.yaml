@@ -60,6 +60,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -68,3 +69,20 @@ flutter:
   assets:
     - .env
     - assets/
+
+# --- CONFIGURACIÓN PARA GENERAR LOS ÍCONOS DE LA APP ---
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"
+  web:
+    generate: true
+    image_path: "assets/app_icon.png"
+    background_color: "#0F1E2E"
+    theme_color: "#0F1E2E"
+  windows:
+    generate: true
+    image_path: "assets/app_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/app_icon.png"
