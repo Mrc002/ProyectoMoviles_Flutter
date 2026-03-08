@@ -29,7 +29,7 @@ dependencies:
   # --- Visualización (Gráficos) ---
   fl_chart: ^1.1.1
   
-  # 3D con ditredi (se sigue usando como fallback si quieres)
+  # 3D con ditredi (fallback desktop)
   ditredi: ^2.0.2
 
   # 3D mejorado: WebView para Three.js (WebGL real)
@@ -45,7 +45,7 @@ dependencies:
   google_fonts: ^8.0.1
   flutter_dotenv: ^5.1.0
 
-# --- Firebase ---
+  # --- Firebase ---
   firebase_core: ^3.0.0
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.6.0
@@ -67,3 +67,4 @@ flutter:
   
   assets:
     - .env
+    - assets/
