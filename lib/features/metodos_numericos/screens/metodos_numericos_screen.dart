@@ -18,7 +18,7 @@ class MetodosNumericosScreen extends StatelessWidget {
       },
       {
         'title': 'Sistemas Lineales',
-        'subtitle': 'Gauss-Jordan, Jacobi',
+        'subtitle': 'Gauss-Jordan, Jacobi, Gauss-Seidel',
         'icon': Icons.grid_on_rounded,
         'color': const Color(0xFF4CAF50), // Verde
       },
@@ -102,21 +102,24 @@ class MetodosNumericosScreen extends StatelessWidget {
                   color: tool['color'],
                   isDark: isDark,
                   onTap: () {
-                    // --- AQUÍ ESTÁ LA LÓGICA DE NAVEGACIÓN CORREGIDA ---
+                    // --- ACTUALIZADO: AHORA MANDA A LA PANTALLA AGRUPADORA ---
                     if (tool['title'] == 'Raíces de Ecuaciones') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const BiseccionScreen()),
-                      );
-                    } else {
-                      // Mensaje temporal para las demás herramientas
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Calculadora de ${tool['title']} en desarrollo...'),
-                          backgroundColor: const Color(0xFF5B9BD5),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
+                        MaterialPageRoute(builder: (context) => const RaicesEcuacionesScreen()),
+                      );  
+                    }
+                    else if (tool['title'] == 'Sistemas Lineales') {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SistemasLinealesScreen()));
+                    } 
+                    else if (tool['title'] == 'Ajuste de Curvas') {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const AjusteCurvasScreen()));
+                    }
+                    else if (tool['title'] == 'Integración Numérica') {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const IntegracionNumericaScreen()));
+                    }
+                    else if (tool['title'] == 'Ecuaciones Diferenciales') {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EcuacionesDiferencialesScreen()));
                     }
                   },
                 );
