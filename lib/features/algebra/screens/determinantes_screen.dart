@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../estadistica/screens/scan_problem_screen.dart';
 class DeterminantesScreen extends StatefulWidget {
   const DeterminantesScreen({super.key});
 
@@ -143,6 +143,20 @@ class _DeterminantesScreenState extends State<DeterminantesScreen> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'btn_scan_determinantes', // Etiqueta única
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF5B9BD5),
+        icon: const Icon(Icons.document_scanner, color: Colors.white),
+        label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

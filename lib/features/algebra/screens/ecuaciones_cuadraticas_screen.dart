@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../estadistica/screens/scan_problem_screen.dart';
 
 class EcuacionesCuadraticasScreen extends StatefulWidget {
   const EcuacionesCuadraticasScreen({super.key});
@@ -111,6 +112,20 @@ class _EcuacionesCuadraticasScreenState extends State<EcuacionesCuadraticasScree
             ]
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'btn_scan_ecuaciones_cuadraticas', // Etiqueta única
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF5B9BD5),
+        icon: const Icon(Icons.document_scanner, color: Colors.white),
+        label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
