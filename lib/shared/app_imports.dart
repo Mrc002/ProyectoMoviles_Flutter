@@ -56,3 +56,12 @@ export '../features/metodos_numericos/screens/simpson_38_screen.dart';
 export '../features/metodos_numericos/screens/ecuaciones_diferenciales_screen.dart';
 export '../features/metodos_numericos/screens/euler_screen.dart';
 export '../features/metodos_numericos/screens/rk4_screen.dart';
+
+// --- PANTALLAS DE ÁLGEBRA ---
+export '../features/algebra/screens/algebra_screen.dart';
+export '../features/algebra/screens/tabulador_screen.dart';
+export '../features/algebra/screens/ecuaciones_cuadraticas_screen.dart';
+export '../features/algebra/screens/operaciones_matrices_screen.dart';
+export '../features/algebra/screens/determinantes_screen.dart';
+export '../features/algebra/screens/division_sintetica_screen.dart';
+export '../features/algebra/screens/numeros_complejos_screen.dart';
