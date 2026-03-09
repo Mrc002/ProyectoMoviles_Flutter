@@ -1,1 +1,0 @@
-//Todo lo visual de la sección de mecánica vectorial.
