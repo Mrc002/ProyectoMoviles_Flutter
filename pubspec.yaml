@@ -2,7 +2,7 @@ name: graficacion_ai
 description: "Una app de graficación matemática 2D/3D con asistencia de IA."
 publish_to: 'none' 
 
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
