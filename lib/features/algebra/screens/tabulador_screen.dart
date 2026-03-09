@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import '../../estadistica/screens/scan_problem_screen.dart';
 
 class TabuladorScreen extends StatefulWidget {
   const TabuladorScreen({super.key});
@@ -130,6 +131,20 @@ class _TabuladorScreenState extends State<TabuladorScreen> {
             ]
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'btn_scan_tabulador', // Etiqueta única
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF5B9BD5),
+        icon: const Icon(Icons.document_scanner, color: Colors.white),
+        label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

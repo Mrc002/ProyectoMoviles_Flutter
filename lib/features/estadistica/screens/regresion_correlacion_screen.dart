@@ -1,8 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:provider/provider.dart';
-import '../../chat/logic/chat_provider.dart';
+import '../../../shared/app_imports.dart';
 
 class RegresionCorrelacionScreen extends StatefulWidget {
   const RegresionCorrelacionScreen({super.key});
@@ -267,7 +266,38 @@ class _RegresionCorrelacionScreenState extends State<RegresionCorrelacionScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _showAssistant(context, primaryColor), backgroundColor: primaryColor, elevation: 4, child: const Icon(Icons.psychology_rounded, color: Colors.white)),
+      // --- MODIFICADO: COLUMNA CON ESCÁNER Y ASISTENTE ---
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // 1. Botón del Escáner
+          FloatingActionButton.extended(
+            heroTag: 'btn_scan_regresion_correlacion', // Tag único
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  // Le mandamos el tema 'pruebas_hipotesis' a Python
+                  builder: (context) => const ScanProblemScreen(tema: 'regresion_correlacion'), 
+                ),
+              );
+            },
+            backgroundColor: const Color(0xFF5B9BD5), // Azul clásico para el escáner
+            icon: const Icon(Icons.document_scanner, color: Colors.white),
+            label: const Text('Escanear Datos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: 16),
+          // 2. Botón del Asistente (El que ya tenías)
+          FloatingActionButton(
+            heroTag: 'btn_asistente_regresion_correlacion',
+            onPressed: () => _showAssistant(context, primaryColor),
+            backgroundColor: primaryColor, // Rosa/Magenta para combinar con la pantalla
+            elevation: 4,
+            child: const Icon(Icons.psychology_rounded, color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 

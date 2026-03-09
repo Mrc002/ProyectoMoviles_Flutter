@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../estadistica/screens/scan_problem_screen.dart';
 class NumerosComplejosScreen extends StatefulWidget {
   const NumerosComplejosScreen({super.key});
 
@@ -130,6 +130,20 @@ class _NumerosComplejosScreenState extends State<NumerosComplejosScreen> {
             ]
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'btn_scan_numeros_complejos', // Etiqueta única
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF5B9BD5),
+        icon: const Icon(Icons.document_scanner, color: Colors.white),
+        label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

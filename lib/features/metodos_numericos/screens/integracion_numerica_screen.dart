@@ -37,15 +37,40 @@ class IntegracionNumericaScreen extends StatelessWidget {
           ],
         ),
         
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'btn_asistente_integracion', 
-          onPressed: () {
-            context.read<ChatProvider>().setSection('Métodos Numéricos');
-            _showAssistant(context);
-          },
-          backgroundColor: const Color(0xFF6B8CAE),
-          elevation: 4,
-          child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+        // --- MODIFICADO: COLUMNA CON AMBOS BOTONES ---
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // 1. Botón del Escáner
+            FloatingActionButton.extended(
+              heroTag: 'btn_scan_integracion_numerica', // Tag único para el escáner
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    // Le enviamos a Python el tema general de "raíces"
+                    builder: (context) => const ScanProblemScreen(tema: 'raices'), 
+                  ),
+                );
+              },
+              backgroundColor: const Color(0xFF5B9BD5),
+              icon: const Icon(Icons.document_scanner, color: Colors.white),
+              label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 16),
+            // 2. Botón del Asistente (El que ya tenías)
+            FloatingActionButton(
+              heroTag: 'btn_asistente_raices', 
+              onPressed: () {
+                context.read<ChatProvider>().setSection('Métodos Numéricos');
+                _showAssistant(context);
+              },
+              backgroundColor: const Color(0xFF6B8CAE),
+              elevation: 4,
+              child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+            ),
+          ],
         ),
       ),
     );

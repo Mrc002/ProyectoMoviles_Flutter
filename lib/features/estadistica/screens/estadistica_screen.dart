@@ -9,7 +9,6 @@ import 'intervalos_confianza_screen.dart';
 import 'pruebas_hipotesis_screen.dart';
 import 'regresion_correlacion_screen.dart';
 import 'anova_screen.dart';
-import 'scan_problem_screen.dart';
 import 'control_calidad_screen.dart';
 
 class EstadisticaScreen extends StatelessWidget {
@@ -92,7 +91,7 @@ class EstadisticaScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Probabilidad y Estadistica Avanzada',
+                  'Probabilidad y Estadistica',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -167,31 +166,13 @@ class EstadisticaScreen extends StatelessWidget {
         ],
       ),
 
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'btn_escaner_estadistica',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ScanProblemScreen()),
-              );
-            },
-            backgroundColor: const Color(0xFF5B9BD5),
-            icon: const Icon(Icons.document_scanner, color: Colors.white),
-            label: const Text('Escanear Problema', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            heroTag: 'btn_asistente_estadistica',
-            onPressed: () => _showAssistant(context),
-            backgroundColor: const Color(0xFF6B8CAE),
-            elevation: 4,
-            child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
-          ),
-        ],
+      // Dejamos solo el asistente en el menú principal
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'btn_asistente_estadistica',
+        onPressed: () => _showAssistant(context),
+        backgroundColor: const Color(0xFF6B8CAE),
+        elevation: 4,
+        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
       ),
     );
   }
