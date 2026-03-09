@@ -643,14 +643,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   } else if (session.topic == 'Gráficas' || session.topic == 'General') {
                                     _currentStudyScreen = const EditorScreen();
                                   }
-<<<<<<< HEAD
                                   // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
-=======
+
                                     else if (session.topic == 'Mecánica Vectorial') { 
                                     _currentStudyScreen = const GraficadorScreen(); 
                                   }
->>>>>>> 0b6d12b (Implementación de la sección de Mecánica Vectorial con lógica y pantallas interactivas)
-                                  
+
                                   // Finalmente, te manda a la pestaña 1 (El Chat)
                                   _selectedIndex = 1; 
                                 });
