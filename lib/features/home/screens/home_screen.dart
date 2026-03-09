@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8), // Bordes redondeados
+            borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               'assets/app_icon.png',
               width: 34,
@@ -66,13 +66,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          const Text(
-            'Graph Math AI Studio',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 19,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
+
+          Expanded(
+            child: Text(
+              'Graph Math AI Studio',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
             ),
           ),
         ],
@@ -137,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
@@ -388,9 +392,9 @@ class _HomeScreenState extends State<HomeScreen> {
               chatProvider.setSection('Álgebra'); 
               Navigator.pop(context); 
               
-              // Usa la graficadora por ahora
+              // CAMBIA EL CONTENIDO DE LA PESTAÑA A ALGEBRA
               setState(() {
-                _currentStudyScreen = const EditorScreen(); 
+                _currentStudyScreen = const AlgebraScreen(); 
                 _selectedIndex = 0; 
               });
             },
@@ -621,15 +625,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.pop(context); 
                                 chatProvider.loadChatSession(session.id); 
                                 setState(() {
-                                  // Cambiamos el canal de TV en el fondo según la materia
-                                  if (session.topic == 'Estadística') {
+                                  if (session.topic == 'Álgebra') {
+                                    _currentStudyScreen = const AlgebraScreen();
+                                  } else if (session.topic == 'Estadística') {
                                     _currentStudyScreen = const EstadisticaScreen();
                                   } else if (session.topic == 'Métodos Numéricos') {
                                     _currentStudyScreen = const MetodosNumericosScreen();
-                                  } else if (session.topic == 'Gráficas' || session.topic == 'Álgebra' || session.topic == 'General') {
+                                  } else if (session.topic == 'Gráficas' || session.topic == 'General') {
                                     _currentStudyScreen = const EditorScreen();
                                   }
-                                  // TODO: Cuando crees las demás pantallas, las agregas aquí:
                                   // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
                                   
                                   // Finalmente, te manda a la pestaña 1 (El Chat)
