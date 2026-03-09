@@ -1,4 +1,4 @@
-package com.example.graficacion_ai
+package com.juancarlos.graphmathaistudio
 
 import io.flutter.embedding.android.FlutterActivity
 

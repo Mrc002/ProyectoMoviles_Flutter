@@ -2,7 +2,7 @@ name: graficacion_ai
 description: "Una app de graficación matemática 2D/3D con asistencia de IA."
 publish_to: 'none' 
 
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -29,7 +29,7 @@ dependencies:
   # --- Visualización (Gráficos) ---
   fl_chart: ^1.1.1
   
-  # 3D con ditredi (se sigue usando como fallback si quieres)
+  # 3D con ditredi (fallback desktop)
   ditredi: ^2.0.2
 
   # 3D mejorado: WebView para Three.js (WebGL real)
@@ -45,7 +45,7 @@ dependencies:
   google_fonts: ^8.0.1
   flutter_dotenv: ^5.1.0
 
-# --- Firebase ---
+  # --- Firebase ---
   firebase_core: ^3.0.0
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.6.0
@@ -60,6 +60,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -67,3 +68,21 @@ flutter:
   
   assets:
     - .env
+    - assets/
+
+# --- CONFIGURACIÓN PARA GENERAR LOS ÍCONOS DE LA APP ---
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"
+  web:
+    generate: true
+    image_path: "assets/app_icon.png"
+    background_color: "#0F1E2E"
+    theme_color: "#0F1E2E"
+  windows:
+    generate: true
+    image_path: "assets/app_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/app_icon.png"

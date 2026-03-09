@@ -362,7 +362,10 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ],
           ),
-          child: const Icon(Icons.functions, color: Colors.white, size: 40),
+          child: ClipRRect(
+  borderRadius: BorderRadius.circular(20),
+  child: Image.asset('assets/app_icon.png', width: 60, height: 60, fit: BoxFit.cover),
+),
         ),
         const SizedBox(height: 20),
         Text(

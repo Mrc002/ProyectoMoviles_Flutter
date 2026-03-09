@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../../shared/app_imports.dart';
+import '../../quiz/screens/quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,18 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       title: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8), // Bordes redondeados
+            child: Image.asset(
+              'assets/app_icon.png',
+              width: 34,
+              height: 34,
+              fit: BoxFit.cover,
             ),
-            child: const Icon(Icons.functions, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           const Text(
-            'Math AI Studio',
+            'Graph Math AI Studio',
             style: TextStyle(
               color: Colors.white,
               fontSize: 19,
@@ -317,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // ── HEADER DEL MENÚ ──
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 60, bottom: 20, left: 16, right: 16),
+            padding: const EdgeInsets.only(top: 40, bottom: 16, left: 16, right: 16),
             decoration: const BoxDecoration(
               color: Color(0xFF5B9BD5),
             ),
@@ -459,6 +460,21 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
           ),
+
+          const Divider(indent: 16, endIndent: 16),
+           _buildDrawerItem(
+            context: context,
+              icon: Icons.quiz_rounded,
+               title: 'Pon a Prueba tus Conocimientos',
+                 isDark: isDark,
+                  onTap: () {
+                  Navigator.pop(context);
+                 Navigator.push(
+            context,
+      MaterialPageRoute(builder: (_) => const QuizScreen()),
+              );
+           },
+        ),
 
           const Divider(),
 
