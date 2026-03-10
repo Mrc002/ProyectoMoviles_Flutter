@@ -15,7 +15,7 @@ export '../features/chat/logic/chat_provider.dart';
 export '../features/editor/logic/editor_provider.dart';
 export '../features/settings/logic/theme_provider.dart';
 export '../features/settings/logic/language_provider.dart';
-export '../features/mecanica_vectorial/logic/logic_mvectorial.dart';
+export '../features/mecanica_vectorial/logic/mecanica_provider.dart';
 
 // ─── PANTALLAS GENERALES (SCREENS) ───
 export '../features/auth/screens/login_screen.dart';
@@ -33,7 +33,8 @@ export '../features/estadistica/screens/distribuciones_continuas_screen.dart';
 export '../features/estadistica/screens/distribuciones_discretas_screen.dart';
 
 // ─── PANTALLAS DE MECÁNICA VECTORIAL ───
-export '../features/mecanica_vectorial/screens/screens_mvectorial.dart';
+export '../features/mecanica_vectorial/screens/graficador_screen.dart';
+export '../features/mecanica_vectorial/screens/ia_tutor_screen.dart';
 
 // ─── PANTALLAS DE MÉTODOS NUMÉRICOS ───
 export '../features/metodos_numericos/screens/metodos_numericos_screen.dart';

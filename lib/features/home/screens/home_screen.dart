@@ -18,8 +18,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // --- 2. ACTUALIZADO: Ahora la lista de pantallas es dinámica ---
   List<Widget> get _screens => [
+    // Índice 0
     _currentStudyScreen, // Muestra lo que el usuario eligió en el menú
-    const ChatScreen(),
+    // Índice 1
+    (_currentStudyScreen is GraficadorScreen) 
+        ? const IaTutorScreen() 
+        : const ChatScreen(),
+    // Índice 2
     const SettingsScreen(),
   ];
 
@@ -406,9 +411,13 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Mecánica Vectorial Estática',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Mecánica Vectorial'); 
+              chatProvider.setSection('Mecánica Vectorial Estática'); 
               Navigator.pop(context); 
-              // TODO: setState(() { _currentStudyScreen = const MecanicaScreen(); _selectedIndex = 0; });
+              
+              setState(() { 
+                _currentStudyScreen = const GraficadorScreen();
+                _selectedIndex = 0; 
+              });
             },
           ),
 
@@ -635,7 +644,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _currentStudyScreen = const EditorScreen();
                                   }
                                   // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
-                                  
+
+                                    else if (session.topic == 'Mecánica Vectorial') { 
+                                    _currentStudyScreen = const GraficadorScreen(); 
+                                  }
+
                                   // Finalmente, te manda a la pestaña 1 (El Chat)
                                   _selectedIndex = 1; 
                                 });
