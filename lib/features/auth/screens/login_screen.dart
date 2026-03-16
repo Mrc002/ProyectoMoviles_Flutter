@@ -369,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         const SizedBox(height: 20),
         Text(
-          'Math AI Studio',
+          ' Graph Math AI Studio',
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w800,

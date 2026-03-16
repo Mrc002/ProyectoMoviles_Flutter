@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../../shared/app_imports.dart';
 import '../../quiz/screens/quiz_screen.dart';
+import '../../ecuaciones_diferenciales/screens/ecuaciones_main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,8 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // --- 2. ACTUALIZADO: Ahora la lista de pantallas es dinámica ---
   List<Widget> get _screens => [
+    // Índice 0
     _currentStudyScreen, // Muestra lo que el usuario eligió en el menú
-    const ChatScreen(),
+    // Índice 1
+    (_currentStudyScreen is GraficadorScreen) 
+        ? const IaTutorScreen() 
+        : const ChatScreen(),
+    // Índice 2
     const SettingsScreen(),
   ];
 
@@ -406,9 +412,13 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Mecánica Vectorial Estática',
             isDark: isDark,
             onTap: () {
-              chatProvider.setSection('Mecánica Vectorial'); 
+              chatProvider.setSection('Mecánica Vectorial Estática'); 
               Navigator.pop(context); 
-              // TODO: setState(() { _currentStudyScreen = const MecanicaScreen(); _selectedIndex = 0; });
+              
+              setState(() { 
+                _currentStudyScreen = const GraficadorScreen();
+                _selectedIndex = 0; 
+              });
             },
           ),
 
@@ -420,7 +430,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               chatProvider.setSection('Ecuaciones Diferenciales'); 
               Navigator.pop(context);
-              // TODO: setState(() { _currentStudyScreen = const EcuacionesScreen(); _selectedIndex = 0; });
+              // --- ACTUALIZADO: Conexión con el nuevo módulo de ecuaciones ---
+              setState(() { 
+                _currentStudyScreen = const EcuacionesMainScreen(); 
+                _selectedIndex = 0; 
+              });
             },
           ),
           
@@ -457,19 +471,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           const Divider(indent: 16, endIndent: 16),
-           _buildDrawerItem(
+          
+          _buildDrawerItem(
             context: context,
-              icon: Icons.quiz_rounded,
-               title: 'Pon a Prueba tus Conocimientos',
-                 isDark: isDark,
-                  onTap: () {
-                  Navigator.pop(context);
-                 Navigator.push(
-            context,
-      MaterialPageRoute(builder: (_) => const QuizScreen()),
+            icon: Icons.quiz_rounded,
+            title: 'Pon a Prueba tus Conocimientos',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const QuizScreen()),
               );
-           },
-        ),
+            },
+          ),
 
           const Divider(),
 
@@ -631,11 +646,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _currentStudyScreen = const EstadisticaScreen();
                                   } else if (session.topic == 'Métodos Numéricos') {
                                     _currentStudyScreen = const MetodosNumericosScreen();
+                                  } else if (session.topic == 'Ecuaciones Diferenciales') {
+                                    // --- ACTUALIZADO: Recuperación del historial para esta materia ---
+                                    _currentStudyScreen = const EcuacionesMainScreen();
                                   } else if (session.topic == 'Gráficas' || session.topic == 'General') {
                                     _currentStudyScreen = const EditorScreen();
+                                  } else if (session.topic == 'Mecánica Vectorial') { 
+                                    _currentStudyScreen = const GraficadorScreen(); 
                                   }
-                                  // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
-                                  
+
                                   // Finalmente, te manda a la pestaña 1 (El Chat)
                                   _selectedIndex = 1; 
                                 });

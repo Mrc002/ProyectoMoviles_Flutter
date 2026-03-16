@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../estadistica/screens/scan_problem_screen.dart';
 class OperacionesMatricesScreen extends StatefulWidget {
   const OperacionesMatricesScreen({super.key});
 
@@ -189,6 +189,20 @@ class _OperacionesMatricesScreenState extends State<OperacionesMatricesScreen> {
             ]
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'btn_scan_operaciones_matrices', // Etiqueta única
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF5B9BD5),
+        icon: const Icon(Icons.document_scanner, color: Colors.white),
+        label: const Text('Escanear Función', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

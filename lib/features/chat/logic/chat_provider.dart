@@ -388,7 +388,7 @@ class ChatProvider extends ChangeNotifier {
       'contents': _history,
       'generationConfig': {
         'temperature': 0.7,
-        'maxOutputTokens': 1024,
+        'maxOutputTokens': 4096,
       },
     });
 
@@ -402,7 +402,13 @@ class ChatProvider extends ChangeNotifier {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final text = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
+      final candidate = data['candidates']?[0];
+      final text = candidate?['content']?['parts']?[0]?['text'];
+      final finishReason = candidate?['finishReason'];
+
+      if (finishReason == 'MAX_TOKENS') {
+        return (text ?? '') + '\n\n*(Nota: La respuesta fue demasiado larga y se truncó)*';
+      }
       return text ?? 'No pude generar una respuesta.';
     } else {
       final error = jsonDecode(response.body);

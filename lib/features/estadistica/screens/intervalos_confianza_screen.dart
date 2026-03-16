@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../chat/logic/chat_provider.dart';
+import '../../../shared/app_imports.dart';
 
 class IntervalosConfianzaScreen extends StatefulWidget {
   const IntervalosConfianzaScreen({super.key});
@@ -242,11 +241,36 @@ class _IntervalosConfianzaScreenState extends State<IntervalosConfianzaScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAssistant(context, primaryColor), 
-        backgroundColor: primaryColor, 
-        elevation: 4, 
-        child: const Icon(Icons.psychology_rounded, color: Colors.white)
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // 1. Botón del Escáner
+          FloatingActionButton.extended(
+            heroTag: 'btn_scan_intervalos_confianza', // Tag único
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  // Le mandamos el tema 'descriptiva' a Python
+                  builder: (context) => const ScanProblemScreen(tema: 'intervalos_confianza'), 
+                ),
+              );
+            },
+            backgroundColor: const Color(0xFF5B9BD5),
+            icon: const Icon(Icons.document_scanner, color: Colors.white),
+            label: const Text('Escanear Datos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: 16),
+          // 2. Botón del Asistente de IA (el que ya tenías)
+          FloatingActionButton(
+            heroTag: 'btn_asistente_intervalos_confianza',
+            onPressed: () => _showAssistant(context, primaryColor),
+            backgroundColor: const Color(0xFF6B8CAE),
+            elevation: 4,
+            child: const Icon(Icons.psychology_rounded, color: Colors.white),
+          ),
+        ],
       ),
     );
   }

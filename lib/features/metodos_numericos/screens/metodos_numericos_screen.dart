@@ -129,7 +129,7 @@ class MetodosNumericosScreen extends StatelessWidget {
         ],
       ),
 
-      // Botón flotante para invocar al Asistente
+      // Reemplaza el floatingActionButton actual por esta columna:
       floatingActionButton: FloatingActionButton(
         heroTag: 'btn_asistente_metodos',
         onPressed: () {

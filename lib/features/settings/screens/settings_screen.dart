@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../../shared/app_imports.dart';
@@ -322,7 +323,8 @@ class _AboutCard extends StatelessWidget {
           title: l10n.acercaDeSub,
           trailing: Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white38 : const Color(0xFFB0CDE8)),
           showDivider: true,
-          onTap: () {},
+          // --- AQUÍ CONECTAMOS EL BOTÓN CON LA FUNCIÓN DEL DIÁLOGO ---
+          onTap: () => _showAboutDialog(context), 
         ),
         _SettingsTile(
           isDark: isDark,
@@ -331,13 +333,154 @@ class _AboutCard extends StatelessWidget {
           title: l10n.valorarApp,
           trailing: Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white38 : const Color(0xFFB0CDE8)),
           showDivider: false,
-          onTap: () {},
+          onTap: () async {
+            // Este es tu enlace oficial directo a tu app en Google Play
+            final Uri playStoreUrl = Uri.parse('https://play.google.com/store/apps/details?id=com.juancarlos.graphmathaistudio');
+            
+            try {
+              // Intentamos abrir la app de la Play Store directamente
+              await launchUrl(
+                playStoreUrl, 
+                mode: LaunchMode.externalApplication, // Esto fuerza a que se abra la app de la tienda, no el navegador web
+              );
+            } catch (e) {
+              // Si falla (por ejemplo, si el celular no tiene la Play Store instalada)
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No se pudo abrir la tienda de aplicaciones.'), 
+                    backgroundColor: Colors.redAccent
+                  )
+                );
+              }
+            }
+          },
         ),
       ],
     );
   }
-}
 
+  // --- FUNCIÓN QUE CONSTRUYE EL CUADRO DE DIÁLOGO ---
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1C3350) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7), 
+            width: 1.5
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Contenedor del Logo
+            Container(
+              width: 85,
+              height: 85,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF5B9BD5).withValues(alpha: 0.2),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                // Usamos el icono nativo de tus assets
+                child: Image.asset('assets/app_icon.png', fit: BoxFit.cover),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Título de la App
+            Text(
+              'Graph Math AI Studio',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+              ),
+            ),
+            const SizedBox(height: 6),
+            
+            // Versión
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF5B9BD5).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Versión 1.0.0',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF5B9BD5),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Descripción
+            Text(
+              'Tu tutor personal inteligente. Escanea problemas, genera tabuladores interactivos y domina Álgebra, Estadística y Métodos Numéricos con la ayuda de Inteligencia Artificial.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.white70 : const Color(0xFF6B8CAE),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // Créditos
+            const Divider(),
+            const SizedBox(height: 12),
+            Text(
+              '''Desarrollado con ❤️ por:
+               Cruz Hernandez Juan Carlos
+               Victor Yahir Medrano Barrera
+               Lenin Baku Cortez Hernández''',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white38 : Colors.black45,
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.only(bottom: 20),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5B9BD5),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Aceptar', 
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 class _SettingsTile extends StatelessWidget {
   final bool isDark;
   final IconData icon;
