@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// No description provided for @acercaDeSub.
   ///
   /// In es, this message translates to:
-  /// **'Acerca de Math AI Studio'**
+  /// **'Acerca de Graph Math AI Studio'**
   String get acercaDeSub;
 
   /// No description provided for @editorModo3D.

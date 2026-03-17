@@ -159,30 +159,88 @@ class ProfileScreen extends StatelessWidget {
                 border: Border.all(color: authProvider.isPremium ? Colors.amber : (isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7))),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    authProvider.isPremium ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: authProvider.isPremium ? Colors.amber : Colors.grey,
-                    size: 30,
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.estadoCuentaInfo, style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey)),
-                        Text(
-                          authProvider.isPremium ? l10n.usuarioPremium : l10n.usuarioBasico, 
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: authProvider.isPremium ? Colors.amber : (isDark ? Colors.white : const Color(0xFF1A2D4A)),
-                          ),
+                  // --- CABECERA (El estado actual) ---
+                  Row(
+                    children: [
+                      Icon(
+                        authProvider.isPremium ? Icons.star_rounded : Icons.star_outline_rounded,
+                        color: authProvider.isPremium ? Colors.amber : Colors.grey,
+                        size: 30,
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l10n.estadoCuentaInfo, style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey)),
+                            Text(
+                              authProvider.isPremium ? l10n.usuarioPremium : l10n.usuarioBasico, 
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: authProvider.isPremium ? Colors.amber : (isDark ? Colors.white : const Color(0xFF1A2D4A)),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      )
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  Divider(color: isDark ? Colors.white12 : Colors.black12),
+                  const SizedBox(height: 12),
+                  
+                  // --- LISTA DE BENEFICIOS ---
+                  Text(
+                    'Tus beneficios actuales:',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : const Color(0xFF6B8CAE)),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  if (authProvider.isPremium) ...[
+                    // Beneficios si ES Premium
+                    _buildBenefitItem(Icons.check_circle_rounded, 'Escáner matemático ilimitado', Colors.green, isDark),
+                    _buildBenefitItem(Icons.check_circle_rounded, 'Tutor IA experto sin restricciones', Colors.green, isDark),
+                    _buildBenefitItem(Icons.check_circle_rounded, 'Soluciones paso a paso detalladas', Colors.green, isDark),
+                    _buildBenefitItem(Icons.check_circle_rounded, 'Experiencia limpia sin anuncios', Colors.green, isDark),
+                  ] else ...[
+                    // Beneficios/Límites si es Básico (Gratis)
+                    _buildBenefitItem(Icons.check_circle_outline_rounded, 'Escáner matemático básico', Colors.grey, isDark),
+                    _buildBenefitItem(Icons.info_outline_rounded, 'Límite diario de consultas al Tutor IA', Colors.orange, isDark),
+                    _buildBenefitItem(Icons.info_outline_rounded, 'Contiene anuncios publicitarios', Colors.orange, isDark),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Botón para invitar a comprar Premium
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black87,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: () {
+                          // Aquí irá la navegación a tu pasarela de pago (RevenueCat/Google Play)
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('¡Suscripciones próximamente!'), 
+                              backgroundColor: Colors.amber,
+                              behavior: SnackBarBehavior.floating,
+                            )
+                          );
+                        },
+                        icon: const Icon(Icons.workspace_premium_rounded, size: 20),
+                        label: const Text('Mejorar a Premium', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      ),
                     ),
-                  )
+                  ],
                 ],
               ),
             ),
@@ -389,7 +447,31 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
         );
+        
       },
     );
   }
-}
+    // --- WIDGET PARA DIBUJAR CADA BENEFICIO ---
+    Widget _buildBenefitItem(IconData icon, String text, Color iconColor, bool isDark) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? Colors.white70 : const Color(0xFF1A2D4A),
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }

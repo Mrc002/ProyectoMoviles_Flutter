@@ -30,7 +30,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get acercaDe => 'About';
 
   @override
-  String get acercaDeSub => 'About Math AI Studio';
+  String get acercaDeSub => 'About Graph Math AI Studio';
 
   @override
   String get editorModo3D => '3D Mode';
