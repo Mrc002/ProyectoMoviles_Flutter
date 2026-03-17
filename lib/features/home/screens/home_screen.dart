@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../../shared/app_imports.dart';
 import '../../quiz/screens/quiz_screen.dart';
+import '../../ecuaciones_diferenciales/screens/ecuaciones_main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -429,7 +430,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               chatProvider.setSection('Ecuaciones Diferenciales'); 
               Navigator.pop(context);
-              // TODO: setState(() { _currentStudyScreen = const EcuacionesScreen(); _selectedIndex = 0; });
+              // --- ACTUALIZADO: Conexión con el nuevo módulo de ecuaciones ---
+              setState(() { 
+                _currentStudyScreen = const EcuacionesMainScreen(); 
+                _selectedIndex = 0; 
+              });
             },
           ),
           
@@ -466,19 +471,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           const Divider(indent: 16, endIndent: 16),
-           _buildDrawerItem(
+          
+          _buildDrawerItem(
             context: context,
-              icon: Icons.quiz_rounded,
-               title: 'Pon a Prueba tus Conocimientos',
-                 isDark: isDark,
-                  onTap: () {
-                  Navigator.pop(context);
-                 Navigator.push(
-            context,
-      MaterialPageRoute(builder: (_) => const QuizScreen()),
+            icon: Icons.quiz_rounded,
+            title: 'Pon a Prueba tus Conocimientos',
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const QuizScreen()),
               );
-           },
-        ),
+            },
+          ),
 
           const Divider(),
 
@@ -640,12 +646,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _currentStudyScreen = const EstadisticaScreen();
                                   } else if (session.topic == 'Métodos Numéricos') {
                                     _currentStudyScreen = const MetodosNumericosScreen();
+                                  } else if (session.topic == 'Ecuaciones Diferenciales') {
+                                    // --- ACTUALIZADO: Recuperación del historial para esta materia ---
+                                    _currentStudyScreen = const EcuacionesMainScreen();
                                   } else if (session.topic == 'Gráficas' || session.topic == 'General') {
                                     _currentStudyScreen = const EditorScreen();
-                                  }
-                                  // else if (session.topic == 'Mecánica Vectorial') { _currentStudyScreen = const MecanicaScreen(); }
-
-                                    else if (session.topic == 'Mecánica Vectorial') { 
+                                  } else if (session.topic == 'Mecánica Vectorial') { 
                                     _currentStudyScreen = const GraficadorScreen(); 
                                   }
 

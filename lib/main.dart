@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart'; 
 import 'firebase_options.dart'; 
 import 'shared/app_imports.dart';
+import 'features/ecuaciones_diferenciales/logic/ecuaciones_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => MecanicaProvider()),
+        ChangeNotifierProvider(create: (_) => EcuacionesProvider()),
       ],
       child: const MyApp(),
     ),
