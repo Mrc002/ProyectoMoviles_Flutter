@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../logic/ecuaciones_provider.dart';
 import 'tema_detalle_screen.dart';
 import '../../chat/logic/chat_provider.dart';
-import '../../mecanica_vectorial/screens/ia_tutor_screen.dart';
+import '../../chat/screens/chat_screen.dart';
 
 class EdoScreen extends StatefulWidget {
   const EdoScreen({Key? key}) : super(key: key);
@@ -81,8 +81,7 @@ class _EdoScreenState extends State<EdoScreen> {
           context.read<ChatProvider>().setSection('Ecuaciones Diferenciales (EDOs)');
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const IaTutorScreen()),
-          );
+            MaterialPageRoute(builder: (_) => const ChatScreen()),          );
         },
         backgroundColor: Colors.blue[700],
         child: const Icon(Icons.chat_bubble_outline),

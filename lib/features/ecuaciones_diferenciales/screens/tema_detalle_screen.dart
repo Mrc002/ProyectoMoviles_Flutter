@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../chat/logic/chat_provider.dart';
-import '../../mecanica_vectorial/screens/ia_tutor_screen.dart'; // Ajusta la ruta si tu IaTutorScreen está en otro lado
 import 'package:provider/provider.dart';
+import 'package:flutter_math_fork/flutter_math.dart'; // Librería 100% nativa
+import '../../chat/logic/chat_provider.dart';
+import '../../chat/screens/chat_screen.dart'; // Navegación al chat oficial
 
 class TemaDetalleScreen extends StatelessWidget {
   final Map<String, dynamic> tema;
@@ -12,7 +13,7 @@ class TemaDetalleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tema['titulo'] ?? 'Detalle del Tema'),
+        title: Text(tema['titulo'] ?? 'Detalle del Tema', overflow: TextOverflow.ellipsis),
         backgroundColor: Colors.blue[800],
         elevation: 0,
       ),
@@ -21,7 +22,7 @@ class TemaDetalleScreen extends StatelessWidget {
         height: double.infinity,
         color: Colors.blue[50],
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -48,30 +49,72 @@ class TemaDetalleScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 25),
+
+              // --- EJEMPLO DE CÓMO SE VERÁ EL CONTENIDO DESDE FIREBASE ---
+              const Text(
+                'Aquí se cargará la teoría teórica. Observa cómo las fórmulas se renderizan de forma nativa e instantánea:',
+                style: TextStyle(fontSize: 16, color: Colors.black87, height: 1.5),
+              ),
               const SizedBox(height: 20),
-              
-              // Aquí irá el contenido del tema extraído de Firebase
-              // Suponiendo que en Firebase guardas un campo "contenido"
-              Text(
-                tema['contenido'] ?? 'El contenido teórico de este tema se cargará aquí. Aquí podrás integrar renderizado de LaTeX si tienes fórmulas matemáticas.',
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.6,
-                  color: Colors.black87,
+
+              const Text(
+                'Una Ecuación Diferencial Lineal de primer orden tiene la forma:',
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              const SizedBox(height: 15),
+
+              // FÓRMULA MATEMÁTICA RENDERIZADA EN BLOQUE
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.blue.shade100),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                    ]
+                  ),
+                  child: Math.tex(
+                    r'\frac{dy}{dx} + P(x)y = Q(x)',
+                    textStyle: const TextStyle(fontSize: 22, color: Colors.black87),
+                  ),
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // FÓRMULA MATEMÁTICA EN EL MISMO RENGLÓN (Wrap)
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text(
+                    'Donde su factor integrante se define como  ',
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                  Math.tex(
+                    r'\mu(x) = e^{\int P(x)dx}', 
+                    textStyle: TextStyle(fontSize: 18, color: Colors.blue[900])
+                  ),
+                  const Text(
+                    '  para resolverla analíticamente.',
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                ],
+              )
+
             ],
           ),
         ),
       ),
-      // Botón flotante para invocar al tutor EXACTAMENTE sobre este tema
+      
+      // Botón del Asistente conectado al Chat correcto
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Le decimos al IA Tutor de qué estamos hablando
           context.read<ChatProvider>().setSection('Ecuaciones Diferenciales: ${tema['titulo']}');
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const IaTutorScreen()),
+            MaterialPageRoute(builder: (_) => const ChatScreen()),
           );
         },
         backgroundColor: Colors.blue[700],
