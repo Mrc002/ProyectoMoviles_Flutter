@@ -3,21 +3,24 @@ import 'package:provider/provider.dart';
 import '../logic/ecuaciones_provider.dart';
 import 'tema_detalle_screen.dart';
 import '../../chat/logic/chat_provider.dart';
-import 'ed_chat_sheet.dart'; // Importamos el componente centralizado
+import 'ed_chat_sheet.dart';
+// IMPORTAMOS LA CALCULADORA DE LAPLACE
+import 'laplace_screen.dart';
 
-class FronteraScreen extends StatefulWidget {
-  const FronteraScreen({Key? key}) : super(key: key);
+class LaplaceModuloScreen extends StatefulWidget {
+  const LaplaceModuloScreen({Key? key}) : super(key: key);
 
   @override
-  State<FronteraScreen> createState() => _FronteraScreenState();
+  State<LaplaceModuloScreen> createState() => _LaplaceModuloScreenState();
 }
 
-class _FronteraScreenState extends State<FronteraScreen> {
+class _LaplaceModuloScreenState extends State<LaplaceModuloScreen> {
   @override
   void initState() {
     super.initState();
+    // Pide los temas de la categoría 'Laplace' a tu base de datos
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EcuacionesProvider>().fetchTemasPorCategoria('Frontera');
+      context.read<EcuacionesProvider>().fetchTemasPorCategoria('Laplace');
     });
   }
 
@@ -26,14 +29,27 @@ class _FronteraScreenState extends State<FronteraScreen> {
     final provider = context.watch<EcuacionesProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Color rosa asignado en el GridView
-    final primaryColor = const Color(0xFFE91E63);
+    // Color naranja asignado en el GridView
+    final primaryColor = const Color(0xFFE67E3A);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Valores en la Frontera'),
+        title: const Text('Transformada de Laplace'),
         backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
         elevation: 0,
+        actions: [
+          // NUEVO BOTÓN: Atajo a la Calculadora de Transformadas
+          IconButton(
+            icon: const Icon(Icons.calculate, color: Colors.white),
+            tooltip: 'Calculadora de Laplace',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LaplaceScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
@@ -55,14 +71,14 @@ class _FronteraScreenState extends State<FronteraScreen> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: primaryColor.withOpacity(0.2),
-                        child: Icon(Icons.border_outer, color: primaryColor),
+                        child: Icon(Icons.functions, color: primaryColor),
                       ),
                       title: Text(
                         tema['titulo'] ?? 'Tema sin título',
                         style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.blue[900]),
                       ),
                       subtitle: Text(
-                        'Fuente: ${tema['bibliografia'] ?? 'Edwards & Penney'}',
+                        'Fuente: ${tema['bibliografia'] ?? 'Desconocida'}',
                         style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: primaryColor),
@@ -89,7 +105,7 @@ class _FronteraScreenState extends State<FronteraScreen> {
   }
 
   void _showAssistant(BuildContext context, Color color) {
-    String contexto = "El usuario está explorando Problemas de Valores en la Frontera, basados en Edwards & Penney.";
+    String contexto = "El usuario está explorando la teoría de la Transformada de Laplace, funciones escalón de Heaviside y transformadas inversas.";
     context.read<ChatProvider>().setSection('Ecuaciones Diferenciales');
 
     showModalBottomSheet(
@@ -97,7 +113,7 @@ class _FronteraScreenState extends State<FronteraScreen> {
       isScrollControlled: true, 
       backgroundColor: Colors.transparent, 
       builder: (context) => EdChatSheet(
-        moduleName: 'Frontera',
+        moduleName: 'Laplace',
         contextoDatos: contexto,
         colorTema: color,
       )
