@@ -1,58 +1,70 @@
 import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EcuacionesProvider extends ChangeNotifier {
-  bool _isLoading = false;
   List<Map<String, dynamic>> _temasCargados = [];
+  bool _isLoading = false;
 
-  bool get isLoading => _isLoading;
   List<Map<String, dynamic>> get temasCargados => _temasCargados;
+  bool get isLoading => _isLoading;
 
   Future<void> fetchTemasPorCategoria(String categoria) async {
     _isLoading = true;
-    _temasCargados = [];
-    notifyListeners(); 
+    notifyListeners();
 
-    try {
-      // Simulamos la carga desde Internet
-      await Future.delayed(const Duration(milliseconds: 600)); 
-      
-      if (categoria == 'EDOs') {
+    // Simula el tiempo de carga de una base de datos (puedes conectarlo a Firestore después)
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    switch (categoria) {
+      case 'EDOs':
         _temasCargados = [
           {'titulo': 'Ecuaciones de Variables Separables', 'bibliografia': 'Shepley L. Ross, Cap. 2'},
-          {'titulo': 'Ecuaciones Exactas y Factor Integrante', 'bibliografia': 'Shepley L. Ross, Cap. 2'},
-          {'titulo': 'Ecuaciones Lineales de Orden Superior', 'bibliografia': 'Shepley L. Ross, Cap. 4'},
-          {'titulo': 'Transformada de Laplace', 'bibliografia': 'Shepley L. Ross, Cap. 6'},
+          {'titulo': 'Ecuaciones Exactas y Factores Integrantes', 'bibliografia': 'Shepley L. Ross, Cap. 2'},
+          {'titulo': 'Ecuaciones Lineales de Primer Orden', 'bibliografia': 'Edwards & Penney, Cap. 1'},
+          {'titulo': 'Ecuación de Bernoulli', 'bibliografia': 'Irineo Peral Alonso, Cap. 1'},
         ];
-      } 
-      // --- NUEVO: Datos para Sistemas y Series ---
-      else if (categoria == 'Sistemas') {
+        break;
+      case 'Segundo Orden':
         _temasCargados = [
-          {'titulo': 'Sistemas Lineales y Valores Propios', 'bibliografia': 'Edwards & Penney, Cap. 5'},
-          {'titulo': 'Matrices Fundamentales', 'bibliografia': 'Edwards & Penney, Cap. 5'},
-          {'titulo': 'Series de Fourier y Convergencia', 'bibliografia': 'Edwards & Penney, Cap. 9'},
+          {'titulo': 'Ecuaciones Lineales Homogéneas', 'bibliografia': 'Shepley L. Ross, Cap. 4'},
+          {'titulo': 'Coeficientes Constantes', 'bibliografia': 'Edwards & Penney, Cap. 3'},
+          {'titulo': 'Método de Coeficientes Indeterminados', 'bibliografia': 'Shepley L. Ross, Cap. 4'},
+          {'titulo': 'Variación de Parámetros', 'bibliografia': 'Irineo Peral Alonso, Cap. 2'},
         ];
-      } 
-      // --- NUEVO: Datos para Valores en la Frontera ---
-      else if (categoria == 'Frontera') {
+        break;
+      case 'Laplace':
         _temasCargados = [
-          {'titulo': 'Problemas de Valores en la Frontera', 'bibliografia': 'Edwards & Penney, Cap. 10'},
-          {'titulo': 'Teoría de Sturm-Liouville', 'bibliografia': 'Edwards & Penney, Cap. 10'},
+          {'titulo': 'Definición de Transformada de Laplace', 'bibliografia': 'Edwards & Penney, Cap. 7'},
+          {'titulo': 'Transformadas Inversas', 'bibliografia': 'Shepley L. Ross, Cap. 7'},
+          {'titulo': 'Función Escalón Unitario (Heaviside)', 'bibliografia': 'Edwards & Penney, Cap. 7'},
+          {'titulo': 'Teoremas de Traslación', 'bibliografia': 'Irineo Peral Alonso, Cap. 4'},
         ];
-      } 
-      else if (categoria == 'EDPs') {
+        break;
+      case 'Sistemas':
         _temasCargados = [
-          {'titulo': 'La Ecuación de Onda', 'bibliografia': 'Hans F. Weinberger, Cap. 2'},
-          {'titulo': 'La Ecuación del Calor', 'bibliografia': 'Hans F. Weinberger, Cap. 3'},
-          {'titulo': 'Separación de Variables', 'bibliografia': 'Hans F. Weinberger, Cap. 5'},
+          {'titulo': 'Sistemas Lineales de Primer Orden', 'bibliografia': 'Edwards & Penney, Cap. 5'},
+          {'titulo': 'Método de Valores Propios', 'bibliografia': 'Shepley L. Ross, Cap. 11'},
+          {'titulo': 'Plano de Fase y Estabilidad', 'bibliografia': 'Edwards & Penney, Cap. 6'},
         ];
-      }
-
-    } catch (e) {
-      debugPrint("Error al cargar temas: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners(); 
+        break;
+      case 'Frontera':
+        _temasCargados = [
+          {'titulo': 'Soluciones en Series de Potencias', 'bibliografia': 'Shepley L. Ross, Cap. 6'},
+          {'titulo': 'Ecuación de Bessel', 'bibliografia': 'Edwards & Penney, Cap. 8'},
+          {'titulo': 'Ecuación de Legendre', 'bibliografia': 'Irineo Peral Alonso, Cap. 5'},
+        ];
+        break;
+      case 'EDPs':
+        _temasCargados = [
+          {'titulo': 'Separación de Variables', 'bibliografia': 'Hans F. Weinberger, Cap. 2'},
+          {'titulo': 'Ecuación de Calor', 'bibliografia': 'Edwards & Penney, Cap. 9'},
+          {'titulo': 'Ecuación de Onda', 'bibliografia': 'Hans F. Weinberger, Cap. 3'},
+        ];
+        break;
+      default:
+        _temasCargados = [];
     }
+
+    _isLoading = false;
+    notifyListeners();
   }
 }

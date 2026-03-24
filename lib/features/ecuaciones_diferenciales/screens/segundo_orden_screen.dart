@@ -3,21 +3,22 @@ import 'package:provider/provider.dart';
 import '../logic/ecuaciones_provider.dart';
 import 'tema_detalle_screen.dart';
 import '../../chat/logic/chat_provider.dart';
-import 'ed_chat_sheet.dart'; // Importamos el componente centralizado
+import 'ed_chat_sheet.dart';
+import 'segundo_orden_calc_screen.dart';
 
-class FronteraScreen extends StatefulWidget {
-  const FronteraScreen({Key? key}) : super(key: key);
+class SegundoOrdenScreen extends StatefulWidget {
+  const SegundoOrdenScreen({Key? key}) : super(key: key);
 
   @override
-  State<FronteraScreen> createState() => _FronteraScreenState();
+  State<SegundoOrdenScreen> createState() => _SegundoOrdenScreenState();
 }
 
-class _FronteraScreenState extends State<FronteraScreen> {
+class _SegundoOrdenScreenState extends State<SegundoOrdenScreen> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EcuacionesProvider>().fetchTemasPorCategoria('Frontera');
+      context.read<EcuacionesProvider>().fetchTemasPorCategoria('Segundo Orden');
     });
   }
 
@@ -26,15 +27,29 @@ class _FronteraScreenState extends State<FronteraScreen> {
     final provider = context.watch<EcuacionesProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Color rosa asignado en el GridView
-    final primaryColor = const Color(0xFFE91E63);
+    // Color morado asignado en el GridView
+    final primaryColor = const Color(0xFF7C6BBD);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Valores en la Frontera'),
+        title: const Text('EDOs de 2do Orden'),
         backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
         elevation: 0,
+        actions: [
+          // NUEVO BOTÓN: Atajo a la Calculadora de 2do Orden
+          IconButton(
+            icon: const Icon(Icons.calculate, color: Colors.white),
+            tooltip: 'Calculadora de Raíces',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SegundoOrdenCalcScreen()),
+              );
+            },
+          ),
+        ],
       ),
+      // ... EL RESTO DEL CÓDIGO SE QUEDA IGUAL (body y floatingActionButton) ...
       body: Container(
         color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
         child: provider.isLoading
@@ -55,14 +70,14 @@ class _FronteraScreenState extends State<FronteraScreen> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: primaryColor.withOpacity(0.2),
-                        child: Icon(Icons.border_outer, color: primaryColor),
+                        child: Icon(Icons.looks_two, color: primaryColor),
                       ),
                       title: Text(
                         tema['titulo'] ?? 'Tema sin título',
                         style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.blue[900]),
                       ),
                       subtitle: Text(
-                        'Fuente: ${tema['bibliografia'] ?? 'Edwards & Penney'}',
+                        'Fuente: ${tema['bibliografia'] ?? 'Desconocida'}',
                         style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: primaryColor),
@@ -89,7 +104,7 @@ class _FronteraScreenState extends State<FronteraScreen> {
   }
 
   void _showAssistant(BuildContext context, Color color) {
-    String contexto = "El usuario está explorando Problemas de Valores en la Frontera, basados en Edwards & Penney.";
+    String contexto = "El usuario está explorando Ecuaciones Diferenciales Lineales de 2do Orden (Coeficientes constantes, variación de parámetros, etc).";
     context.read<ChatProvider>().setSection('Ecuaciones Diferenciales');
 
     showModalBottomSheet(
@@ -97,7 +112,7 @@ class _FronteraScreenState extends State<FronteraScreen> {
       isScrollControlled: true, 
       backgroundColor: Colors.transparent, 
       builder: (context) => EdChatSheet(
-        moduleName: 'Frontera',
+        moduleName: '2do Orden Lineal',
         contextoDatos: contexto,
         colorTema: color,
       )
