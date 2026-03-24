@@ -7,14 +7,14 @@ class EdChatSheet extends StatefulWidget {
   final String moduleName;
   final String contextoDatos;
   final Color colorTema;
-  final String? initialMessage; // <-- NUEVO: Para mensajes automáticos
+  final String? initialMessage;
 
   const EdChatSheet({
     Key? key,
     required this.moduleName,
     required this.contextoDatos,
     required this.colorTema,
-    this.initialMessage, // <-- NUEVO
+    this.initialMessage,
   }) : super(key: key);
 
   @override
@@ -24,6 +24,9 @@ class EdChatSheet extends StatefulWidget {
 class _EdChatSheetState extends State<EdChatSheet> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  
+  // Variable para rastrear la cantidad de mensajes y evitar renders infinitos
+  int _previousMessageCount = 0;
 
   @override
   void initState() {
@@ -31,17 +34,28 @@ class _EdChatSheetState extends State<EdChatSheet> {
     // Si entramos con un mensaje inicial (desde una calculadora), lo disparamos
     if (widget.initialMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _sendInitialMessage();
+        // Verificar que el widget siga en pantalla antes de enviar el mensaje
+        if (mounted) {
+          _sendInitialMessage();
+        }
       });
     }
   }
 
+  @override
+  void dispose() {
+    // Es importante liberar los controladores para evitar fugas de memoria
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _sendInitialMessage() {
     final chatProvider = context.read<ChatProvider>();
-    // Enviamos el mensaje inicial a la IA
+    // <-- CORRECCIÓN: Usar currentEquation en lugar de contexto para coincidir con ChatProvider
     chatProvider.sendMessage(
       widget.initialMessage!,
-      contexto: widget.contextoDatos,
+      currentEquation: widget.contextoDatos,
     );
   }
 
@@ -60,8 +74,13 @@ class _EdChatSheetState extends State<EdChatSheet> {
     final chatProvider = context.watch<ChatProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Auto-scroll cuando llega un mensaje nuevo
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    // Auto-scroll solo cuando llega un mensaje nuevo (evita bugs de rendimiento)
+    if (chatProvider.messages.length > _previousMessageCount) {
+      _previousMessageCount = chatProvider.messages.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollToBottom();
+      });
+    }
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -90,17 +109,19 @@ class _EdChatSheetState extends State<EdChatSheet> {
                   child: Icon(Icons.auto_awesome, color: widget.colorTema, size: 20),
                 ),
                 const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Asistente: ${widget.moduleName}",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const Text("Basado en Ross & Edwards", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Asistente: ${widget.moduleName}",
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Text("Basado en Ross & Edwards", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
                 ),
-                const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
@@ -120,8 +141,9 @@ class _EdChatSheetState extends State<EdChatSheet> {
                     itemCount: chatProvider.messages.length,
                     itemBuilder: (context, index) {
                       final msg = chatProvider.messages[index];
-                      final isUser = msg['role'] == 'user';
-                      return _buildChatBubble(msg['content'], isUser, isDark);
+                      // <-- CORRECCIÓN: Usar las propiedades del objeto ChatMessage
+                      final isUser = msg.isUser;
+                      return _buildChatBubble(msg.text, isUser, isDark);
                     },
                   ),
           ),
@@ -172,9 +194,10 @@ class _EdChatSheetState extends State<EdChatSheet> {
 
   void _handleSend(ChatProvider chatProvider) {
     if (_messageController.text.trim().isEmpty) return;
+    // <-- CORRECCIÓN: Usar currentEquation en lugar de contexto
     chatProvider.sendMessage(
       _messageController.text.trim(),
-      contexto: widget.contextoDatos,
+      currentEquation: widget.contextoDatos,
     );
     _messageController.clear();
   }
@@ -198,14 +221,39 @@ class _EdChatSheetState extends State<EdChatSheet> {
           ),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2)],
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isUser ? Colors.white : (isDark ? Colors.white : Colors.black87),
-            fontSize: 14,
-          ),
-        ),
+        child: isUser 
+            ? Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ) 
+            : _renderMathOrText(text, isDark),
       ),
     );
+  }
+
+  // Método auxiliar para intentar renderizar LaTeX si el mensaje es de la IA
+  Widget _renderMathOrText(String text, bool isDark) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    
+    // Si detectamos patrones comunes de ecuaciones intentamos usar Math.tex
+    if (text.contains(r'\') || text.contains('^') || text.contains('_') || text.contains(r'$')) {
+      try {
+        // Limpiamos los delimitadores comunes de bloque que usan las IAs
+        String cleanText = text.replaceAll(r'\[', '').replaceAll(r'\]', '').replaceAll(r'$$', '');
+        return Math.tex(
+          cleanText,
+          textStyle: TextStyle(color: textColor, fontSize: 16),
+          mathStyle: MathStyle.display,
+        );
+      } catch (e) {
+        // Si falla el parseo de LaTeX, hace un fallback seguro a texto normal
+        return Text(text, style: TextStyle(color: textColor, fontSize: 14));
+      }
+    }
+    
+    return Text(text, style: TextStyle(color: textColor, fontSize: 14));
   }
 }
