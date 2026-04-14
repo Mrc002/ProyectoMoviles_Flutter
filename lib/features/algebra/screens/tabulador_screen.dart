@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 import '../../../shared/app_imports.dart';
-import '../../estadistica/screens/scan_problem_screen.dart';
 
 class TabuladorScreen extends StatefulWidget {
   const TabuladorScreen({super.key});
@@ -16,7 +15,7 @@ class _TabuladorScreenState extends State<TabuladorScreen> {
   final _xfController     = TextEditingController(text: '5');
   final _pasoController   = TextEditingController(text: '1');
 
-  List<Map<String, dynamic>> _tabla = [];
+  final List<Map<String, dynamic>> _tabla = [];
   String _mensajeError = '';
 
   @override

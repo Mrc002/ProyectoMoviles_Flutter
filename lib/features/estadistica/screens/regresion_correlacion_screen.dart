@@ -105,8 +105,9 @@ class _RegresionCorrelacionScreenState extends State<RegresionCorrelacionScreen>
     double absR = r.abs();
     String fuerza = "";
     
-    if (absR >= 0.9) fuerza = "muy fuerte";
-    else if (absR >= 0.7) fuerza = "fuerte";
+    if (absR >= 0.9) {
+      fuerza = "muy fuerte";
+    } else if (absR >= 0.7) fuerza = "fuerte";
     else if (absR >= 0.4) fuerza = "moderada";
     else if (absR >= 0.2) fuerza = "débil";
     else fuerza = "prácticamente nula";

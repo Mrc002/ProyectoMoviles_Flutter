@@ -10,12 +10,12 @@ class EdChatSheet extends StatefulWidget {
   final String? initialMessage;
 
   const EdChatSheet({
-    Key? key,
+    super.key,
     required this.moduleName,
     required this.contextoDatos,
     required this.colorTema,
     this.initialMessage,
-  }) : super(key: key);
+  });
 
   @override
   State<EdChatSheet> createState() => _EdChatSheetState();
@@ -52,7 +52,6 @@ class _EdChatSheetState extends State<EdChatSheet> {
 
   void _sendInitialMessage() {
     final chatProvider = context.read<ChatProvider>();
-    // <-- CORRECCIÓN: Usar currentEquation en lugar de contexto para coincidir con ChatProvider
     chatProvider.sendMessage(
       widget.initialMessage!,
       currentEquation: widget.contextoDatos,
@@ -141,7 +140,6 @@ class _EdChatSheetState extends State<EdChatSheet> {
                     itemCount: chatProvider.messages.length,
                     itemBuilder: (context, index) {
                       final msg = chatProvider.messages[index];
-                      // <-- CORRECCIÓN: Usar las propiedades del objeto ChatMessage
                       final isUser = msg.isUser;
                       return _buildChatBubble(msg.text, isUser, isDark);
                     },

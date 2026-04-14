@@ -12,7 +12,7 @@ class _GaussSeidelScreenState extends State<GaussSeidelScreen> {
   List<List<TextEditingController>> _controllers = [];
   final _tolController = TextEditingController(text: '0.001');
   
-  List<Map<String, dynamic>> _iteraciones = [];
+  final List<Map<String, dynamic>> _iteraciones = [];
   String _mensajeError = '';
   String _resultadoFinal = '';
 
@@ -61,8 +61,11 @@ class _GaussSeidelScreenState extends State<GaussSeidelScreen> {
         for (int j = 0; j <= _n; j++) {
           String val = _controllers[i][j].text;
           if (val.isEmpty) val = '0';
-          if (j == _n) b.add(double.parse(val));
-          else fila.add(double.parse(val));
+          if (j == _n) {
+            b.add(double.parse(val));
+          } else {
+            fila.add(double.parse(val));
+          }
         }
         A.add(fila);
       }

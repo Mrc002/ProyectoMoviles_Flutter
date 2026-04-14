@@ -206,8 +206,12 @@ class _DCLPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint gridPaint = Paint()..color = gridColor..strokeWidth = 1.0;
     const double gridSize = 40.0;
-    for (double x = 0; x <= size.width; x += gridSize) canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    for (double y = 0; y <= size.height; y += gridSize) canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    for (double x = 0; x <= size.width; x += gridSize) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+    }
+    for (double y = 0; y <= size.height; y += gridSize) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
 
     final Offset center = Offset(size.width / 2, size.height / 2);
 

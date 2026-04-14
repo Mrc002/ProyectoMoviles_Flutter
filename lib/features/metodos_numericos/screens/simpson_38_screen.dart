@@ -14,7 +14,7 @@ class _Simpson38ScreenState extends State<Simpson38Screen> {
   final _bController = TextEditingController(text: '2');
   final _nController = TextEditingController(text: '3');
 
-  List<Map<String, dynamic>> _tabla = [];
+  final List<Map<String, dynamic>> _tabla = [];
   String _resultadoFinal = '';
   String _mensajeError = '';
 

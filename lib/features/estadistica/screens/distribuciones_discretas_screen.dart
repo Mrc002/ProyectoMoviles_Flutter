@@ -234,7 +234,7 @@ class _DistribucionesDiscretasScreenState extends State<DistribucionesDiscretasS
                 border: Border.all(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7))
               ),
               child: DropdownButtonFormField<String>(
-                value: _selectedDist,
+                initialValue: _selectedDist,
                 items: ['Binomial', 'Poisson', 'Hipergeométrica', 'Geométrica']
                     .map((dist) => DropdownMenuItem(value: dist, child: Text(dist)))
                     .toList(),

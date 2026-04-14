@@ -3,12 +3,11 @@ import 'edo_screen.dart';
 import 'sistemas_series_screen.dart';
 import 'frontera_screen.dart';
 import 'edp_screen.dart';
-// Nuevas importaciones de los módulos que acabamos de crear
 import 'segundo_orden_screen.dart';
 import 'laplace_modulo_screen.dart';
 
 class EcuacionesMainScreen extends StatelessWidget {
-  const EcuacionesMainScreen({Key? key}) : super(key: key);
+  const EcuacionesMainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

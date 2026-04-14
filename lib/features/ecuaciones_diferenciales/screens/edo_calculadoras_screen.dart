@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-// Importamos tus solvers numéricos existentes desde su propio módulo
 import '../../metodos_numericos/screens/euler_screen.dart';
 import '../../metodos_numericos/screens/rk4_screen.dart';
-
-// Importamos los solvers analíticos de este módulo
 import 'separables_screen.dart';
 import 'exactas_screen.dart';
 import 'lineales_screen.dart'; 
-import 'bernoulli_screen.dart'; // <-- NUEVO: Importación de Bernoulli
+import 'bernoulli_screen.dart';
 import 'campos_pendientes_screen.dart';
 
 class EdoCalculadorasScreen extends StatelessWidget {
-  const EdoCalculadorasScreen({Key? key}) : super(key: key);
+  const EdoCalculadorasScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

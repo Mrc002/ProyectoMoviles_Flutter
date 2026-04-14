@@ -169,13 +169,17 @@ class _ControlCalidadScreenState extends State<ControlCalidadScreen> {
 
     if (_xBarBar != null) {
       if (_tipoGrafico == 'Gráfico X̄ (Medias)') {
-        for (int i = 0; i < _medias.length; i++) spots.add(FlSpot(i.toDouble(), _medias[i]));
+        for (int i = 0; i < _medias.length; i++) {
+          spots.add(FlSpot(i.toDouble(), _medias[i]));
+        }
         ucl = _uclX!; lcl = _lclX!; cl = _clX!;
         maxY = max(_medias.reduce(max), ucl) * 1.05;
         minY = min(_medias.reduce(min), lcl) * 0.95;
         fueraDeControl = _fueraDeControlX;
       } else {
-        for (int i = 0; i < _rangos.length; i++) spots.add(FlSpot(i.toDouble(), _rangos[i]));
+        for (int i = 0; i < _rangos.length; i++) {
+          spots.add(FlSpot(i.toDouble(), _rangos[i]));
+        }
         ucl = _uclR!; lcl = _lclR!; cl = _clR!;
         maxY = max(_rangos.reduce(max), ucl) * 1.1;
         minY = min(_rangos.reduce(min), lcl) * 0.9;
@@ -248,7 +252,7 @@ class _ControlCalidadScreenState extends State<ControlCalidadScreen> {
               Container(
                 decoration: BoxDecoration(color: isDark ? const Color(0xFF1C3350) : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: isDark ? const Color(0xFF234060) : primaryColor.withValues(alpha: 0.3))),
                 child: DropdownButtonFormField<String>(
-                  value: _tipoGrafico, isExpanded: true,
+                  initialValue: _tipoGrafico, isExpanded: true,
                   items: ['Gráfico X̄ (Medias)', 'Gráfico R (Rangos)'].map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black87)))).toList(),
                   onChanged: (val) => setState(() { _tipoGrafico = val!; }),
                   decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), border: InputBorder.none),
@@ -262,7 +266,7 @@ class _ControlCalidadScreenState extends State<ControlCalidadScreen> {
                 decoration: BoxDecoration(color: isDark ? const Color(0xFF1C3350) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: primaryColor.withValues(alpha: 0.5), width: 2)),
                 child: Column(
                   children: [
-                    Text('Estado del Proceso (${_tipoGrafico})', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
+                    Text('Estado del Proceso ($_tipoGrafico)', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
                     const SizedBox(height: 12),
                     Text(
                       fueraDeControl ? 'FUERA DE CONTROL' : 'BAJO CONTROL ESTADÍSTICO', 

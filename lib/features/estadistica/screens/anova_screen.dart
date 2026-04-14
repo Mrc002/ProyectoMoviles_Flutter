@@ -190,7 +190,7 @@ class _AnovaScreenState extends State<AnovaScreen> {
             Container(
               decoration: BoxDecoration(color: isDark ? const Color(0xFF1C3350) : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: isDark ? const Color(0xFF234060) : primaryColor.withValues(alpha: 0.3))),
               child: DropdownButtonFormField<String>(
-                value: _nivelSignificancia, isExpanded: true,
+                initialValue: _nivelSignificancia, isExpanded: true,
                 items: ['0.01', '0.05', '0.10'].map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black87)))).toList(),
                 onChanged: (val) => setState(() { _nivelSignificancia = val!; _fStat = null; }),
                 decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), labelText: 'Significancia (α)', labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54), border: InputBorder.none),

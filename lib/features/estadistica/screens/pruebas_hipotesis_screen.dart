@@ -142,8 +142,9 @@ class _PruebasHipotesisScreenState extends State<PruebasHipotesisScreen> {
       stat = (xBar - mu0) / (sigma / sqrt(n));
       nombreEstat = 'Z';
       
-      if (_tipoCola == 'Unilateral Izquierda (<)') pVal = _normalCDF(stat);
-      else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _normalCDF(stat);
+      if (_tipoCola == 'Unilateral Izquierda (<)') {
+        pVal = _normalCDF(stat);
+      } else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _normalCDF(stat);
       else pVal = 2.0 * (1.0 - _normalCDF(stat.abs()));
     } 
     
@@ -158,8 +159,9 @@ class _PruebasHipotesisScreenState extends State<PruebasHipotesisScreen> {
       nombreEstat = 'T';
       int df = n - 1;
       
-      if (_tipoCola == 'Unilateral Izquierda (<)') pVal = _tCDF(stat, df);
-      else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _tCDF(stat, df);
+      if (_tipoCola == 'Unilateral Izquierda (<)') {
+        pVal = _tCDF(stat, df);
+      } else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _tCDF(stat, df);
       else pVal = 2.0 * (1.0 - _tCDF(stat.abs(), df));
     }
     
@@ -174,8 +176,9 @@ class _PruebasHipotesisScreenState extends State<PruebasHipotesisScreen> {
       stat = (pHat - p0) / sqrt((p0 * (1 - p0)) / n);
       nombreEstat = 'Z';
       
-      if (_tipoCola == 'Unilateral Izquierda (<)') pVal = _normalCDF(stat);
-      else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _normalCDF(stat);
+      if (_tipoCola == 'Unilateral Izquierda (<)') {
+        pVal = _normalCDF(stat);
+      } else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _normalCDF(stat);
       else pVal = 2.0 * (1.0 - _normalCDF(stat.abs()));
     }
     
@@ -189,8 +192,9 @@ class _PruebasHipotesisScreenState extends State<PruebasHipotesisScreen> {
       stat = (df * varM) / var0;
       nombreEstat = 'χ²';
       
-      if (_tipoCola == 'Unilateral Izquierda (<)') pVal = _chiSquareCDF(stat, df);
-      else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _chiSquareCDF(stat, df);
+      if (_tipoCola == 'Unilateral Izquierda (<)') {
+        pVal = _chiSquareCDF(stat, df);
+      } else if (_tipoCola == 'Unilateral Derecha (>)') pVal = 1.0 - _chiSquareCDF(stat, df);
       else pVal = 2.0 * min(_chiSquareCDF(stat, df), 1.0 - _chiSquareCDF(stat, df));
     }
 
@@ -333,7 +337,7 @@ class _PruebasHipotesisScreenState extends State<PruebasHipotesisScreen> {
     return Container(
       decoration: BoxDecoration(color: isDark ? const Color(0xFF1C3350) : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: isDark ? const Color(0xFF234060) : color.withValues(alpha: 0.3))),
       child: DropdownButtonFormField<String>(
-        value: value, isExpanded: true,
+        initialValue: value, isExpanded: true,
         items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black87)))).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), labelText: label, labelStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 13), border: InputBorder.none),
