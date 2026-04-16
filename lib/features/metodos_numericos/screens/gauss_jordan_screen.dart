@@ -10,7 +10,7 @@ class GaussJordanScreen extends StatefulWidget {
 class _GaussJordanScreenState extends State<GaussJordanScreen> {
   int _n = 3; // Tamaño por defecto 3x3
   List<List<TextEditingController>> _controllers = [];
-  List<double> _resultados = [];
+  final List<double> _resultados = [];
   String _mensajeError = '';
 
   @override

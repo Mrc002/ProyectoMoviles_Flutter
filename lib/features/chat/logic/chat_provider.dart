@@ -113,26 +113,20 @@ class ChatProvider extends ChangeNotifier {
 
     // Para detectar cualquier variante de la sección de Ecuaciones
     if (_currentSection.contains('Ecuaciones Diferenciales')) {
-      return baseInstruction + 
-          'Contexto Actual: Eres un experto en Ecuaciones Diferenciales basado en:\n'
-          '- "Differential Equations 3rd Ed." de Shepley L. Ross\n'
-          '- "Elementary Differential Equations" de Edwards & Penney\n'
-          '- "Ecuaciones Diferenciales" de Irineo Peral Alonso\n'
-          'Cita el capítulo y sección del libro al explicar cada método. '
-          'Resuelve paso a paso mostrando cada transformación algebraica.';
+      return '${baseInstruction}Contexto Actual: Eres un experto en Ecuaciones Diferenciales basado en:\n- "Differential Equations 3rd Ed." de Shepley L. Ross\n- "Elementary Differential Equations" de Edwards & Penney\n- "Ecuaciones Diferenciales" de Irineo Peral Alonso\nCita el capítulo y sección del libro al explicar cada método. Resuelve paso a paso mostrando cada transformación algebraica.';
     }
 
     switch (_currentSection) {
       case 'Gráficas':
-        return baseInstruction + 'Contexto Actual: Eres un experto en cálculo, álgebra y análisis de funciones 2D y 3D. Ayuda a entender la gráfica matemática actual.';
+        return '${baseInstruction}Contexto Actual: Eres un experto en cálculo, álgebra y análisis de funciones 2D y 3D. Ayuda a entender la gráfica matemática actual.';
       case 'Estadística':
-        return baseInstruction + 'Contexto Actual: Eres un profesor titular de Probabilidad y Estadística para Ingenieros. Basa tus respuestas rigurosamente en la metodología del libro "Probabilidad y Estadística para Ingenieros" de Miller y Freund (Richard A. Johnson). Utiliza teoría exacta extraída de la base de datos cuando se te proporcione.';
+        return '${baseInstruction}Contexto Actual: Eres un profesor titular de Probabilidad y Estadística para Ingenieros. Basa tus respuestas rigurosamente en la metodología del libro "Probabilidad y Estadística para Ingenieros" de Miller y Freund (Richard A. Johnson). Utiliza teoría exacta extraída de la base de datos cuando se te proporcione.';
       case 'Mecánica Vectorial':
-        return baseInstruction + 'Contexto Actual: Eres un profesor universitario de Física y Mecánica Vectorial (Estática y Dinámica). Basa tus respuestas en el libro de "Mecánica Vectorial para Ingenieros" de Beer & Johnston.';
+        return '${baseInstruction}Contexto Actual: Eres un profesor universitario de Física y Mecánica Vectorial (Estática y Dinámica). Basa tus respuestas en el libro de "Mecánica Vectorial para Ingenieros" de Beer & Johnston.';
       case 'Métodos Numéricos':
-        return baseInstruction + 'Contexto Actual: Eres un experto en Métodos Numéricos y Análisis Numérico. Ayuda a resolver problemas usando algoritmos como Bisección, Newton-Raphson, Gauss-Seidel, Interpolación y Runge-Kutta. Explica las iteraciones y el cálculo de errores de forma clara.';  
+        return '${baseInstruction}Contexto Actual: Eres un experto en Métodos Numéricos y Análisis Numérico. Ayuda a resolver problemas usando algoritmos como Bisección, Newton-Raphson, Gauss-Seidel, Interpolación y Runge-Kutta. Explica las iteraciones y el cálculo de errores de forma clara.';  
       default:
-        return baseInstruction + 'Contexto Actual: Eres un tutor general de matemáticas y ciencias. Responde de manera general sin asumir un tema específico a menos que se indique lo contrario.';
+        return '${baseInstruction}Contexto Actual: Eres un tutor general de matemáticas y ciencias. Responde de manera general sin asumir un tema específico a menos que se indique lo contrario.';
     }
   }
 

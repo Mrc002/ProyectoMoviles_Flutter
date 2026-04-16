@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../shared/app_imports.dart';
 
 // Importamos todas las pantallas de estadística que hemos creado
-import 'descriptiva_screen.dart';
-import 'distribuciones_discretas_screen.dart';
-import 'distribuciones_continuas_screen.dart';
 import 'intervalos_confianza_screen.dart';
 import 'pruebas_hipotesis_screen.dart';
 import 'regresion_correlacion_screen.dart';

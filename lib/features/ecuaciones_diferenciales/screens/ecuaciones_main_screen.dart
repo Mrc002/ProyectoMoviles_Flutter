@@ -1,159 +1,138 @@
 import 'package:flutter/material.dart';
-import 'edo_screen.dart';
+
+// IMPORTAMOS DIRECTAMENTE LAS CALCULADORAS EN LUGAR DE LAS LISTAS DE TEORÍA
+import 'edo_calculadoras_screen.dart';
+import 'segundo_orden_calc_screen.dart';
+import 'laplace_screen.dart';
+
+// Estos se quedan igual porque ya son calculadoras/pantallas directas
 import 'sistemas_series_screen.dart';
 import 'frontera_screen.dart';
 import 'edp_screen.dart';
-// Nuevas importaciones de los módulos que acabamos de crear
-import 'segundo_orden_screen.dart';
-import 'laplace_modulo_screen.dart';
 
 class EcuacionesMainScreen extends StatelessWidget {
   const EcuacionesMainScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Detección del tema para mantener la consistencia con Álgebra y Estadística
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC);
 
-    // Definición de los 6 módulos propuestos para el grid, ahora todos conectados
-    final modules = [
+    final List<Map<String, dynamic>> modulos = [
       {
-        'title': 'EDOs de 1er Orden',
-        'subtitle': 'Separables, Exactas, Bernoulli',
-        'icon': Icons.looks_one_rounded,
+        'titulo': '1er Orden',
+        'subtitulo': 'Separables, Exactas, Lineales',
+        'icono': Icons.looks_one,
         'color': const Color(0xFF5B9BD5),
-        'screen': const EdoScreen(),
+        'ruta': const EdoCalculadorasScreen(), // <-- RUTA DIRECTA AL HUB
       },
       {
-        'title': '2do Orden Lineal',
-        'subtitle': 'Coeficientes Cte, Variación Parámetros',
-        'icon': Icons.looks_two_rounded,
+        'titulo': '2do Orden Lineal',
+        'subtitulo': 'Homogéneas y No Homogéneas',
+        'icono': Icons.looks_two,
         'color': const Color(0xFF7C6BBD),
-        'screen': const SegundoOrdenScreen(), // Ya conectado
+        'ruta': const SegundoOrdenCalcScreen(), // <-- RUTA DIRECTA A LA CALCULADORA
       },
       {
-        'title': 'Laplace',
-        'subtitle': 'Transformada, Tabla, Heaviside',
-        'icon': Icons.functions_rounded,
+        'titulo': 'Laplace',
+        'subtitulo': 'Transformadas y PVI',
+        'icono': Icons.transform,
         'color': const Color(0xFFE67E3A),
-        'screen': const LaplaceModuloScreen(), // Ya conectado
+        'ruta': const LaplaceScreen(), // <-- RUTA DIRECTA A LA CALCULADORA
       },
       {
-        'title': 'Sistemas de ED',
-        'subtitle': 'Valores propios, Plano de fase',
-        'icon': Icons.account_tree_rounded,
-        'color': const Color(0xFF4CAF50),
-        'screen': const SistemasSeriesScreen(),
+        'titulo': 'Sistemas de ED',
+        'subtitulo': 'Eigenvalores y Eigenvectores',
+        'icono': Icons.account_tree,
+        'color': const Color(0xFF4DB6AC),
+        'ruta': const SistemasSeriesScreen(),
       },
       {
-        'title': 'Series y Frobenius',
-        'subtitle': 'Potencias, Bessel, Legendre',
-        'icon': Icons.timeline_rounded,
-        'color': const Color(0xFFE91E63),
-        'screen': const FronteraScreen(),
+        'titulo': 'Frontera y Series',
+        'subtitulo': 'Sturm-Liouville y Frobenius',
+        'icono': Icons.waves,
+        'color': const Color(0xFFF06292),
+        'ruta': const FronteraScreen(),
       },
       {
-        'title': 'EDPs',
-        'subtitle': 'Onda, Calor, Laplace',
-        'icon': Icons.waves_rounded,
-        'color': const Color(0xFF00ACC1),
-        'screen': const EdpScreen(),
+        'titulo': 'EDPs',
+        'subtitulo': 'Calor, Onda y Laplace',
+        'icono': Icons.grid_3x3,
+        'color': const Color(0xFF81C784),
+        'ruta': const EdpScreen(),
       },
     ];
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('Ecuaciones Diferenciales'),
-        backgroundColor: isDark ? const Color(0xFF1C3350) : const Color(0xFF5B9BD5),
+        backgroundColor: isDark ? const Color(0xFF1C3350) : const Color(0xFF2C3E50),
         elevation: 0,
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.85, // Ajustado para que el texto e íconos respiren
+      body: Container(
+        color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFF4F7F6),
+        child: GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: modulos.length,
+          itemBuilder: (context, index) {
+            final mod = modulos[index];
+            return _buildModuloCard(context, mod, isDark);
+          },
         ),
-        itemCount: modules.length,
-        itemBuilder: (context, index) {
-          final mod = modules[index];
-          return _buildModuleCard(
-            context,
-            mod['title'] as String,
-            mod['subtitle'] as String,
-            mod['icon'] as IconData,
-            mod['color'] as Color,
-            mod['screen'] as Widget?,
-            isDark,
-          );
-        },
       ),
     );
   }
 
-  Widget _buildModuleCard(
-    BuildContext context, 
-    String title, 
-    String subtitle, 
-    IconData icon, 
-    Color color, 
-    Widget? screen, 
-    bool isDark
-  ) {
+  Widget _buildModuloCard(BuildContext context, Map<String, dynamic> mod, bool isDark) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shadowColor: mod['color'].withOpacity(0.4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: isDark ? const Color(0xFF1C3350) : Colors.white,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: () {
-          if (screen != null) {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
-          } else {
-            // Mostrar un SnackBar amigable si algún módulo llega a ser null en el futuro
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('El módulo "$title" está en desarrollo.'),
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: color,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            );
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => mod['ruta']),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: color.withOpacity(0.2),
-                child: Icon(icon, color: color, size: 32),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: mod['color'].withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(mod['icono'], size: 40, color: mod['color']),
               ),
-              const SizedBox(height: 12),
+              const Spacer(),
               Text(
-                title,
+                mod['titulo'],
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF1A2D4A),
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                subtitle,
+                mod['subtitulo'],
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white70 : Colors.black54,
+                  fontSize: 11,
+                  color: isDark ? Colors.white54 : Colors.black54,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

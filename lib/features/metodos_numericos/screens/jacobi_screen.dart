@@ -12,7 +12,7 @@ class _JacobiScreenState extends State<JacobiScreen> {
   List<List<TextEditingController>> _controllers = [];
   final _tolController = TextEditingController(text: '0.001');
   
-  List<Map<String, dynamic>> _iteraciones = [];
+  final List<Map<String, dynamic>> _iteraciones = [];
   String _mensajeError = '';
   String _resultadoFinal = '';
 

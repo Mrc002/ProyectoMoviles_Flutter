@@ -14,7 +14,7 @@ class _TrapecioScreenState extends State<TrapecioScreen> {
   final _bController = TextEditingController(text: '2');
   final _nController = TextEditingController(text: '4');
 
-  List<Map<String, dynamic>> _tabla = [];
+  final List<Map<String, dynamic>> _tabla = [];
   String _resultadoFinal = '';
   String _mensajeError = '';
 

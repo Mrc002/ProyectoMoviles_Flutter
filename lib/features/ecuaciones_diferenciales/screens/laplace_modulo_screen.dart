@@ -4,11 +4,10 @@ import '../logic/ecuaciones_provider.dart';
 import 'tema_detalle_screen.dart';
 import '../../chat/logic/chat_provider.dart';
 import 'ed_chat_sheet.dart';
-// IMPORTAMOS LA CALCULADORA DE LAPLACE
 import 'laplace_screen.dart';
 
 class LaplaceModuloScreen extends StatefulWidget {
-  const LaplaceModuloScreen({Key? key}) : super(key: key);
+  const LaplaceModuloScreen({super.key});
 
   @override
   State<LaplaceModuloScreen> createState() => _LaplaceModuloScreenState();

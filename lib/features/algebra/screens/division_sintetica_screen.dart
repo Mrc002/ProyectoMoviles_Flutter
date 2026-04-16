@@ -12,7 +12,7 @@ class _DivisionSinteticaScreenState extends State<DivisionSinteticaScreen> {
   final _coeficientesController = TextEditingController(text: '1, -3, 2, 5');
   final _raizController = TextEditingController(text: '2');
 
-  List<double> _filaSuperior = [];
+  final List<double> _filaSuperior = [];
   List<double> _filaMedia = [];
   List<double> _filaInferior = [];
   String _resultadoCociente = '';

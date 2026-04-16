@@ -7,7 +7,7 @@ import 'ed_chat_sheet.dart';
 import 'segundo_orden_calc_screen.dart';
 
 class SegundoOrdenScreen extends StatefulWidget {
-  const SegundoOrdenScreen({Key? key}) : super(key: key);
+  const SegundoOrdenScreen({super.key});
 
   @override
   State<SegundoOrdenScreen> createState() => _SegundoOrdenScreenState();

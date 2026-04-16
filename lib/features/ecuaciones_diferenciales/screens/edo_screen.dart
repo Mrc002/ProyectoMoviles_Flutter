@@ -7,7 +7,7 @@ import 'ed_chat_sheet.dart'; // El componente de chat centralizado
 import 'edo_calculadoras_screen.dart'; // <-- NUEVO: Importamos la pantalla de calculadoras
 
 class EdoScreen extends StatefulWidget {
-  const EdoScreen({Key? key}) : super(key: key);
+  const EdoScreen({super.key});
 
   @override
   State<EdoScreen> createState() => _EdoScreenState();

@@ -283,7 +283,7 @@ class _IntervalosConfianzaScreenState extends State<IntervalosConfianzaScreen> {
         border: Border.all(color: isDark ? const Color(0xFF234060) : color.withValues(alpha: 0.3))
       ),
       child: DropdownButtonFormField<String>(
-        value: value, 
+        initialValue: value, 
         isExpanded: true,
         items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black87)))).toList(),
         onChanged: onChanged,

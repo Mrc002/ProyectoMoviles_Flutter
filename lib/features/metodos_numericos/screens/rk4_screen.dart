@@ -15,7 +15,7 @@ class _RungeKuttaScreenState extends State<RungeKuttaScreen> {
   final _xfController = TextEditingController(text: '1'); 
   final _hController = TextEditingController(text: '0.25'); 
 
-  List<Map<String, dynamic>> _tabla = [];
+  final List<Map<String, dynamic>> _tabla = [];
   String _resultadoFinal = '';
   String _mensajeError = '';
 

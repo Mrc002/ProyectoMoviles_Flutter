@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_math_fork/flutter_math.dart'; 
 import '../../chat/logic/chat_provider.dart';
-import 'ed_chat_sheet.dart'; // Importamos el componente centralizado
+import 'ed_chat_sheet.dart'; 
 
 class TemaDetalleScreen extends StatelessWidget {
   final Map<String, dynamic> tema;
 
-  const TemaDetalleScreen({Key? key, required this.tema}) : super(key: key);
+  const TemaDetalleScreen({super.key, required this.tema});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF5B9BD5); // Un azul estandarizado
+    final primaryColor = const Color(0xFF5B9BD5);
+
+    // Se extrae la lista de contenido dinámica proveniente de Firebase
+    final List<dynamic> contenidoTeorico = tema['contenido'] ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +36,7 @@ class TemaDetalleScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF234060) : primaryColor.withOpacity(0.15),
+                  color: isDark ? const Color(0xFF234060) : primaryColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -54,62 +57,12 @@ class TemaDetalleScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // Contenido Teórico (Ejemplo con LaTeX Nativo)
-              Text(
-                'Aquí se cargará la teoría. Observa cómo las fórmulas se renderizan de forma nativa e instantánea:',
-                style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : Colors.black87, height: 1.5),
-              ),
-              const SizedBox(height: 20),
-
-              Text(
-                'Una Ecuación Diferencial Lineal de primer orden tiene la forma:',
-                style: TextStyle(fontSize: 16, color: isDark ? Colors.white : Colors.black87),
-              ),
-              const SizedBox(height: 15),
-
-              // FÓRMULA MATEMÁTICA EN BLOQUE
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C3350) : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.transparent : Colors.blue.shade100),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-                    ]
-                  ),
-                  child: Math.tex(
-                    r'\frac{dy}{dx} + P(x)y = Q(x)',
-                    textStyle: TextStyle(fontSize: 22, color: isDark ? Colors.white : Colors.black87),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // FÓRMULA MATEMÁTICA EN EL MISMO RENGLÓN
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    'Donde su factor integrante se define como  ',
-                    style: TextStyle(fontSize: 16, color: isDark ? Colors.white : Colors.black87),
-                  ),
-                  Math.tex(
-                    r'\mu(x) = e^{\int P(x)dx}', 
-                    textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900])
-                  ),
-                  Text(
-                    '  para resolverla analíticamente.',
-                    style: TextStyle(fontSize: 16, color: isDark ? Colors.white : Colors.black87),
-                  ),
-                ],
-              )
+              // Generación dinámica del contenido teórico
+              ...contenidoTeorico.map((fragmento) => _renderizarFragmento(fragmento, isDark)).toList(),
             ],
           ),
         ),
       ),
-      
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAssistant(context, primaryColor, tema),
         backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
@@ -117,6 +70,54 @@ class TemaDetalleScreen extends StatelessWidget {
         label: const Text('Tutor IA', style: TextStyle(color: Colors.white)),
       ),
     );
+  }
+
+  // Motor de renderizado de fragmentos
+  Widget _renderizarFragmento(Map<String, dynamic> fragmento, bool isDark) {
+    final String tipo = fragmento['tipo'] ?? 'texto';
+    final String valor = fragmento['valor'] ?? '';
+
+    switch (tipo) {
+      case 'texto':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: Text(
+            valor,
+            style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : Colors.black87, height: 1.5),
+          ),
+        );
+      case 'formula_bloque':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20.0),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C3350) : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: isDark ? Colors.transparent : Colors.blue.shade100),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                ]
+              ),
+              child: Math.tex(
+                valor,
+                textStyle: TextStyle(fontSize: 22, color: isDark ? Colors.white : Colors.black87),
+              ),
+            ),
+          ),
+        );
+      case 'formula_inline':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: Math.tex(
+            valor, 
+            textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900])
+          ),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   void _showAssistant(BuildContext context, Color color, Map<String, dynamic> tema) {

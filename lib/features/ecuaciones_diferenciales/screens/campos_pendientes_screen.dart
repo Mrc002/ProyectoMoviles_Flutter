@@ -3,7 +3,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'dart:math';
 
 class CamposPendientesScreen extends StatefulWidget {
-  const CamposPendientesScreen({Key? key}) : super(key: key);
+  const CamposPendientesScreen({super.key});
 
   @override
   State<CamposPendientesScreen> createState() => _CamposPendientesScreenState();

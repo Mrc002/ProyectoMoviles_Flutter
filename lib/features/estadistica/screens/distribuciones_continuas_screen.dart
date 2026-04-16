@@ -336,7 +336,7 @@ class _DistribucionesContinuasScreenState extends State<DistribucionesContinuasS
         border: Border.all(color: isDark ? const Color(0xFF234060) : const Color(0xFFFFCC80)),
       ),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         isExpanded: true,
         items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: TextStyle(fontSize: 13, color: isDark ? Colors.white : Colors.black87), overflow: TextOverflow.ellipsis))).toList(),
         onChanged: onChanged,
