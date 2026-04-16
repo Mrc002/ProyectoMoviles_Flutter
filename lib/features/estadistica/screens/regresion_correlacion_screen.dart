@@ -38,25 +38,31 @@ class _RegresionCorrelacionScreenState extends State<RegresionCorrelacionScreen>
   void _calcular() {
     setState(() {
       _beta0 = null; _beta1 = null; _r = null; _r2 = null;
-      _xData = []; _yData = [];
+      _xData = []; _yData = []; // Limpiamos para que no dibuje basura si hay error
     });
 
     final rawX = _xController.text.split(RegExp(r'[,\s]+'));
     final rawY = _yController.text.split(RegExp(r'[,\s]+'));
 
-    _xData = rawX.map((s) => double.tryParse(s.replaceAll(',', '.'))).where((n) => n != null).cast<double>().toList();
-    _yData = rawY.map((s) => double.tryParse(s.replaceAll(',', '.'))).where((n) => n != null).cast<double>().toList();
+    // 1. Guardamos en listas temporales primero
+    List<double> tempX = rawX.map((s) => double.tryParse(s.replaceAll(',', '.'))).where((n) => n != null).cast<double>().toList();
+    List<double> tempY = rawY.map((s) => double.tryParse(s.replaceAll(',', '.'))).where((n) => n != null).cast<double>().toList();
 
-    int n = _xData.length;
+    int n = tempX.length;
 
+    // 2. Hacemos las validaciones con las temporales
     if (n < 2) {
       _mostrarError('Error: Se requieren al menos 2 pares de datos.');
       return;
     }
-    if (n != _yData.length) {
-      _mostrarError('Error: Los conjuntos X e Y deben tener la misma cantidad de datos (X tiene $n, Y tiene ${_yData.length}).');
+    if (n != tempY.length) {
+      _mostrarError('Error: Los conjuntos X e Y deben tener la misma cantidad de datos (X tiene $n, Y tiene ${tempY.length}).');
       return;
     }
+
+    // 3. ¡Todo está bien! Ahora sí pasamos los datos a las variables que usa el gráfico
+    _xData = tempX;
+    _yData = tempY;
 
     double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
 

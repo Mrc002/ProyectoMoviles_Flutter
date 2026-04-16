@@ -5,26 +5,69 @@ import 'package:provider/provider.dart';
 import '../../chat/logic/chat_provider.dart';
 import 'ed_chat_sheet.dart';
 
-class SistemasSeriesScreen extends StatefulWidget {
+class SistemasSeriesScreen extends StatelessWidget {
   const SistemasSeriesScreen({super.key});
 
   @override
-  State<SistemasSeriesScreen> createState() => _SistemasSeriesScreenState();
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF4DB6AC); // Teal para Sistemas/Series
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Sistemas y Series'),
+          backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
+          elevation: 0,
+          bottom: const TabBar(
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            tabs: [
+              Tab(icon: Icon(Icons.grid_4x4), text: "Sistemas (2x2)"),
+              Tab(icon: Icon(Icons.waves), text: "Series de Potencias"),
+            ],
+          ),
+        ),
+        body: Container(
+          color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
+          child: TabBarView(
+            children: [
+              _SistemasTab(primaryColor: primaryColor, isDark: isDark),
+              _SeriesTab(primaryColor: primaryColor, isDark: isDark),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _SistemasSeriesScreenState extends State<SistemasSeriesScreen> {
-  // Controladores para la matriz 2x2
+// =====================================================================
+// PESTAÑA 1: SISTEMAS DE EDOs (Matriz 2x2 y Eigenvalores)
+// =====================================================================
+class _SistemasTab extends StatefulWidget {
+  final Color primaryColor;
+  final bool isDark;
+
+  const _SistemasTab({required this.primaryColor, required this.isDark});
+
+  @override
+  State<_SistemasTab> createState() => _SistemasTabState();
+}
+
+class _SistemasTabState extends State<_SistemasTab> {
   final TextEditingController _a11Controller = TextEditingController();
   final TextEditingController _a12Controller = TextEditingController();
   final TextEditingController _a21Controller = TextEditingController();
   final TextEditingController _a22Controller = TextEditingController();
   
-  final FocusNode _a11Focus = FocusNode();
-  final FocusNode _a12Focus = FocusNode();
-  final FocusNode _a21Focus = FocusNode();
-  final FocusNode _a22Focus = FocusNode();
-  
   bool _mostrarResultado = false;
+  
+  // Variables calculadas
+  double _traza = 0;
+  double _det = 0;
+  String _polinomioLatex = "";
 
   @override
   void dispose() {
@@ -32,296 +75,337 @@ class _SistemasSeriesScreenState extends State<SistemasSeriesScreen> {
     _a12Controller.dispose();
     _a21Controller.dispose();
     _a22Controller.dispose();
-    _a11Focus.dispose();
-    _a12Focus.dispose();
-    _a21Focus.dispose();
-    _a22Focus.dispose();
     super.dispose();
-  }
-
-  void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_a11Focus.hasFocus) activeController = _a11Controller;
-    if (_a12Focus.hasFocus) activeController = _a12Controller;
-    if (_a21Focus.hasFocus) activeController = _a21Controller;
-    if (_a22Focus.hasFocus) activeController = _a22Controller;
-
-    if (activeController != null) {
-      final text = activeController.text;
-      final selection = activeController.selection;
-      
-      final start = selection.start >= 0 ? selection.start : text.length;
-      final end = selection.end >= 0 ? selection.end : text.length;
-
-      final newText = text.replaceRange(start, end, simbolo);
-      activeController.text = newText;
-
-      int offset = start + simbolo.length;
-      if (simbolo.endsWith('()') || simbolo.endsWith('{}')) offset -= 1; 
-      if (simbolo == r'\frac{}{}') offset -= 3; 
-      
-      activeController.selection = TextSelection.collapsed(offset: offset);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Se requiere seleccionar una caja de texto para insertar el símbolo.')),
-      );
-    }
   }
 
   void _calcular() {
     if (_a11Controller.text.isEmpty || _a12Controller.text.isEmpty || 
         _a21Controller.text.isEmpty || _a22Controller.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Es necesario ingresar los 4 componentes de la matriz A.')),
+        const SnackBar(content: Text('Ingresa los 4 componentes de la matriz A.')),
       );
       return;
     }
     
+    // Convertir a doubles
+    double a11 = double.tryParse(_a11Controller.text) ?? 0;
+    double a12 = double.tryParse(_a12Controller.text) ?? 0;
+    double a21 = double.tryParse(_a21Controller.text) ?? 0;
+    double a22 = double.tryParse(_a22Controller.text) ?? 0;
+
+    // Calcular Traza y Determinante
+    _traza = a11 + a22;
+    _det = (a11 * a22) - (a12 * a21);
+
+    // Formatear el polinomio característico: λ^2 - Tλ + D = 0
+    String fmt(double v) => v == v.truncateToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+    
+    String tStr = _traza == 0 ? "" : (_traza > 0 ? "- ${fmt(_traza)}" : "+ ${fmt(_traza.abs())}");
+    if (_traza == 1) tStr = "- ";
+    if (_traza == -1) tStr = "+ ";
+
+    String dStr = _det == 0 ? "" : (_det > 0 ? "+ ${fmt(_det)}" : "- ${fmt(_det.abs())}");
+
+    _polinomioLatex = r'\lambda^2 ' + (tStr.isNotEmpty ? tStr + r'\lambda ' : '') + dStr + ' = 0';
+
     FocusScope.of(context).unfocus(); 
-    setState(() {
-      _mostrarResultado = true;
-    });
+    setState(() => _mostrarResultado = true);
   }
 
-  void _abrirTutorIA(BuildContext context, Color colorTema) {
-    final a11 = _a11Controller.text.isNotEmpty ? _a11Controller.text : "0";
-    final a12 = _a12Controller.text.isNotEmpty ? _a12Controller.text : "0";
-    final a21 = _a21Controller.text.isNotEmpty ? _a21Controller.text : "0";
-    final a22 = _a22Controller.text.isNotEmpty ? _a22Controller.text : "0";
+  void _abrirTutorIA() {
+    final a11 = _a11Controller.text;
+    final a12 = _a12Controller.text;
+    final a21 = _a21Controller.text;
+    final a22 = _a22Controller.text;
 
-    final contextoDinamico = "El usuario se encuentra en la Calculadora de Sistemas de Ecuaciones Diferenciales Lineales (2x2). "
-        "El sistema a resolver es X' = AX, donde la matriz A es: [[$a11, $a12], [$a21, $a22]]. "
-        "La instrucción operativa es actuar como un tutor matemático objetivo. Si se requiere asistencia, "
-        "se debe guiar paso a paso en el cálculo del polinomio característico det(A - \\lambda I) = 0, "
-        "la obtención de los eigenvalores (valores propios) y los eigenvectores (vectores propios) correspondientes. "
-        "Es obligatorio emplear formato LaTeX con \$\$ para las expresiones matemáticas y matrices.";
+    final contexto = "El usuario quiere resolver el Sistema EDO X' = AX con matriz A=[[$a11, $a12], [$a21, $a22]]. "
+        "El polinomio característico es $_polinomioLatex. "
+        "Guíalo obteniendo los Eigenvalores (λ), los Eigenvectores y armando la solución general.";
 
-    context.read<ChatProvider>().setSection('Ecuaciones Diferenciales');
+    final chatProvider = context.read<ChatProvider>();
+    chatProvider.setSection('Ecuaciones Diferenciales');
+    
+    // CORRECCIÓN: Envío directo del mensaje uniendo el contexto y la pregunta
+    chatProvider.sendMessage(
+      "$contexto\n\nAyúdame a resolver este sistema de EDOs. Ya calculé el polinomio característico: \$\$$_polinomioLatex\$\$"
+    );
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => EdChatSheet(
-        moduleName: 'Tutor: Sistemas de EDOs',
-        contextoDatos: contextoDinamico,
-        colorTema: colorTema,
+        moduleName: 'Sistemas Matriciales',
+        contextoDatos: contexto,
+        colorTema: widget.primaryColor,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF5B9BD5);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Math.tex(
+              r'X^\prime = \begin{pmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{pmatrix} X',
+              textStyle: TextStyle(fontSize: 22, color: widget.isDark ? Colors.white : Colors.black87),
+            ),
+          ),
+          const SizedBox(height: 30),
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sistemas de EDOs (2x2)'),
-        backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
-        elevation: 0,
-      ),
-      body: Container(
-        color: isDark ? const Color(0xFF0F1E2E) : const Color(0xFFEBF4FC),
-        width: double.infinity,
-        height: double.infinity,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Definición del sistema lineal matricial:',
-                style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : Colors.black87),
-              ),
-              const SizedBox(height: 15),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C3350) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isDark ? Colors.transparent : Colors.blue.shade100),
-                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
-                  ),
-                  child: Math.tex(
-                    r'X^\prime = \begin{pmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{pmatrix} X',
-                    textStyle: TextStyle(fontSize: 22, color: isDark ? Colors.white : Colors.black87),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              Text('Componentes de la Matriz A:', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
-              const SizedBox(height: 15),
-              
-              // Constructor visual de la matriz 2x2
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1C3350) : Colors.blue.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
-                ),
-                child: Column(
+          Text('Ingresa la Matriz A:', style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? Colors.white : Colors.black87)),
+          const SizedBox(height: 15),
+          
+          Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: widget.isDark ? const Color(0xFF1C3350) : Colors.blue.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: widget.primaryColor.withOpacity(0.3)),
+            ),
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(child: _buildMatrixField('a11', _a11Controller, _a11Focus, isDark)),
-                        const SizedBox(width: 15),
-                        Expanded(child: _buildMatrixField('a12', _a12Controller, _a12Focus, isDark)),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Expanded(child: _buildMatrixField('a21', _a21Controller, _a21Focus, isDark)),
-                        const SizedBox(width: 15),
-                        Expanded(child: _buildMatrixField('a22', _a22Controller, _a22Focus, isDark)),
-                      ],
-                    ),
+                    Expanded(child: _buildMatrixField('a11', _a11Controller)),
+                    const SizedBox(width: 15),
+                    Expanded(child: _buildMatrixField('a12', _a12Controller)),
                   ],
                 ),
-              ),
-              
-              const SizedBox(height: 25),
-              _buildTecladoMatematico(isDark, primaryColor),
-              const SizedBox(height: 30),
-
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: _calcular,
-                  icon: const Icon(Icons.grid_4x4, color: Colors.white),
-                  label: const Text('Calcular Determinante', style: TextStyle(fontSize: 16, color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              if (_mostrarResultado) ...[
-                const Divider(),
-                const SizedBox(height: 10),
-                Text('Planteamiento de valores propios:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.blue[900])),
                 const SizedBox(height: 15),
-                _buildPaso(
-                  context, 
-                  'Ecuación det(A - \u03BBI) = 0', 
-                  r'\det \begin{pmatrix} ' + _a11Controller.text + r'-\lambda & ' + _a12Controller.text + r' \\ ' + _a21Controller.text + r' & ' + _a22Controller.text + r'-\lambda \end{pmatrix} = 0', 
-                  isDark
+                Row(
+                  children: [
+                    Expanded(child: _buildMatrixField('a21', _a21Controller)),
+                    const SizedBox(width: 15),
+                    Expanded(child: _buildMatrixField('a22', _a22Controller)),
+                  ],
                 ),
-                
-                const SizedBox(height: 10),
-                Center(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _abrirTutorIA(context, primaryColor),
-                    icon: const Icon(Icons.psychology),
-                    label: const Text('Resolver polinomio e eigenvectores con IA'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: isDark ? Colors.amber : Colors.blue[900],
-                      side: BorderSide(color: isDark ? Colors.amber : Colors.blue.shade900),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 80), 
-              ]
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-      
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _abrirTutorIA(context, primaryColor),
-        backgroundColor: isDark ? const Color(0xFF1C3350) : primaryColor,
-        icon: const Icon(Icons.psychology, color: Colors.white),
-        label: const Text('Tutor IA', style: TextStyle(color: Colors.white)),
+          const SizedBox(height: 30),
+
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton.icon(
+              onPressed: _calcular,
+              icon: const Icon(Icons.calculate, color: Colors.white),
+              label: const Text('Calcular Polinomio', style: TextStyle(fontSize: 16, color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.primaryColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          if (_mostrarResultado) ...[
+            const Divider(),
+            const SizedBox(height: 15),
+            _buildResultadoLocal('Traza (T = a + d)', _traza),
+            _buildResultadoLocal('Determinante (D = ad - bc)', _det),
+            
+            const SizedBox(height: 10),
+            Text('Polinomio Característico:', style: TextStyle(fontSize: 16, color: widget.isDark ? Colors.white70 : Colors.black87)),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: widget.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: widget.primaryColor),
+              ),
+              child: Center(
+                child: Math.tex(_polinomioLatex, textStyle: TextStyle(fontSize: 20, color: widget.isDark ? Colors.amber : widget.primaryColor)),
+              ),
+            ),
+            
+            const SizedBox(height: 25),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: _abrirTutorIA,
+                icon: const Icon(Icons.psychology, color: Colors.white),
+                label: const Text('Calcular Eigenvalores con IA', style: TextStyle(fontSize: 16, color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE67E3A), // Naranja para resaltar la IA
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40), 
+          ]
+        ],
       ),
     );
   }
 
-  Widget _buildMatrixField(String hint, TextEditingController controller, FocusNode focus, bool isDark) {
+  Widget _buildMatrixField(String hint, TextEditingController controller) {
     return TextField(
       controller: controller,
-      focusNode: focus,
+      keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
       textAlign: TextAlign.center,
-      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+      style: TextStyle(color: widget.isDark ? Colors.white : Colors.black87),
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: isDark ? const Color(0xFF234060) : Colors.white,
+        fillColor: widget.isDark ? const Color(0xFF234060) : Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
       ),
     );
   }
 
-  Widget _buildTecladoMatematico(bool isDark, Color primaryColor) {
-    final Map<String, String> botones = {
-      '-': '-', '+': '+', '\\frac{x}{y}': r'\frac{}{}', 
-      '\\sqrt{x}': '\\sqrt{}', 't': 't', 'e^t': 'e^{}', 
-      '\\lambda': '\\lambda', '\\sin': '\\sin()', '\\cos': '\\cos()'
-    };
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C3350) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+  Widget _buildResultadoLocal(String titulo, double valor) {
+    String valStr = valor == valor.truncateToDouble() ? valor.toInt().toString() : valor.toStringAsFixed(2);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? Colors.white70 : Colors.black87)),
+          Text(valStr, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.isDark ? Colors.amber : widget.primaryColor)),
+        ],
       ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: botones.entries.map((entrada) {
-          return InkWell(
-            onTap: () => _insertarSimbolo(entrada.value),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF234060) : Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Math.tex(
-                entrada.key, 
-                textStyle: TextStyle(
-                  fontSize: 16, 
-                  color: isDark ? Colors.amber : Colors.blue[900]
-                )
-              ),
-            ),
-          );
-        }).toList(),
+    );
+  }
+}
+
+// =====================================================================
+// PESTAÑA 2: SERIES DE POTENCIAS (Integración con IA)
+// =====================================================================
+class _SeriesTab extends StatefulWidget {
+  final Color primaryColor;
+  final bool isDark;
+
+  const _SeriesTab({required this.primaryColor, required this.isDark});
+
+  @override
+  State<_SeriesTab> createState() => _SeriesTabState();
+}
+
+class _SeriesTabState extends State<_SeriesTab> {
+  final TextEditingController _edoController = TextEditingController();
+  final TextEditingController _x0Controller = TextEditingController(text: "0");
+
+  void _resolverConIA() {
+    if (_edoController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingresa la EDO a resolver.')));
+      return;
+    }
+
+    final edo = _edoController.text;
+    final x0 = _x0Controller.text.isEmpty ? "0" : _x0Controller.text;
+    
+    final contexto = "El usuario quiere resolver la EDO: $edo mediante Series de Potencias centradas en x_0 = $x0. "
+        "Guíalo paso a paso para sustituir y = Σ c_n (x-x_0)^n, ajustar índices, encontrar la relación de recurrencia "
+        "y dar los primeros términos de la serie solución.";
+
+    final chatProvider = context.read<ChatProvider>();
+    chatProvider.setSection('Ecuaciones Diferenciales');
+    
+    // CORRECCIÓN: Envío directo uniendo contexto y pregunta en un solo string
+    chatProvider.sendMessage(
+      "$contexto\n\nResuelve por Series de Potencias alrededor de x_0 = $x0 esta ecuación: $edo"
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EdChatSheet(
+        moduleName: 'Series de Potencias',
+        contextoDatos: contexto,
+        colorTema: widget.primaryColor,
       ),
     );
   }
 
-  Widget _buildPaso(BuildContext context, String titulo, String formulaLatex, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titulo, style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C3350) : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+          Center(
+            child: Math.tex(
+              r'y = \sum_{n=0}^{\infty} c_n (x - x_0)^n',
+              textStyle: TextStyle(fontSize: 22, color: widget.isDark ? Colors.white : Colors.black87),
             ),
-            child: Center(
-              child: Math.tex(
-                formulaLatex,
-                textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+          ),
+          const SizedBox(height: 30),
+
+          Text('1. Ingresa la Ecuación Diferencial:', style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? Colors.white : Colors.black87)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _edoController,
+            style: TextStyle(color: widget.isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: "Ej. y'' - xy = 0",
+              filled: true,
+              fillColor: widget.isDark ? const Color(0xFF234060) : Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              prefixIcon: Icon(Icons.functions, color: widget.primaryColor),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          Text('2. Punto de expansión (x_0):', style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? Colors.white : Colors.black87)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _x0Controller,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: widget.isDark ? Colors.white : Colors.black87),
+            decoration: InputDecoration(
+              hintText: "Por lo general es 0",
+              filled: true,
+              fillColor: widget.isDark ? const Color(0xFF234060) : Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              prefixIcon: Icon(Icons.adjust, color: widget.primaryColor),
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: widget.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: widget.primaryColor.withOpacity(0.5)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome, color: widget.primaryColor, size: 30),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Text(
+                    'Debido a los desplazamientos de índices y relaciones de recurrencia, el Asistente IA desarrollará la suma infinita paso a paso.',
+                    style: TextStyle(fontSize: 13, color: widget.isDark ? Colors.white70 : Colors.black87),
+                  ),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton.icon(
+              onPressed: _resolverConIA,
+              icon: const Icon(Icons.send, color: Colors.white),
+              label: const Text('Resolver Serie con IA', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.primaryColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
