@@ -21,7 +21,24 @@ class _SegundoOrdenCalcScreenState extends State<SegundoOrdenCalcScreen> {
   final FocusNode _bFocus = FocusNode();
   final FocusNode _cFocus = FocusNode();
   
+  // --- MEMORIA DEL TECLADO ---
+  TextEditingController? _ultimoControladorActivo;
+
   bool _mostrarResultado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _aFocus.addListener(() {
+      if (_aFocus.hasFocus) _ultimoControladorActivo = _aController;
+    });
+    _bFocus.addListener(() {
+      if (_bFocus.hasFocus) _ultimoControladorActivo = _bController;
+    });
+    _cFocus.addListener(() {
+      if (_cFocus.hasFocus) _ultimoControladorActivo = _cController;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,12 +52,8 @@ class _SegundoOrdenCalcScreenState extends State<SegundoOrdenCalcScreen> {
   }
 
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_aFocus.hasFocus) activeController = _aController;
-    if (_bFocus.hasFocus) activeController = _bController;
-    if (_cFocus.hasFocus) activeController = _cController;
-
-    if (activeController != null) {
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -59,6 +72,15 @@ class _SegundoOrdenCalcScreenState extends State<SegundoOrdenCalcScreen> {
       }
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+
+      // Le devolvemos el foco a la caja correspondiente
+      if (activeController == _aController) {
+        _aFocus.requestFocus();
+      } else if (activeController == _bController) {
+        _bFocus.requestFocus();
+      } else {
+        _cFocus.requestFocus();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Se requiere seleccionar una caja de texto para insertar el símbolo.')),
@@ -330,9 +352,12 @@ class _SegundoOrdenCalcScreenState extends State<SegundoOrdenCalcScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             ),
-            child: Math.tex(
-              formulaLatex,
-              textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Math.tex(
+                formulaLatex,
+                textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+              ),
             ),
           ),
         ],

@@ -17,8 +17,22 @@ class _LaplaceScreenState extends State<LaplaceScreen> {
   final TextEditingController _funcionController = TextEditingController();
   final FocusNode _funcionFocus = FocusNode();
   
+  // --- CORRECCIÓN 1: Memoria del controlador ---
+  TextEditingController? _ultimoControladorActivo;
+  
   bool _esInversa = false; // Toggle para Directa o Inversa
   bool _mostrarResultado = false;
+
+  // --- CORRECCIÓN 2: Rastrear cuando el usuario toca la caja ---
+  @override
+  void initState() {
+    super.initState();
+    _funcionFocus.addListener(() {
+      if (_funcionFocus.hasFocus) {
+        _ultimoControladorActivo = _funcionController;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -27,22 +41,27 @@ class _LaplaceScreenState extends State<LaplaceScreen> {
     super.dispose();
   }
 
+  // --- LÓGICA DEL TECLADO MATEMÁTICO CORREGIDA ---
   void _insertarSimbolo(String simbolo) {
-    if (_funcionFocus.hasFocus) {
-      final text = _funcionController.text;
-      final selection = _funcionController.selection;
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
+      final text = activeController.text;
+      final selection = activeController.selection;
       
       final start = selection.start >= 0 ? selection.start : text.length;
       final end = selection.end >= 0 ? selection.end : text.length;
 
       final newText = text.replaceRange(start, end, simbolo);
-      _funcionController.text = newText;
+      activeController.text = newText;
 
       int offset = start + simbolo.length;
       if (simbolo.endsWith('()') || simbolo.endsWith('{}')) offset -= 1; 
       if (simbolo == r'\frac{}{}') offset -= 3; 
       
-      _funcionController.selection = TextSelection.collapsed(offset: offset);
+      activeController.selection = TextSelection.collapsed(offset: offset);
+      
+      // CORRECCIÓN 3: Le devolvemos el foco a la caja para seguir escribiendo
+      _funcionFocus.requestFocus();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Toca la caja de texto para insertar el símbolo.')),
@@ -326,9 +345,13 @@ class _LaplaceScreenState extends State<LaplaceScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             ),
-            child: Math.tex(
-              formulaLatex,
-              textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+            // CORRECCIÓN 4: SingleChildScrollView para evitar desbordamientos
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Math.tex(
+                formulaLatex,
+                textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+              ),
             ),
           ),
         ],

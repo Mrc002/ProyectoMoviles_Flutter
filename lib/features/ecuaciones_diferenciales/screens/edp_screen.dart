@@ -19,7 +19,22 @@ class _EdpScreenState extends State<EdpScreen> {
   final FocusNode _edpFocus = FocusNode();
   final FocusNode _condicionesFocus = FocusNode();
   
+  // --- CORRECCIÓN: Memoria del controlador ---
+  TextEditingController? _ultimoControladorActivo;
+
   bool _mostrarResultado = false;
+
+  // --- CORRECCIÓN: Rastrear cuando el usuario toca la caja ---
+  @override
+  void initState() {
+    super.initState();
+    _edpFocus.addListener(() {
+      if (_edpFocus.hasFocus) _ultimoControladorActivo = _edpController;
+    });
+    _condicionesFocus.addListener(() {
+      if (_condicionesFocus.hasFocus) _ultimoControladorActivo = _condicionesController;
+    });
+  }
 
   @override
   void dispose() {
@@ -30,12 +45,10 @@ class _EdpScreenState extends State<EdpScreen> {
     super.dispose();
   }
 
+  // --- LÓGICA DEL TECLADO MATEMÁTICO CORREGIDA ---
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_edpFocus.hasFocus) activeController = _edpController;
-    if (_condicionesFocus.hasFocus) activeController = _condicionesController;
-
-    if (activeController != null) {
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -51,6 +64,13 @@ class _EdpScreenState extends State<EdpScreen> {
       if (simbolo == r'\frac{\partial}{\partial}') offset -= 13;
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+      
+      // Devolvemos el foco a la caja correspondiente
+      if (activeController == _edpController) {
+        _edpFocus.requestFocus();
+      } else {
+        _condicionesFocus.requestFocus();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Se requiere seleccionar una caja de texto para insertar el símbolo.')),

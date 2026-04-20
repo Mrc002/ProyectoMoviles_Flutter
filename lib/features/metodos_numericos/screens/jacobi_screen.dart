@@ -117,11 +117,11 @@ class _JacobiScreenState extends State<JacobiScreen> {
 
       _iteraciones.add({
         'iter': iteracion,
-        'x': List.from(xNew),
+        'x': List<double>.from(xNew), // CORRECCIÓN: Agregar <double>
         'error': iteracion == 1 ? '-' : '${error.toStringAsFixed(4)}%',
       });
 
-      x = List.from(xNew);
+      x = List<double>.from(xNew); // CORRECCIÓN: Agregar <double>
       iteracion++;
     }
 
@@ -174,24 +174,28 @@ class _JacobiScreenState extends State<JacobiScreen> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: isDark ? const Color(0xFF1C3350) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? const Color(0xFF234060) : const Color(0xFFD6E8F7))),
+              // CORRECCIÓN: Doble Scroll 
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_n, (i) {
-                    return Row(
-                      children: List.generate(_n + 1, (j) {
-                        bool isResult = j == _n;
-                        return Container(
-                          width: 55, margin: EdgeInsets.only(right: isResult ? 0 : 8, bottom: 8, left: isResult ? 16 : 0),
-                          child: TextField(
-                            controller: _controllers[i][j], textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: isResult ? FontWeight.bold : FontWeight.normal),
-                            decoration: InputDecoration(filled: true, fillColor: isResult ? primaryColor.withValues(alpha: 0.1) : (isDark ? const Color(0xFF0F1E2E) : const Color(0xFFF0F7FF)), contentPadding: const EdgeInsets.symmetric(vertical: 12), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none), hintText: isResult ? 'b${i + 1}' : 'a${i + 1}${j + 1}', hintStyle: const TextStyle(fontSize: 11, color: Colors.grey)),
-                          ),
-                        );
-                      }),
-                    );
-                  }),
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_n, (i) {
+                      return Row(
+                        children: List.generate(_n + 1, (j) {
+                          bool isResult = j == _n;
+                          return Container(
+                            width: 55, margin: EdgeInsets.only(right: isResult ? 0 : 8, bottom: 8, left: isResult ? 16 : 0),
+                            child: TextField(
+                              controller: _controllers[i][j], textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: isResult ? FontWeight.bold : FontWeight.normal),
+                              decoration: InputDecoration(filled: true, fillColor: isResult ? primaryColor.withValues(alpha: 0.1) : (isDark ? const Color(0xFF0F1E2E) : const Color(0xFFF0F7FF)), contentPadding: const EdgeInsets.symmetric(vertical: 12), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none), hintText: isResult ? 'b${i + 1}' : 'a${i + 1}${j + 1}', hintStyle: const TextStyle(fontSize: 11, color: Colors.grey)),
+                            ),
+                          );
+                        }),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
@@ -219,7 +223,6 @@ class _JacobiScreenState extends State<JacobiScreen> {
                       headingRowColor: WidgetStateProperty.all(primaryColor.withValues(alpha: 0.1)),
                       columns: [
                         const DataColumn(label: Text('k', style: TextStyle(fontWeight: FontWeight.bold))),
-                        // Generamos las columnas con x, y, z, w
                         ...List.generate(_n, (index) {
                           final variables = ['x', 'y', 'z', 'w'];
                           return DataColumn(

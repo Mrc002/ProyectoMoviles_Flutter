@@ -20,7 +20,12 @@ class _EcuacionesCuadraticasScreenState extends State<EcuacionesCuadraticasScree
   String _tipoRaiz = '';
 
   @override
-  void dispose() { _aController.dispose(); _bController.dispose(); _cController.dispose(); super.dispose(); }
+  void dispose() { 
+    _aController.dispose(); 
+    _bController.dispose(); 
+    _cController.dispose(); 
+    super.dispose(); 
+  }
 
   void _calcularGeneral() {
     double a = double.tryParse(_aController.text) ?? 0;
@@ -28,7 +33,12 @@ class _EcuacionesCuadraticasScreenState extends State<EcuacionesCuadraticasScree
     double c = double.tryParse(_cController.text) ?? 0;
 
     if (a == 0) {
-      setState(() { _tipoRaiz = "No es una ecuación cuadrática (A no puede ser 0)"; _resultadoX1 = ""; _resultadoX2 = ""; _discriminante = ""; });
+      setState(() { 
+        _tipoRaiz = "No es una ecuación cuadrática (A no puede ser 0)"; 
+        _resultadoX1 = ""; 
+        _resultadoX2 = ""; 
+        _discriminante = ""; 
+      });
       return;
     }
 
@@ -51,7 +61,12 @@ class _EcuacionesCuadraticasScreenState extends State<EcuacionesCuadraticasScree
       res2 = "${realPart.toStringAsFixed(4)} - ${imaginaryPart.toStringAsFixed(4)}i";
     }
 
-    setState(() { _discriminante = "Δ = ${d.toStringAsFixed(2)}"; _tipoRaiz = tipo; _resultadoX1 = "x₁ = $res1"; _resultadoX2 = "x₂ = $res2"; });
+    setState(() { 
+      _discriminante = "Δ = ${d.toStringAsFixed(2)}"; 
+      _tipoRaiz = tipo; 
+      _resultadoX1 = "x₁ = $res1"; 
+      _resultadoX2 = "x₂ = $res2"; 
+    });
   }
 
   @override
@@ -93,33 +108,48 @@ class _EcuacionesCuadraticasScreenState extends State<EcuacionesCuadraticasScree
             ElevatedButton(onPressed: _calcularGeneral, style: ElevatedButton.styleFrom(backgroundColor: primaryColor, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Resolver', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white))),
             const SizedBox(height: 24),
             
-            if (_resultadoX1.isNotEmpty) ...[
+            // --- SOLUCIÓN DE DIBUJO ---
+            if (_tipoRaiz.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: primaryColor)),
                 child: Column(
                   children: [
-                    Text(_tipoRaiz, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black54)),
-                    const SizedBox(height: 4),
-                    Text(_discriminante, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                    const Divider(height: 24),
-                    Text(_resultadoX1, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: primaryColor)),
-                    const SizedBox(height: 8),
-                    Text(_resultadoX2, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: primaryColor)),
+                    // Mostramos el texto principal o de error, cambiando a rojo si fue error
+                    Text(
+                      _tipoRaiz, 
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.w600, 
+                        color: _resultadoX1.isEmpty ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black54)
+                      )
+                    ),
+                    
+                    // Solo dibujamos los números de las respuestas si NO fue un error
+                    if (_resultadoX1.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(_discriminante, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                      const Divider(height: 24),
+                      Text(_resultadoX1, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: primaryColor)),
+                      const SizedBox(height: 8),
+                      Text(_resultadoX2, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: primaryColor)),
+                    ]
                   ],
                 ),
               )
             ]
+            // --------------------------
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'btn_scan_ecuaciones_cuadraticas', // Etiqueta única
+        heroTag: 'btn_scan_ecuaciones_cuadraticas', 
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ScanProblemScreen(tema: 'tabulador'), 
+              builder: (context) => const ScanProblemScreen(tema: 'ecuaciones_cuadraticas'),
             ),
           );
         },

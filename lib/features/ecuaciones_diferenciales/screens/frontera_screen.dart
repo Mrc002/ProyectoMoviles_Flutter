@@ -19,7 +19,22 @@ class _FronteraScreenState extends State<FronteraScreen> {
   final FocusNode _fxFocus = FocusNode();
   final FocusNode _lFocus = FocusNode();
   
+  // --- CORRECCIÓN: Memoria del controlador ---
+  TextEditingController? _ultimoControladorActivo;
+
   bool _mostrarResultado = false;
+
+  // --- CORRECCIÓN: Rastrear cuando el usuario toca la caja ---
+  @override
+  void initState() {
+    super.initState();
+    _fxFocus.addListener(() {
+      if (_fxFocus.hasFocus) _ultimoControladorActivo = _fxController;
+    });
+    _lFocus.addListener(() {
+      if (_lFocus.hasFocus) _ultimoControladorActivo = _lController;
+    });
+  }
 
   @override
   void dispose() {
@@ -30,12 +45,10 @@ class _FronteraScreenState extends State<FronteraScreen> {
     super.dispose();
   }
 
+  // --- LÓGICA DEL TECLADO MATEMÁTICO CORREGIDA ---
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_fxFocus.hasFocus) activeController = _fxController;
-    if (_lFocus.hasFocus) activeController = _lController;
-
-    if (activeController != null) {
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -51,6 +64,13 @@ class _FronteraScreenState extends State<FronteraScreen> {
       if (simbolo == r'\int_{}^{}') offset -= 4;
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+      
+      // Devolvemos el foco a la caja correspondiente
+      if (activeController == _fxController) {
+        _fxFocus.requestFocus();
+      } else {
+        _lFocus.requestFocus();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Se requiere seleccionar una caja de texto para insertar el símbolo.')),

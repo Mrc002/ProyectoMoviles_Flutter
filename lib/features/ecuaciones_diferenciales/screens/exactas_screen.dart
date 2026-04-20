@@ -19,7 +19,22 @@ class _ExactasScreenState extends State<ExactasScreen> {
   final FocusNode _mFocus = FocusNode();
   final FocusNode _nFocus = FocusNode();
   
+  // --- CORRECCIÓN 1: Memoria del último controlador seleccionado ---
+  TextEditingController? _ultimoControladorActivo;
+
   bool _mostrarResultado = false;
+
+  // --- CORRECCIÓN 2: Escuchamos quién tiene el foco ---
+  @override
+  void initState() {
+    super.initState();
+    _mFocus.addListener(() {
+      if (_mFocus.hasFocus) _ultimoControladorActivo = _mController;
+    });
+    _nFocus.addListener(() {
+      if (_nFocus.hasFocus) _ultimoControladorActivo = _nController;
+    });
+  }
 
   @override
   void dispose() {
@@ -30,12 +45,10 @@ class _ExactasScreenState extends State<ExactasScreen> {
     super.dispose();
   }
 
+  // --- LÓGICA DEL TECLADO MATEMÁTICO CORREGIDA ---
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_mFocus.hasFocus) activeController = _mController;
-    if (_nFocus.hasFocus) activeController = _nController;
-
-    if (activeController != null) {
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -54,6 +67,13 @@ class _ExactasScreenState extends State<ExactasScreen> {
       }
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+      
+      // CORRECCIÓN 3: Le devolvemos el foco a la caja de texto
+      if (activeController == _mController) {
+        _mFocus.requestFocus();
+      } else {
+        _nFocus.requestFocus();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Toca una caja de texto primero para insertar el símbolo.')),
@@ -145,7 +165,7 @@ class _ExactasScreenState extends State<ExactasScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _mController,
-                focusNode: _mFocus,
+                focusNode: _mFocus, // Detector de enfoque
                 style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Ej. 2xy',
@@ -161,7 +181,7 @@ class _ExactasScreenState extends State<ExactasScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _nController,
-                focusNode: _nFocus,
+                focusNode: _nFocus, // Detector de enfoque
                 style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Ej. x^2 + 1',
@@ -286,9 +306,13 @@ class _ExactasScreenState extends State<ExactasScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             ),
-            child: Math.tex(
-              formulaLatex,
-              textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+            // CORRECCIÓN 4: SingleChildScrollView para evitar RenderFlex overflow
+            child: SingleChildScrollView(
+               scrollDirection: Axis.horizontal,
+               child: Math.tex(
+                 formulaLatex,
+                 textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+               ),
             ),
           ),
         ],
