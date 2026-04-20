@@ -21,7 +21,23 @@ class _BernoulliScreenState extends State<BernoulliScreen> {
   final FocusNode _qxFocus = FocusNode();
   final FocusNode _nFocus = FocusNode();
   
+  TextEditingController? _ultimoControladorActivo;
+
   bool _mostrarResultado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pxFocus.addListener(() {
+      if (_pxFocus.hasFocus) _ultimoControladorActivo = _pxController;
+    });
+    _qxFocus.addListener(() {
+      if (_qxFocus.hasFocus) _ultimoControladorActivo = _qxController;
+    });
+    _nFocus.addListener(() {
+      if (_nFocus.hasFocus) _ultimoControladorActivo = _nController;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,12 +51,8 @@ class _BernoulliScreenState extends State<BernoulliScreen> {
   }
 
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_pxFocus.hasFocus) activeController = _pxController;
-    if (_qxFocus.hasFocus) activeController = _qxController;
-    if (_nFocus.hasFocus) activeController = _nController;
-
-    if (activeController != null) {
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -59,6 +71,14 @@ class _BernoulliScreenState extends State<BernoulliScreen> {
       }
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+
+      if (activeController == _pxController) {
+        _pxFocus.requestFocus();
+      } else if (activeController == _qxController) {
+        _qxFocus.requestFocus();
+      } else {
+        _nFocus.requestFocus();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Selecciona una caja de texto primero para insertar el símbolo.')),
@@ -333,9 +353,12 @@ class _BernoulliScreenState extends State<BernoulliScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             ),
-            child: Math.tex(
-              formulaLatex,
-              textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Math.tex(
+                formulaLatex,
+                textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+              ),
             ),
           ),
         ],

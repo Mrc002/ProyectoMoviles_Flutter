@@ -16,11 +16,25 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
   final TextEditingController _fxController = TextEditingController();
   final TextEditingController _gyController = TextEditingController();
   
-  // Nodos de enfoque para saber qué caja de texto está seleccionada
   final FocusNode _fxFocus = FocusNode();
   final FocusNode _gyFocus = FocusNode();
   
+  // --- CORRECCIÓN 1: Memoria del último controlador seleccionado ---
+  TextEditingController? _ultimoControladorActivo;
+  
   bool _mostrarResultado = false;
+
+  // --- CORRECCIÓN 2: Escuchamos quién tiene el foco ---
+  @override
+  void initState() {
+    super.initState();
+    _fxFocus.addListener(() {
+      if (_fxFocus.hasFocus) _ultimoControladorActivo = _fxController;
+    });
+    _gyFocus.addListener(() {
+      if (_gyFocus.hasFocus) _ultimoControladorActivo = _gyController;
+    });
+  }
 
   @override
   void dispose() {
@@ -31,13 +45,11 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
     super.dispose();
   }
 
-  // --- LÓGICA DEL TECLADO MATEMÁTICO ---
+  // --- LÓGICA DEL TECLADO MATEMÁTICO CORREGIDA ---
   void _insertarSimbolo(String simbolo) {
-    TextEditingController? activeController;
-    if (_fxFocus.hasFocus) activeController = _fxController;
-    if (_gyFocus.hasFocus) activeController = _gyController;
-
-    if (activeController != null) {
+    // Usamos nuestra variable de memoria en lugar del .hasFocus instantáneo
+    if (_ultimoControladorActivo != null) {
+      final activeController = _ultimoControladorActivo!;
       final text = activeController.text;
       final selection = activeController.selection;
       
@@ -50,7 +62,6 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
       activeController.text = newText;
 
       // --- Magia del Cursor ---
-      // Calcula dónde dejar el cursor parpadeando después de insertar
       int offset = start + simbolo.length;
       if (simbolo.endsWith('()') || simbolo.endsWith('{}')) {
         offset -= 1; // Lo mete adentro del paréntesis o llave final
@@ -60,8 +71,17 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
       }
       
       activeController.selection = TextSelection.collapsed(offset: offset);
+      
+      // CORRECCIÓN 3: Le devolvemos el foco a la caja de texto para que 
+      // el cursor siga parpadeando después de picar el botón
+      if (activeController == _fxController) {
+        _fxFocus.requestFocus();
+      } else {
+        _gyFocus.requestFocus();
+      }
+      
     } else {
-      // Si no hay ninguna caja enfocada, le avisa al usuario
+      // Si no hay ninguna caja enfocada en la memoria, avisa al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Toca una caja de texto primero para insertar el símbolo.')),
       );
@@ -237,7 +257,6 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
 
   // --- UI DEL TECLADO ---
   Widget _buildTecladoMatematico(bool isDark, Color primaryColor) {
-    // Diccionario de los botones y el texto LaTeX real que insertarán
     final Map<String, String> botones = {
       'x': 'x', 'y': 'y', 'x^2': '^2', 'x^y': '^{}', 
       '\\sqrt{x}': '\\sqrt{}', '\\frac{x}{y}': r'\frac{}{}', 
@@ -265,7 +284,6 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
                 color: isDark ? const Color(0xFF234060) : Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
-              // Dibujamos el icono del botón usando la librería matemática
               child: Math.tex(
                 entrada.key, 
                 textStyle: TextStyle(
@@ -296,9 +314,12 @@ class _SeparablesScreenState extends State<SeparablesScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             ),
-            child: Math.tex(
-              formulaLatex,
-              textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+            child: SingleChildScrollView(
+               scrollDirection: Axis.horizontal,
+               child: Math.tex(
+                 formulaLatex,
+                 textStyle: TextStyle(fontSize: 18, color: isDark ? Colors.amber : Colors.blue[900]),
+               ),
             ),
           ),
         ],
